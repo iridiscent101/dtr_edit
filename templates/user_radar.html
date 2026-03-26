@@ -1,0 +1,132 @@
+{% extends "base.html" %}{% block title %}Behavioral Profile | NVSU DTR{%
+endblock %}{% block content %}<!-- React & Recharts Dependencies -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<div id="radar-root" class="max-w-5xl mx-auto py-6"></div>
+<script type="text/babel">
+  const { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip, Legend } = Recharts;// Data injected from Flask
+  const rawMetrics = {{ metrics|tojson }};
+  const userName = &quot;{{ user.name }}&quot;;
+  const totalLogs = {{ total_logs }};
+
+  function App() {
+      const persona = React.useMemo(() =&gt; {
+          const scores = rawMetrics.reduce((acc, curr) =&gt; ({ ...acc, [curr.metric]: curr.me }), {});
+
+          if (scores.Punctuality &gt; 85 &amp;&amp; scores.Stability &gt; 80) return {
+              title: &quot;The Disciplined Anchor&quot;,
+              desc: &quot;Highly predictable and punctual. Your habits are the benchmark for department reliability.&quot;,
+              color: &quot;text-blue-600 dark:text-blue-400&quot;,
+              bg: &quot;bg-blue-50 dark:bg-blue-900/20&quot;,
+              icon: &quot;shield-check&quot;
+          };
+          if (scores.Punctuality &gt; 85) return {
+              title: &quot;The Early Bird Maverick&quot;,
+              desc: &quot;You arrive early, though your timing varies day-to-day. Always ready before the official start.&quot;,
+              color: &quot;text-emerald-600 dark:text-emerald-400&quot;,
+              bg: &quot;bg-emerald-50 dark:bg-emerald-900/20&quot;,
+              icon: &quot;zap&quot;
+          };
+          if (scores.Integrity === 100) return {
+              title: &quot;The Precise Chronicler&quot;,
+              desc: &quot;Your data logs are perfect. No missing clock-outs, ensuring flawless administrative records.&quot;,
+              color: &quot;text-purple-600 dark:text-purple-400&quot;,
+              bg: &quot;bg-purple-50 dark:bg-purple-900/20&quot;,
+              icon: &quot;check-circle&quot;
+          };
+          return {
+              title: &quot;Steady Contributor&quot;,
+              desc: &quot;Balanced attendance habits that align well with university standards and team flow.&quot;,
+              color: &quot;text-slate-600 dark:text-slate-400&quot;,
+              bg: &quot;bg-slate-50 dark:bg-slate-900/50&quot;,
+              icon: &quot;star&quot;
+          };
+      }, []);
+
+      React.useEffect(() =&gt; {
+          if (window.lucide) lucide.createIcons();
+      }, []);
+
+      const averageScore = Math.round(rawMetrics.reduce((a, b) =&gt; a + b.me, 0) / 6);
+
+      return (
+          &lt;div className=&quot;space-y-8 animate-spring&quot;&gt;
+              &lt;header className=&quot;flex items-center justify-between&quot;&gt;
+                  &lt;div&gt;
+                      &lt;h1 className=&quot;text-4xl font-black text-gray-900 dark:text-white tracking-tighter&quot;&gt;Habit Profile&lt;/h1&gt;
+                      &lt;p className=&quot;text-gray-500 dark:text-dark-muted text-sm mt-1 font-medium&quot;&gt;Monthly patterns for {userName}&lt;/p&gt;
+                  &lt;/div&gt;
+                  &lt;div className=&quot;bg-white dark:bg-dark-surface p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-dark-border text-center min-w-[140px]&quot;&gt;
+                      &lt;p className=&quot;text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1&quot;&gt;DTR Quality&lt;/p&gt;
+                      &lt;p className=&quot;text-4xl font-black text-brand&quot;&gt;{averageScore}&lt;/p&gt;
+                  &lt;/div&gt;
+              &lt;/header&gt;
+
+              &lt;div className={`p-8 rounded-[2.5rem] border border-gray-100 dark:border-dark-border flex flex-col md:flex-row items-center gap-10 ${persona.bg}`}&gt;
+                  &lt;div className=&quot;p-8 bg-white dark:bg-dark-surface rounded-[2rem] shadow-xl shadow-black/5 flex-shrink-0 transition-transform hover:scale-105 duration-500&quot;&gt;
+                      &lt;i data-lucide={persona.icon} className={`w-14 h-14 ${persona.color}`}&gt;&lt;/i&gt;
+                  &lt;/div&gt;
+                  &lt;div&gt;
+                      &lt;div className=&quot;flex items-center gap-2 mb-3&quot;&gt;
+                          &lt;span className=&quot;bg-brand text-white text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-tighter&quot;&gt;Verified Persona&lt;/span&gt;
+                          &lt;h2 className={`text-3xl font-black ${persona.color}`}&gt;{persona.title}&lt;/h2&gt;
+                      &lt;/div&gt;
+                      &lt;p className=&quot;text-gray-600 dark:text-dark-muted leading-relaxed font-semibold text-lg&quot;&gt;{persona.desc}&lt;/p&gt;
+                  &lt;/div&gt;
+              &lt;/div&gt;
+
+              &lt;div className=&quot;grid grid-cols-1 lg:grid-cols-12 gap-8&quot;&gt;
+                  &lt;div className=&quot;lg:col-span-7 bg-white dark:bg-dark-surface p-10 rounded-[3rem] shadow-sm border border-gray-100 dark:border-dark-border&quot;&gt;
+                      &lt;h3 className=&quot;text-xl font-bold text-gray-900 dark:text-white mb-10&quot;&gt;Performance Radar&lt;/h3&gt;
+                      &lt;div className=&quot;h-[400px]&quot;&gt;
+                          &lt;ResponsiveContainer width=&quot;100%&quot; height=&quot;100%&quot;&gt;
+                              &lt;RadarChart cx=&quot;50%&quot; cy=&quot;50%&quot; outerRadius=&quot;80%&quot; data={rawMetrics}&gt;
+                                  &lt;PolarGrid stroke=&quot;#94a3b8&quot; strokeDasharray=&quot;4 4&quot; opacity={0.2} /&gt;
+                                  {/* Added space in double curlies to avoid Jinja error */}
+                                  &lt;PolarAngleAxis dataKey=&quot;metric&quot; tick={ { fill: &#39;#94a3b8&#39;, fontSize: 10, fontWeight: 800 } } /&gt;
+                                  &lt;Tooltip contentStyle={ { borderRadius: &#39;24px&#39;, border: &#39;none&#39;, background: &#39;#1a1d27&#39;, color: &#39;#fff&#39;, fontSize: &#39;12px&#39;, padding: &#39;12px&#39; } } /&gt;
+                                  &lt;Radar name=&quot;My Score&quot; dataKey=&quot;me&quot; stroke=&quot;#067302&quot; fill=&quot;#067302&quot; fillOpacity={0.4} dot={ { r: 5, fillOpacity: 1 } } /&gt;
+                                  &lt;Radar name=&quot;Dept. Avg&quot; dataKey=&quot;avg&quot; stroke=&quot;#94a3b8&quot; fill=&quot;#94a3b8&quot; fillOpacity={0.1} /&gt;
+                                  &lt;Legend wrapperStyle={ { paddingTop: &#39;30px&#39;, fontWeight: 700, fontSize: &#39;11px&#39;, textTransform: &#39;uppercase&#39; } } /&gt;
+                              &lt;/RadarChart&gt;
+                          &lt;/ResponsiveContainer&gt;
+                      &lt;/div&gt;
+                  &lt;/div&gt;
+
+                  &lt;div className=&quot;lg:col-span-5 space-y-6&quot;&gt;
+                      &lt;div className=&quot;bg-white dark:bg-dark-surface p-10 rounded-[3rem] shadow-sm border border-gray-100 dark:border-dark-border h-full&quot;&gt;
+                          &lt;h3 className=&quot;text-xl font-bold text-gray-900 dark:text-white mb-8&quot;&gt;Observations&lt;/h3&gt;
+                          &lt;div className=&quot;space-y-6&quot;&gt;
+                              {rawMetrics.map((m, i) =&gt; (
+                                  &lt;div key={i} className=&quot;group&quot;&gt;
+                                      &lt;div className=&quot;flex justify-between items-center mb-2 text-[10px] font-black tracking-widest uppercase&quot;&gt;
+                                          &lt;span className=&quot;text-gray-400&quot;&gt;{m.metric}&lt;/span&gt;
+                                          &lt;span className={m.me &gt; 85 ? &#39;text-brand&#39; : m.me &lt; 70 ? &#39;text-amber-500&#39; : &#39;text-gray-500&#39;}&gt;
+                                              {m.me}%
+                                          &lt;/span&gt;
+                                      &lt;/div&gt;
+                                      &lt;div className=&quot;h-2 w-full bg-gray-100 dark:bg-dark-bg rounded-full overflow-hidden&quot;&gt;
+                                          &lt;div className={`h-full rounded-full transition-all duration-1000 ${m.me &gt; 85 ? &#39;bg-brand shadow-[0_0_10px_rgba(6,115,2,0.5)]&#39; : m.me &lt; 70 ? &#39;bg-amber-500&#39; : &#39;bg-gray-400&#39;}`} style={ { width: `${m.me}%` } }&gt;&lt;/div&gt;
+                                      &lt;/div&gt;
+                                  &lt;/div&gt;
+                              ))}
+                              {totalLogs &lt; 5 &amp;&amp; (
+                                  &lt;div className=&quot;mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl&quot;&gt;
+                                      &lt;p className=&quot;text-[11px] text-blue-700 dark:text-blue-400 font-medium italic&quot;&gt;Data will become more accurate as you record more logs.&lt;/p&gt;
+                                  &lt;/div&gt;
+                              )}
+                          &lt;/div&gt;
+                      &lt;/div&gt;
+                  &lt;/div&gt;
+              &lt;/div&gt;
+          &lt;/div&gt;
+      );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById(&#39;radar-root&#39;));
+  root.render(&lt;App /&gt;);
+</script>
+{% endblock %}

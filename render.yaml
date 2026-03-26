@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: nvsu-dtr-system
+    env: python
+    buildCommand: "bash render-build.sh"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT app:app"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.15

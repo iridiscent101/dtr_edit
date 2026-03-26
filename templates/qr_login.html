@@ -1,0 +1,120 @@
+{% extends "base.html" %} {% block title %}QR Code Login | NVSU DTR{% endblock
+%} {% block content %}
+<div
+  class="h-[calc(100vh-100px)] flex flex-col items-center justify-center px-4"
+>
+  <div
+    class="glass-strong p-10 rounded-3xl shadow-xl max-w-md w-full relative overflow-hidden animate-spring dark:shadow-black/30"
+  >
+    <!-- Top gradient accent -->
+    <div
+      class="absolute top-0 left-0 w-full h-1.5"
+      style="background: linear-gradient(90deg, #067302, #f2e205, #067302)"
+    ></div>
+
+    <div class="text-center mb-8">
+      <div
+        class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg animate-spring-scale"
+        style="
+          animation-delay: 0.15s;
+          background: linear-gradient(135deg, #067302, #055902);
+          box-shadow: 0 8px 20px rgba(6, 115, 2, 0.3);
+        "
+      >
+        <svg
+          class="w-9 h-9 text-white"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+      </div>
+      <h1
+        class="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight"
+      >
+        Scan QR Code
+      </h1>
+      <p class="text-gray-500 dark:text-dark-muted text-sm mt-1.5">
+        Use your mobile app to scan the QR code below
+      </p>
+    </div>
+
+    <div
+      class="stagger-item flex flex-col items-center"
+      style="animation-delay: 0.1s"
+    >
+      <!-- QR Code Display -->
+      <img
+        src="data:image/png;base64,{{ qr_code }}"
+        alt="QR Code for Login"
+        class="w-64 h-64 mb-6"
+      />
+
+      <p class="text-gray-600 dark:text-gray-300 text-sm mb-6 text-center">
+        Scan this QR code with your mobile app to log in automatically
+      </p>
+
+      <p
+        class="text-xs text-gray-400 dark:text-gray-500 break-all text-center mb-6"
+      >
+        {{ scan_url }}
+      </p>
+
+      <!-- Status Indicator -->
+      <div id="status" class="text-center mb-6">
+        <p class="text-gray-500 dark:text-gray-400 text-sm">
+          Waiting for scan...
+        </p>
+      </div>
+
+      <!-- Cancel Button -->
+      <a
+        href="{{ url_for('login') }}"
+        class="text-sm text-brand hover:underline"
+        >Cancel and return to login</a
+      >
+    </div>
+  </div>
+</div>
+
+<script>
+  // Poll for QR code validation
+  const token = "{{ token }}";
+  const pollInterval = 2000; // 2 seconds
+
+  function checkQRStatus() {
+    fetch(`/api/qr-check?token=${token}`)
+      .then((response) => {
+        if (response.status === 202) {
+          // Still waiting
+          return { success: false };
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.success) {
+          // Login successful, redirect
+          window.location.href = data.redirect;
+        } else if (data.message) {
+          // Update status message
+          document.getElementById("status").innerHTML =
+            `<p class="text-gray-500 dark:text-gray-400 text-sm">${data.message}</p>`;
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking QR status:", error);
+        document.getElementById("status").innerHTML =
+          '<p class="text-red-500 text-sm">Error checking status</p>';
+      });
+  }
+
+  // Start polling
+  setInterval(checkQRStatus, pollInterval);
+</script>
+{% endblock %}

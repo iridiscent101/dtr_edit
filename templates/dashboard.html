@@ -1,0 +1,1112 @@
+{% extends "base.html" %} {% block title %}My Dashboard | NVSU DTR
+<script>
+  // ── Live status polling (replaces static Jinja render) ──────────────────────
+  const CLOCKED_IN_CLASSES = [
+    "bg-yellow-50",
+    "border-yellow-200",
+    "dark:bg-yellow-900/20",
+    "dark:border-yellow-800",
+  ];
+  const CLOCKED_OUT_CLASSES = [
+    "bg-brand/8",
+    "border-brand/20",
+    "dark:bg-brand/15",
+  ];
+
+  function applyClockState(clockedIn) {
+    const badge = document.getElementById("clock-badge");
+    const ping = document.getElementById("clock-ping");
+    const dot = document.getElementById("clock-dot");
+    const label = document.getElementById("clock-label");
+    if (!badge) return;
+
+    if (clockedIn) {
+      badge.classList.remove(...CLOCKED_OUT_CLASSES);
+      badge.classList.add(...CLOCKED_IN_CLASSES);
+      ping.classList.replace("bg-brand", "bg-yellow-500");
+      dot.classList.replace("bg-brand", "bg-yellow-500");
+      label.className =
+        "text-sm font-extrabold text-yellow-700 dark:text-yellow-400";
+      label.textContent = "Clocked In";
+    } else {
+      badge.classList.remove(...CLOCKED_IN_CLASSES);
+      badge.classList.add(...CLOCKED_OUT_CLASSES);
+      ping.classList.replace("bg-yellow-500", "bg-brand");
+      dot.classList.replace("bg-yellow-500", "bg-brand");
+      label.className = "text-sm font-extrabold text-brand";
+      label.textContent = "Clocked Out";
+    }
+  }
+
+  function tickElapsed() {
+    const el = document.getElementById("live-elapsed");
+    if (!el) return;
+    const timeIn = parseInt(el.dataset.timeIn);
+    if (!timeIn) return;
+    const diff = Math.floor(Date.now() / 1000) - timeIn;
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    el.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  function pollLiveStatus() {
+    fetch("/api/live-status")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        applyClockState(data.clocked_in);
+        // Update elapsed timer's data-time-in if changed
+        const el = document.getElementById("live-elapsed");
+        if (el && data.time_in) el.dataset.timeIn = data.time_in;
+      })
+      .catch(() => {});
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    tickElapsed();
+    setInterval(tickElapsed, 1000);
+    pollLiveStatus();
+    setInterval(pollLiveStatus, 5000);
+  });
+</script>
+
+{% endblock %} {% block content %} {% set active_log = (logs or []) |
+selectattr("time_out", "equalto", none) | first %}
+
+<style>
+  .log-row {
+    transition:
+      background 0.18s,
+      box-shadow 0.18s;
+  }
+  .log-row:hover {
+    background: rgba(6, 115, 2, 0.04);
+    box-shadow: 0 2px 12px rgba(6, 115, 2, 0.07);
+  }
+  html.dark .log-row:hover {
+    background: rgba(6, 115, 2, 0.08);
+  }
+  .stat-card {
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
+  }
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+  }
+  /* Keep rows visible by default for no-JS fallback, JS pagination will hide/show accordingly */
+  [data-log-row] {
+    display: grid;
+  }
+</style>
+
+<div class="max-w-7xl mx-auto space-y-7">
+  <!-- ── Page Header ── -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring"
+  >
+    <div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1"
+      >
+        Personal Ledger
+      </p>
+      <h1
+        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none"
+      >
+        My Dashboard
+      </h1>
+      <p class="text-gray-400 dark:text-dark-muted mt-1.5 text-sm">
+        Your personal attendance insights and history
+      </p>
+    </div>
+    <!-- Status Badge + Clock In/Out Button -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <div
+        id="clock-badge"
+        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border {{ 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' if active_log else 'bg-brand/8 border-brand/20 dark:bg-brand/15' }}"
+      >
+        <span class="relative flex h-2 w-2">
+          <span
+            id="clock-ping"
+            class="animate-ping absolute inline-flex h-full w-full rounded-full {{ 'bg-yellow-500' if active_log else 'bg-brand' }} opacity-75"
+          ></span>
+          <span
+            id="clock-dot"
+            class="relative inline-flex rounded-full h-2 w-2 {{ 'bg-yellow-500' if active_log else 'bg-brand' }}"
+          ></span>
+        </span>
+        <span
+          id="clock-label"
+          class="text-sm font-extrabold {{ 'text-yellow-700 dark:text-yellow-400' if active_log else 'text-brand' }}"
+        >
+          {{ 'Clocked In' if active_log else 'Clocked Out' }}
+        </span>
+      </div>
+      {% if active_log %}
+      <div
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
+      >
+        <svg
+          class="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+        <span
+          id="live-elapsed"
+          class="text-xs font-bold text-yellow-700 dark:text-yellow-400"
+          data-time-in="{{ active_log.time_in }}"
+          >--:--:--</span
+        >
+      </div>
+      <button
+        id="timeOutBtn"
+        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm text-white"
+        style="
+          background: linear-gradient(135deg, #067302, #055902);
+          box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
+        "
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7"
+          ></path>
+        </svg>
+        Clock Out
+      </button>
+      {% endif %}
+    </div>
+
+    <a
+      href="{{ url_for('user_radar') }}"
+      class="flex items-center gap-2 px-5 py-2.5 bg-brand text-white rounded-xl text-sm font-bold shadow-lg shadow-brand/20 hover:-translate-y-0.5 transition-all"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+        ></path>
+      </svg>
+      Habit Analysis
+    </a>
+  </div>
+
+  <!-- ── Stats Row ── -->
+  <div
+    class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
+    style="align-items: stretch"
+  >
+    <!-- Avg Clock In -->
+    <div
+      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
+      style="animation-delay: 0.05s"
+    >
+      <div
+        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(209, 250, 229, 0.6),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div class="flex flex-col gap-3">
+        <div
+          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
+          >
+            Avg. Clock-In
+          </p>
+          <p
+            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap"
+          >
+            {{ avg_clock_in }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avg Clock Out -->
+    <div
+      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
+      style="animation-delay: 0.08s"
+    >
+      <div
+        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(199, 210, 254, 0.6),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div class="flex flex-col gap-3">
+        <div
+          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
+          >
+            Avg. Clock-Out
+          </p>
+          <p
+            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap"
+          >
+            {{ avg_clock_out }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Sessions -->
+    <div
+      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
+      style="animation-delay: 0.11s"
+    >
+      <div
+        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(221, 214, 254, 0.6),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div class="flex flex-col gap-3">
+        <div
+          class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-500 flex-shrink-0"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
+          >
+            Total Sessions
+          </p>
+          <p
+            class="text-2xl font-headline font-extrabold text-violet-600 dark:text-violet-400 tracking-tight whitespace-nowrap"
+          >
+            {{ logs | length }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- On-Time Rate -->
+    <div
+      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
+      style="animation-delay: 0.14s"
+    >
+      <div
+        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(6, 115, 2, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div class="flex flex-col gap-3">
+        <div
+          class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
+          >
+            On-Time Rate
+          </p>
+          {% set completed = logs | selectattr('time_out') | list %} {% set
+          on_time = completed | rejectattr('is_late') | list %} {% set rate =
+          ((on_time | length / completed | length) * 100) | round(0) | int if
+          completed | length > 0 else 0 %}
+          <p
+            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap"
+          >
+            {{ rate }}<span class="text-sm font-semibold text-gray-400 ml-0.5"
+              >%</span
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main 2-Col Layout ── -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:items-start">
+    <!-- ── Time Logs (left, 2/3) ── -->
+    <div
+      class="glass-strong rounded-2xl overflow-hidden stagger-item lg:col-span-2 flex flex-col"
+      style="animation-delay: 0.15s"
+    >
+      <!-- Header -->
+      <div
+        class="p-6 border-b border-gray-100/60 dark:border-dark-border flex-shrink-0"
+      >
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Personal Ledger
+        </p>
+        <h2
+          class="text-lg font-headline font-bold text-gray-900 dark:text-white tracking-tight"
+        >
+          My Recent Time Logs
+        </h2>
+      </div>
+
+      <!-- Scrollable table wrapper -->
+      <div class="overflow-auto" style="max-height: 500px">
+        <table class="w-full min-w-[700px]">
+          <thead class="sticky top-0 z-10">
+            <tr
+              class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border"
+            >
+              <th
+                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
+              >
+                Date
+              </th>
+              <th
+                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
+              >
+                Time In
+              </th>
+              <th
+                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
+              >
+                Time Out
+              </th>
+              <th
+                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
+              >
+                Duration
+              </th>
+              <th
+                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50">
+            {% for log in logs[:50] %}
+            <tr class="log-row hover:bg-gray-50 dark:hover:bg-dark-surface/50">
+              <td class="px-3 py-3 text-center">
+                <div class="flex items-center gap-3 justify-left">
+                  <div
+                    class="w-10 h-10 rounded-xl flex items-center justify-center text-brand font-headline font-extrabold text-sm flex-shrink-0 bg-gray-100 dark:bg-dark-border group-hover:bg-brand/15 transition-colors"
+                  >
+                    <span class="format-epoch-day">{{ log.time_in }}</span>
+                  </div>
+                  <div class="min-w-0 text-left">
+                    <p
+                      class="text-sm font-bold text-gray-900 dark:text-white format-epoch-long truncate"
+                    >
+                      {{ log.time_in }}
+                    </p>
+                    <p class="text-[10px] text-gray-400 dark:text-dark-muted">
+                      Personal Record
+                    </p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-3 py-3 text-center">
+                <p
+                  class="text-sm font-medium text-gray-700 dark:text-gray-300 format-epoch-time"
+                >
+                  {{ log.time_in }}
+                </p>
+                <p
+                  class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5"
+                  title="Unix epoch"
+                >
+                  {{ log.time_in }}
+                </p>
+                {% if log.is_late %}
+                <div class="mt-1">
+                  <span
+                    class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                    >Late</span
+                  >
+                </div>
+                {% endif %}
+              </td>
+              <td class="px-3 py-3 text-center">
+                {% if log.time_out %}
+                <span
+                  class="text-sm font-medium text-gray-500 dark:text-dark-muted format-epoch-time"
+                  >{{ log.time_out }}</span
+                >
+                <p
+                  class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5"
+                  title="Unix epoch"
+                >
+                  {{ log.time_out }}
+                </p>
+                {% else %}<span class="text-blue-500 font-bold text-sm"
+                  >Active</span
+                >{% endif %}
+              </td>
+              <td class="px-3 py-3 text-center">
+                <p class="text-sm font-headline font-extrabold text-brand">
+                  {{ log.rendered_hours if log.rendered_hours else '—' }}{% if
+                  log.rendered_hours %}<span
+                    class="text-xs font-semibold text-gray-400 ml-0.5"
+                    >h</span
+                  >{% endif %}
+                </p>
+              </td>
+              <td class="px-3 py-3 text-center">
+                {% if not log.time_out %}
+                <span
+                  class="pill-badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                  >Active</span
+                >
+                {% elif log.is_late %}
+                <span
+                  class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  >Late Entry</span
+                >
+                {% else %}
+                <span
+                  class="pill-badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                  >Approved</span
+                >
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="5" class="px-4 py-12 text-center">
+                <svg
+                  class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  ></path>
+                </svg>
+                <p class="text-sm text-gray-400 dark:text-dark-muted">
+                  No logs recorded yet.
+                </p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      {% set qs = 'filter_time=' ~ (current_time_filter or 'all') ~
+      '&date_from=' ~ (current_date_from or '') ~ '&date_to=' ~ (current_date_to
+      or '') ~ '&status_filter=' ~ (current_status_filter or 'all') %}
+      <div
+        class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-100/60 dark:border-dark-border"
+      >
+        <span
+          class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
+        >
+          {% if total_logs > 0 %} Showing {{ ((page - 1) * 30) + 1 }}–{{ [page *
+          30, total_logs] | min }} of {{ total_logs }} entries {% else %} No
+          entries {% endif %}
+        </span>
+        {% if total_pages > 1 %}
+        <div class="flex items-center gap-1">
+          {% if page > 1 %}
+          <a
+            href="/dashboard?{{ qs }}&page={{ page - 1 }}"
+            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+            Previous
+          </a>
+          {% else %}
+          <span
+            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              ></path>
+            </svg>
+            Previous
+          </span>
+          {% endif %} {% set start_pg = [1, page - 2] | max %} {% set end_pg =
+          [total_pages, start_pg + 4] | min %} {% for p in range(start_pg,
+          end_pg + 1) %} {% if p == page %}
+          <span
+            class="w-8 h-8 rounded-lg text-xs font-bold text-white flex items-center justify-center"
+            style="background: linear-gradient(135deg, #067302, #055902)"
+            >{{ p }}</span
+          >
+          {% else %}
+          <a
+            href="/dashboard?{{ qs }}&page={{ p }}"
+            class="w-8 h-8 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-surface transition-all flex items-center justify-center"
+            >{{ p }}</a
+          >
+          {% endif %} {% endfor %} {% if page < total_pages %}
+          <a
+            href="/dashboard?{{ qs }}&page={{ page + 1 }}"
+            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
+          >
+            Next
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </a>
+          {% else %}
+          <span
+            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
+          >
+            Next
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </span>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── Right Column ── -->
+    <div class="lg:col-span-1 space-y-5">
+      <!-- Rendered Hours Metric -->
+      <div
+        class="glass-strong rounded-2xl p-7 stagger-item relative overflow-hidden"
+        style="animation-delay: 0.2s"
+      >
+        <div
+          class="absolute top-0 right-0 w-40 h-40 rounded-full -mr-16 -mt-16"
+          style="
+            background: radial-gradient(
+              circle,
+              rgba(6, 115, 2, 0.08) 0%,
+              transparent 70%
+            );
+          "
+        ></div>
+        <div class="relative z-10">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-dark-muted mb-1"
+          >
+            Rendered Hours Metric
+          </p>
+          <h3
+            class="text-xl font-headline font-bold text-gray-800 dark:text-white mb-1"
+          >
+            My Hours
+          </h3>
+          <p class="text-sm text-gray-400 mb-6">
+            Cumulative productivity for the current period.
+          </p>
+          <div class="flex items-end justify-between">
+            <div>
+              <p
+                class="text-5xl font-headline font-extrabold text-brand leading-none tracking-tighter"
+              >
+                {{ total_hours or '—' }}
+              </p>
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2"
+              >
+                Total Hours
+              </p>
+            </div>
+            <div class="text-right">
+              <p
+                class="text-lg font-headline font-extrabold {% if total_lates > 0 %}text-red-500{% else %}text-emerald-500{% endif %}"
+              >
+                {{ total_lates }}
+              </p>
+              <p
+                class="text-[10px] font-bold uppercase tracking-wider text-gray-400"
+              >
+                Lates
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Parameters Filter Card -->
+      <div
+        class="glass-strong rounded-2xl overflow-hidden stagger-item"
+        style="animation-delay: 0.25s"
+      >
+        <div class="p-6 space-y-6">
+          <!-- Card Title -->
+          <div class="flex items-center gap-2">
+            <svg
+              class="w-4 h-4 text-brand"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
+              ></path>
+            </svg>
+            <h3
+              class="font-headline font-bold text-gray-900 dark:text-white tracking-tight"
+            >
+              Parameters
+            </h3>
+          </div>
+
+          <!-- Timeline -->
+          <form method="GET" action="/dashboard" id="filterForm">
+            <div class="space-y-3">
+              <label
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
+                >Timeline</label
+              >
+              <div class="space-y-2">
+                <div>
+                  <label
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
+                    >From</label
+                  >
+                  <input
+                    type="date"
+                    name="date_from"
+                    value="{{ current_date_from or '' }}"
+                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
+                    >To</label
+                  >
+                  <input
+                    type="date"
+                    name="date_to"
+                    value="{{ current_date_to or '' }}"
+                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Filter Pills -->
+            <div class="space-y-2 mt-5">
+              <label
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
+                >Quick Filter</label
+              >
+              <div class="flex flex-wrap gap-2">
+                <a
+                  href="/dashboard"
+                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_time_filter or current_time_filter == 'all' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
+                  >All Time</a
+                >
+                <a
+                  href="/dashboard?filter_time=year"
+                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'year' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
+                  >This Year</a
+                >
+                <a
+                  href="/dashboard?filter_time=month"
+                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'month' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
+                  >This Month</a
+                >
+                <a
+                  href="/dashboard?filter_time=week"
+                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'week' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
+                  >This Week</a
+                >
+                <a
+                  href="/dashboard?filter_time=today"
+                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'today' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
+                  >This Day</a
+                >
+              </div>
+            </div>
+
+            <!-- Attendance Status Filter -->
+            <div class="space-y-2 mt-5">
+              <label
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
+                >Attendance Status</label
+              >
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onclick="setStatusFilter('all')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_status_filter or current_status_filter == 'all' %}bg-gray-700 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  onclick="setStatusFilter('ontime')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'ontime' %}bg-emerald-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
+                >
+                  On Time
+                </button>
+                <button
+                  type="button"
+                  onclick="setStatusFilter('late')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'late' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
+                >
+                  Late
+                </button>
+              </div>
+              <input
+                type="hidden"
+                name="status_filter"
+                id="status_filter_input"
+                value="{{ current_status_filter or 'all' }}"
+              />
+            </div>
+
+            <!-- Apply / Clear Buttons -->
+            <div
+              class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2"
+            >
+              <button
+                type="submit"
+                class="w-full py-3.5 font-headline font-bold text-sm text-white rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+                style="
+                  background: linear-gradient(135deg, #067302, #055902);
+                  box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
+                "
+              >
+                Apply Filters
+              </button>
+              <a
+                href="/dashboard"
+                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
+              >
+                Clear All
+              </a>
+            </div>
+          </form>
+
+          <!-- Live Status Chip -->
+          <div
+            class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between"
+          >
+            <div>
+              <span
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
+                >Real-time Status</span
+              >
+              <span class="text-sm font-bold text-brand"
+                >Live Monitoring Active</span
+              >
+            </div>
+            <div
+              class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
+              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const logsData = {{ logs_data | tojson | safe }};
+
+  // ── Run immediately on script parse — no waiting ──────────────────────────
+
+  function formatEpochs() {
+    document.querySelectorAll(".format-epoch-day").forEach(el => {
+      const epoch = parseInt(el.textContent.trim());
+      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).getDate();
+    });
+    document.querySelectorAll(".format-epoch-long").forEach(el => {
+      const epoch = parseInt(el.textContent.trim());
+      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+    });
+    document.querySelectorAll(".format-epoch-time").forEach(el => {
+      const epoch = parseInt(el.textContent.trim());
+      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    });
+  }
+
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  const ROWS_PER_PAGE = 30;
+  let currentPage = 1;
+
+  function initPagination() {
+    const rows = document.querySelectorAll('[data-log-row]');
+    const total = rows.length;
+    const totalPages = Math.ceil(total / ROWS_PER_PAGE);
+
+    if (total === 0) {
+      const footer = document.getElementById('pagination-footer');
+      if (footer) footer.classList.add('hidden');
+      return;
+    }
+
+    function renderPageNumbers(page) {
+      const container = document.getElementById('page-numbers');
+      if (!container) return;
+      container.innerHTML = '';
+      let start = Math.max(1, page - 2);
+      let end = Math.min(totalPages, start + 4);
+      if (end - start < 4) start = Math.max(1, end - 4);
+      for (let p = start; p <= end; p++) {
+        const btn = document.createElement('button');
+        btn.textContent = p;
+        btn.onclick = () => renderPage(p);
+        btn.className = p === page
+          ? 'w-8 h-8 rounded-lg text-xs font-bold text-white transition-all'
+          : 'w-8 h-8 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 transition-all';
+        if (p === page) btn.style.background = 'linear-gradient(135deg, #067302, #055902)';
+        container.appendChild(btn);
+      }
+    }
+
+    function renderPage(page) {
+      currentPage = page;
+      const start = (page - 1) * ROWS_PER_PAGE;
+      const end = start + ROWS_PER_PAGE;
+      const rowsOnPage = Math.min(end, total) - start;
+
+      rows.forEach((row, i) => {
+        row.style.display = (i >= start && i < end) ? '' : 'none';
+      });
+
+      const rowContainer = document.querySelector('[data-log-row]')?.parentElement;
+      if (rowContainer) rowContainer.style.minHeight = (rowsOnPage * 80) + 'px';
+
+      const info = document.getElementById('pagination-info');
+      if (info) info.textContent = `Showing ${start + 1}–${Math.min(end, total)} of ${total} entries`;
+
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      if (prevBtn) prevBtn.disabled = page === 1;
+      if (nextBtn) nextBtn.disabled = page === totalPages;
+      renderPageNumbers(page);
+    }
+
+    window.changePage = function(dir) {
+      const next = currentPage + dir;
+      if (next >= 1 && next <= totalPages) renderPage(next);
+    };
+
+    renderPage(1);
+  }
+
+  // ── Charts (only thing that needs to wait for Chart.js) ───────────────────
+  function initCharts() {
+    if (typeof Chart === "undefined") { setTimeout(initCharts, 100); return; }
+    const isDark = document.documentElement.classList.contains("dark");
+
+    let hoursByDate = {}, totalOnTime = 0, totalLate = 0, totalActive = 0;
+    if (typeof logsData !== "undefined" && Array.isArray(logsData)) {
+      logsData.forEach(log => {
+        if (log.time_out) {
+          const d = new Date(log.time_in * 1000).toISOString().split('T')[0];
+          hoursByDate[d] = (hoursByDate[d] || 0) + (parseFloat(log.rendered_hours) || 0);
+          log.is_late ? totalLate++ : totalOnTime++;
+        } else { totalActive++; }
+      });
+    }
+
+    const sorted = Object.keys(hoursByDate).sort().slice(-7);
+
+    const barCanvas = document.getElementById("hoursChart");
+    if (barCanvas) {
+      new Chart(barCanvas.getContext("2d"), {
+        type: "bar",
+        data: { labels: sorted.length ? sorted : ["No Data"], datasets: [{ data: sorted.length ? sorted.map(d => hoursByDate[d]) : [0], backgroundColor: "#067302", borderRadius: 6, barThickness: 14 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: isDark ? "#8892a4" : "#6b7280" }, grid: { color: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)" } }, x: { grid: { display: false }, ticks: { color: isDark ? "#8892a4" : "#6b7280" } } } }
+      });
+    }
+
+    const pieCanvas = document.getElementById("statusChart");
+    if (pieCanvas) {
+      new Chart(pieCanvas.getContext("2d"), {
+        type: "doughnut",
+        data: { labels: ["On Time", "Late", "Active"], datasets: [{ data: [totalOnTime, totalLate, totalActive], backgroundColor: ["#067302", "#ef4444", "#3b82f6"], borderColor: isDark ? "#1a1d27" : "#fff", borderWidth: 3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: isDark ? "#8892a4" : "#6b7280", padding: 12, font: { size: 11 } } } } }
+      });
+    }
+
+    const timeOutBtn = document.getElementById("timeOutBtn");
+    if (timeOutBtn) {
+      timeOutBtn.addEventListener("click", () => {
+        fetch("/api/dashboard-tap", { method: "POST" })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success && data.rfid) return fetch("/api/tap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rfid_tag: data.rfid }) });
+            throw new Error(data.message || "Could not get RFID.");
+          })
+          .then(r => r.json())
+          .then(data => { showToast(data.message, data.success ? "success" : "error"); if (data.success) setTimeout(() => location.reload(), 1500); })
+          .catch(err => showToast(err.message, "error"));
+      });
+    }
+  }
+
+  function setStatusFilter(value) {
+    document.getElementById('status_filter_input').value = value;
+    document.querySelectorAll('.status-pill').forEach(btn => {
+      btn.classList.remove('bg-gray-700', 'bg-emerald-500', 'bg-amber-500', 'text-white', 'shadow-sm');
+      btn.classList.add('bg-gray-100', 'text-gray-500');
+    });
+    const colors = { all: 'bg-gray-700', ontime: 'bg-emerald-500', late: 'bg-amber-500' };
+    event.currentTarget.classList.add(colors[value], 'text-white', 'shadow-sm');
+    event.currentTarget.classList.remove('bg-gray-100', 'text-gray-500');
+  }
+
+  // ── Boot — script is at bottom of page so DOM is always ready ───────────
+  formatEpochs();
+  initPagination();
+  initCharts();
+</script>
+{% endblock %}

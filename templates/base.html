@@ -1,0 +1,2178 @@
+<!doctype html>
+<html lang="en" style="background: #ffffff">
+  <head>
+    <!-- Anti-flash: must be first — sets bg before any stylesheet parses -->
+    <style>
+      html {
+        background: #ffffff;
+      }
+      html.dark {
+        background: #0f1117;
+      }
+      body {
+        background: #ffffff;
+      }
+      html.dark body {
+        background: #0f1117;
+      }
+    </style>
+    <!-- Apply dark mode class instantly before first paint -->
+    <script>
+      (function () {
+        if (localStorage.getItem("darkMode") === "true") {
+          document.documentElement.classList.add("dark");
+          document.documentElement.style.background = "#0f1117";
+        }
+      })();
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}NVSU DTR System{% endblock %}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/nvsu logo.png" />
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine JS -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <!-- Chart.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jQuery (Required for Select2) -->
+    <script defer src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Select2 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"
+    ></script>
+    <!-- Flatpickr -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                DEFAULT: "#067302",
+                dark: "#055902",
+                light: "#2ea52b",
+                50: "#eefbee",
+                100: "#d4f5d4",
+                200: "#a8e8a8",
+                900: "#03350a",
+              },
+              accent: {
+                DEFAULT: "#F2E205",
+                dark: "#d4c504",
+                light: "#f7ef5a",
+              },
+              danger: {
+                DEFAULT: "#F20505",
+                dark: "#c70404",
+                light: "#f55555",
+              },
+              honeydew: "#F2F2F2",
+              sidebar: "#042e01",
+              /* Soft-Ink Status Colors */
+              status: {
+                done: "#dcfce7" /* Soft green */,
+                "done-text": "#166534" /* Dark green text */,
+                late: "#fef3c7" /* Soft amber */,
+                "late-text": "#92400e" /* Dark amber text */,
+                active: "#dbeafe" /* Soft blue */,
+                "active-text": "#1e40af" /* Dark blue text */,
+              },
+              dark: {
+                bg: "#0f1117",
+                surface: "#1a1d27",
+                card: "#21242f",
+                border: "#2a2d3a",
+                text: "#e2e8f0",
+                muted: "#8892a4",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #ffffff;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+        min-height: 100vh;
+      }
+
+      /* Typography - Inter for headlines */
+      h1,
+      h2,
+      h3,
+      .font-headline {
+        font-family: "Inter", system-ui, sans-serif;
+      }
+      html.dark body {
+        background-color: #0f1117;
+      }
+      [x-cloak] {
+        display: none !important;
+      }
+
+      /* === Glassmorphism === */
+      .glass {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .glass-strong {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow:
+          0 10px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      }
+      html.dark .glass {
+        background: rgba(26, 29, 39, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      html.dark .glass-strong {
+        background: rgba(33, 36, 47, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* === Spring Animations === */
+      @keyframes spring-in {
+        0% {
+          transform: scale(0.92) translateY(8px);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.02) translateY(-2px);
+          opacity: 1;
+        }
+        80% {
+          transform: scale(0.99) translateY(1px);
+        }
+        100% {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes spring-scale {
+        0% {
+          transform: scale(0.9);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+        80% {
+          transform: scale(0.98);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes fade-up {
+        0% {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes float-pulse {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      .animate-spring {
+        animation: spring-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      .animate-spring-scale {
+        animation: spring-scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      .animate-float {
+        animation: float-pulse 3s ease-in-out infinite;
+      }
+
+      /* Reduce motion for accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Staggered entrance */
+      .stagger-item {
+        opacity: 0;
+        transform: translateY(14px);
+        animation: fade-up 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+
+      /* Button Base Styles - Modern & Discernable */
+      button {
+        cursor: pointer;
+      }
+
+      button:not(:disabled):active {
+        transform: scale(0.97) !important;
+      }
+
+      /* Primary Action Button */
+      .btn-primary {
+        background: linear-gradient(135deg, #067302, #055902);
+        color: white;
+        font-weight: 700;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 4px 20px rgba(6, 115, 2, 0.35);
+        border: none;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        box-shadow: 0 8px 30px rgba(6, 115, 2, 0.45);
+        transform: translateY(-2px);
+      }
+
+      .btn-primary:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+
+      /* Secondary Button */
+      .btn-secondary {
+        background-color: #f3f4f6;
+        color: #111827;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background-color: #e5e7eb;
+        border-color: #d1d5db;
+      }
+
+      html.dark .btn-secondary {
+        background-color: #374151;
+        color: #f3f4f6;
+        border-color: #4b5563;
+      }
+
+      html.dark .btn-secondary:hover:not(:disabled) {
+        background-color: #4b5563;
+        border-color: #6b7280;
+      }
+
+      /* Danger Button */
+      .btn-danger {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        border: 2px solid #fecaca;
+        transition: all 0.3s ease;
+      }
+
+      .btn-danger:hover:not(:disabled) {
+        background-color: #fecaca;
+        border-color: #fca5a5;
+      }
+
+      html.dark .btn-danger {
+        background-color: #7f1d1d;
+        color: #fee2e2;
+        border-color: #991b1b;
+      }
+
+      html.dark .btn-danger:hover:not(:disabled) {
+        background-color: #991b1b;
+        border-color: #b91c1c;
+      }
+
+      /* Spring hover for cards */
+      .card-hover {
+        transition:
+          transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .card-hover:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -12px rgba(6, 115, 2, 0.18);
+      }
+      html.dark .card-hover:hover {
+        box-shadow: 0 20px 40px -12px rgba(6, 115, 2, 0.12);
+      }
+
+      /* ── Micro-interactions (from Layout.tsx) ── */
+      /* Icon container tints for stat cards */
+      .icon-tint-emerald {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .icon-tint-blue {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+      .icon-tint-red {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+      .icon-tint-violet {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+      }
+      .icon-tint-amber {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+      html.dark .icon-tint-emerald {
+        background: rgba(16, 185, 129, 0.15);
+      }
+      html.dark .icon-tint-blue {
+        background: rgba(59, 130, 246, 0.15);
+      }
+      html.dark .icon-tint-red {
+        background: rgba(239, 68, 68, 0.15);
+      }
+      html.dark .icon-tint-violet {
+        background: rgba(139, 92, 246, 0.15);
+      }
+      html.dark .icon-tint-amber {
+        background: rgba(245, 158, 11, 0.15);
+      }
+
+      /* Logout icon nudge */
+      .logout-icon {
+        transition: transform 0.2s ease;
+      }
+      .logout-btn:hover .logout-icon {
+        transform: translateX(3px);
+      }
+
+      /* Toggle pill (dark mode switch in user menu) */
+      .toggle-pill {
+        width: 32px;
+        height: 16px;
+        background: #d1d5db;
+        border-radius: 999px;
+        position: relative;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+      }
+      .toggle-pill.active {
+        background: #067302;
+      }
+      .toggle-pill::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .toggle-pill.active::after {
+        transform: translateX(16px);
+      }
+
+      /* Stat card subtle lift */
+      .stat-card {
+        transition:
+          transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.3s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px -8px rgba(6, 115, 2, 0.12);
+      }
+      html.dark .stat-card:hover {
+        box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Toast */
+      @keyframes toast-in {
+        0% {
+          transform: translateY(100%) scale(0.9);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes toast-out {
+        0% {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100%) scale(0.9);
+          opacity: 0;
+        }
+      }
+      /* ── Page-enter transition ── */
+      @keyframes page-enter {
+        0% {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .page-enter {
+        animation: page-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      /* ── Auto-stagger: [data-stagger] staggers direct children ── */
+      [data-stagger] > * {
+        opacity: 0;
+        transform: translateY(16px);
+        animation: fade-up 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      [data-stagger] > *:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      [data-stagger] > *:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      [data-stagger] > *:nth-child(3) {
+        animation-delay: 0.15s;
+      }
+      [data-stagger] > *:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      [data-stagger] > *:nth-child(5) {
+        animation-delay: 0.25s;
+      }
+      [data-stagger] > *:nth-child(6) {
+        animation-delay: 0.3s;
+      }
+      [data-stagger] > *:nth-child(7) {
+        animation-delay: 0.35s;
+      }
+      [data-stagger] > *:nth-child(8) {
+        animation-delay: 0.4s;
+      }
+
+      /* ── Skeleton shimmer (for JS-hydrated stat cards) ── */
+      @keyframes skeleton-sweep {
+        0% {
+          background-position: -400px 0;
+        }
+        100% {
+          background-position: 400px 0;
+        }
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, 0.06) 25%,
+          rgba(0, 0, 0, 0.12) 37%,
+          rgba(0, 0, 0, 0.06) 63%
+        );
+        background-size: 800px 100%;
+        animation: skeleton-sweep 1.4s ease infinite;
+        border-radius: 6px;
+        color: transparent !important;
+        pointer-events: none;
+        user-select: none;
+      }
+      html.dark .skeleton {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.1) 37%,
+          rgba(255, 255, 255, 0.05) 63%
+        );
+        background-size: 800px 100%;
+        animation: skeleton-sweep 1.4s ease infinite;
+      }
+
+      /* ── Nav link active indicator ── */
+      .nav-active {
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 3px solid #2ea52b;
+        padding-left: calc(0.75rem - 3px) !important;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #067302 0%, #055902 100%);
+        color: white;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 8px 32px rgba(6, 115, 2, 0.35);
+        animation: toast-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        z-index: 9999;
+      }
+      .toast.error {
+        background: linear-gradient(135deg, #f20505 0%, #c70404 100%);
+        box-shadow: 0 8px 32px rgba(242, 5, 5, 0.35);
+      }
+
+      /* Scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+      html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #3a3d4a;
+      }
+
+      /* Blobs */
+      .bg-blob-1 {
+        position: fixed;
+        top: -120px;
+        right: -80px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          circle,
+          rgba(6, 115, 2, 0.08) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .bg-blob-2 {
+        position: fixed;
+        bottom: -150px;
+        left: 10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+          circle,
+          rgba(242, 226, 5, 0.06) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+      }
+      html.dark .bg-blob-1 {
+        background: radial-gradient(
+          circle,
+          rgba(6, 115, 2, 0.04) 0%,
+          transparent 70%
+        );
+      }
+      html.dark .bg-blob-2 {
+        background: radial-gradient(
+          circle,
+          rgba(242, 226, 5, 0.03) 0%,
+          transparent 70%
+        );
+      }
+
+      /* Nav active */
+      .nav-active {
+        background: linear-gradient(
+          135deg,
+          rgba(6, 115, 2, 0.15) 0%,
+          rgba(242, 226, 5, 0.05) 100%
+        );
+        border-left: 3px solid #067302;
+      }
+
+      /* Table stagger */
+      .table-stagger tr {
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fade-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+
+      /* Dark mode toggle switch */
+      .toggle-switch {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: #374151;
+        border-radius: 24px;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .toggle-slider:before {
+        content: "";
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background: white;
+        border-radius: 50%;
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      input:checked + .toggle-slider {
+        background: #067302;
+      }
+      input:checked + .toggle-slider:before {
+        transform: translateX(20px);
+      }
+
+      /* Modal overlay - Scholastic Glass */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      html.dark .modal-overlay {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      /* Scholastic glass for modals */
+      .glass-modal {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      html.dark .glass-modal {
+        background: rgba(33, 36, 47, 0.85);
+      }
+
+      /* Table - No dividers, use whitespace */
+      .table-no-divider tbody tr {
+        border-bottom: none;
+      }
+      .table-no-divider tbody tr + tr {
+        margin-top: 0;
+        border-top: none;
+      }
+      .table-no-divider tbody tr:not(:last-child) {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+      }
+
+      /* Ghost borders - 15% opacity for accessibility */
+      .ghost-border {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+      }
+      html.dark .ghost-border {
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      /* Surface tiers for "no-line" design */
+      .surface-canvas {
+        background-color: #ffffff;
+      }
+      .surface-elevated {
+        background-color: #f8fafc;
+      }
+      html.dark .surface-canvas {
+        background-color: #0f1117;
+      }
+      html.dark .surface-elevated {
+        background-color: #1a1d27;
+      }
+
+      /* Row hover states - background shift instead of borders */
+      .table-row-hover:hover {
+        background-color: #f8fafc;
+      }
+      html.dark .table-row-hover:hover {
+        background-color: #1a1d27;
+      }
+
+      /* === Modern Filter Styling === */
+      /* Base Filter Element Styling */
+      .time-filter-dropdown,
+      .user-select-dropdown,
+      .date-picker {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(248, 250, 252, 0.95)
+        ) !important;
+        border: 2px solid #e5e7eb !important;
+        color: #1f2937 !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        border-radius: 0.875rem;
+        padding: 0.625rem 1rem !important;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 8px rgba(6, 115, 2, 0.08);
+        height: 44px;
+        min-height: 44px;
+      }
+
+      .time-filter-dropdown:hover,
+      .user-select-dropdown:hover,
+      .date-picker:hover {
+        border-color: #067302 !important;
+        box-shadow: 0 4px 16px rgba(6, 115, 2, 0.15);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.95),
+          rgba(248, 250, 252, 1)
+        ) !important;
+      }
+
+      .time-filter-dropdown:focus,
+      .user-select-dropdown:focus,
+      .date-picker:focus {
+        outline: none;
+        border-color: #067302 !important;
+        box-shadow:
+          0 0 0 3px rgba(6, 115, 2, 0.1),
+          0 4px 20px rgba(6, 115, 2, 0.2);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.98),
+          rgba(248, 250, 252, 1)
+        ) !important;
+      }
+
+      .time-filter-dropdown:focus-visible,
+      .user-select-dropdown:focus-visible,
+      .date-picker:focus-visible {
+        outline: none;
+        border-color: #067302 !important;
+        box-shadow:
+          0 0 0 3px rgba(6, 115, 2, 0.1),
+          0 4px 20px rgba(6, 115, 2, 0.2);
+      }
+
+      /* Dark Mode Filter Styling */
+      html.dark .time-filter-dropdown,
+      html.dark .user-select-dropdown,
+      html.dark .date-picker {
+        background: linear-gradient(
+          135deg,
+          rgba(55, 65, 81, 0.8),
+          rgba(71, 85, 105, 0.8)
+        ) !important;
+        border-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      html.dark .time-filter-dropdown:hover,
+      html.dark .user-select-dropdown:hover,
+      html.dark .date-picker:hover {
+        border-color: #2ea52b !important;
+        background: linear-gradient(
+          135deg,
+          rgba(55, 65, 81, 0.9),
+          rgba(71, 85, 105, 0.9)
+        ) !important;
+        box-shadow: 0 4px 16px rgba(6, 115, 2, 0.25);
+      }
+
+      html.dark .time-filter-dropdown:focus,
+      html.dark .user-select-dropdown:focus,
+      html.dark .date-picker:focus {
+        border-color: #2ea52b !important;
+        background: linear-gradient(
+          135deg,
+          rgba(55, 65, 81, 1),
+          rgba(71, 85, 105, 1)
+        ) !important;
+        box-shadow:
+          0 0 0 3px rgba(6, 115, 2, 0.15),
+          0 4px 20px rgba(6, 115, 2, 0.3);
+      }
+
+      /* Select2 Custom Container Styling */
+      .select2-container--default .select2-selection--single {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(248, 250, 252, 0.95)
+        ) !important;
+        border: 2px solid #e5e7eb !important;
+        border-radius: 0.875rem !important;
+        height: 44px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 8px rgba(6, 115, 2, 0.08);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .select2-container--default
+        .select2-selection--single
+        .select2-selection__rendered {
+        color: #1f2937 !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        line-height: 42px;
+        padding: 0 1rem !important;
+      }
+
+      .select2-container--default
+        .select2-selection--single
+        .select2-selection__arrow {
+        height: 42px !important;
+      }
+
+      .select2-container--default
+        .select2-selection--single
+        .select2-selection__arrow
+        b {
+        border-color: #067302 transparent transparent transparent !important;
+        margin-top: -8px;
+      }
+
+      .select2-container--default.select2-container--open
+        .select2-selection--single {
+        border-color: #067302 !important;
+        box-shadow: 0 4px 20px rgba(6, 115, 2, 0.2);
+      }
+
+      .select2-container--default.select2-container--focus
+        .select2-selection--single {
+        border-color: #067302 !important;
+        box-shadow:
+          0 0 0 3px rgba(6, 115, 2, 0.1),
+          0 4px 20px rgba(6, 115, 2, 0.2);
+      }
+
+      /* Select2 Dark Mode */
+      html.dark .select2-container--default .select2-selection--single {
+        background: linear-gradient(
+          135deg,
+          rgba(55, 65, 81, 0.8),
+          rgba(71, 85, 105, 0.8)
+        ) !important;
+        border-color: #4b5563 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      html.dark
+        .select2-container--default
+        .select2-selection--single
+        .select2-selection__rendered {
+        color: #f3f4f6 !important;
+      }
+
+      html.dark
+        .select2-container--default.select2-container--open
+        .select2-selection--single {
+        border-color: #2ea52b !important;
+        box-shadow: 0 4px 20px rgba(6, 115, 2, 0.25);
+      }
+
+      html.dark
+        .select2-container--default.select2-container--focus
+        .select2-selection--single {
+        border-color: #2ea52b !important;
+        box-shadow:
+          0 0 0 3px rgba(6, 115, 2, 0.15),
+          0 4px 20px rgba(6, 115, 2, 0.3);
+      }
+
+      /* Select2 Dropdown List */
+      .select2-container--default .select2-results__option {
+        padding: 10px 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.2s ease;
+      }
+
+      .select2-container--default .select2-results__option:hover {
+        background: linear-gradient(90deg, rgba(6, 115, 2, 0.08), transparent);
+        color: #067302;
+      }
+
+      .select2-container--default
+        .select2-results__option[aria-selected="true"] {
+        background: linear-gradient(90deg, rgba(6, 115, 2, 0.15), transparent);
+        color: #067302;
+        font-weight: 700;
+      }
+
+      html.dark .select2-container--default .select2-results__option {
+        background-color: #2d3748;
+        color: #e2e8f0;
+      }
+
+      html.dark .select2-container--default .select2-results__option:hover {
+        background: linear-gradient(90deg, rgba(6, 115, 2, 0.2), transparent);
+        color: #2ea52b;
+      }
+
+      html.dark
+        .select2-container--default
+        .select2-results__option[aria-selected="true"] {
+        background: linear-gradient(90deg, rgba(6, 115, 2, 0.25), transparent);
+        color: #2ea52b;
+      }
+
+      /* Flatpickr Calendar Customization */
+      .flatpickr-calendar {
+        background: white !important;
+        border: 2px solid #e5e7eb !important;
+        border-radius: 0.875rem !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+      }
+
+      .flatpickr-calendar.open {
+        box-shadow: 0 20px 60px rgba(6, 115, 2, 0.15) !important;
+      }
+
+      html.dark .flatpickr-calendar {
+        background: #374151 !important;
+        border-color: #4b5563 !important;
+      }
+
+      .flatpickr-monthDropdown-months,
+      .flatpickr-yearDropdown {
+        background: #f8fafc !important;
+        color: #1f2937 !important;
+        border-radius: 0.5rem !important;
+      }
+
+      html.dark .flatpickr-monthDropdown-months,
+      html.dark .flatpickr-yearDropdown {
+        background: #2d3748 !important;
+        color: #f3f4f6 !important;
+      }
+
+      .flatpickr-day.selected {
+        background: linear-gradient(135deg, #067302, #055902) !important;
+        border-color: #067302 !important;
+        color: white !important;
+        font-weight: 700;
+      }
+
+      .flatpickr-day:hover {
+        background: rgba(6, 115, 2, 0.15) !important;
+      }
+
+      .flatpickr-day.today {
+        border-color: #067302 !important;
+        color: #067302 !important;
+        font-weight: 700;
+      }
+
+      html.dark .flatpickr-day.today {
+        color: #2ea52b !important;
+        border-color: #2ea52b !important;
+      }
+
+      .flatpickr-prev,
+      .flatpickr-next {
+        color: #067302 !important;
+        fill: #067302 !important;
+      }
+
+      html.dark .flatpickr-prev,
+      html.dark .flatpickr-next {
+        color: #2ea52b !important;
+        fill: #2ea52b !important;
+      }
+
+      /* Filter Container Enhancement */
+      .relative.group {
+        position: relative;
+      }
+
+      .relative.group:has(.time-filter-dropdown:focus),
+      .relative.group:has(.user-select-dropdown:focus),
+      .relative.group:has(.date-picker:focus) {
+        z-index: 100;
+      }
+
+      /* Icon styling for filter containers */
+      .relative.group .absolute svg {
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      .relative.group:has(.date-picker:focus) .absolute svg {
+        color: #067302 !important;
+        transform: scale(1.1);
+      }
+
+      html.dark .relative.group:has(.date-picker:focus) .absolute svg {
+        color: #2ea52b !important;
+      }
+
+      /* Filter Pills */
+      .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.7);
+        color: #6b7280;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      .filter-pill:hover {
+        background: rgba(6, 115, 2, 0.08);
+        color: #067302;
+        border-color: rgba(6, 115, 2, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(6, 115, 2, 0.15);
+      }
+
+      .filter-pill.active {
+        background: linear-gradient(135deg, #067302, #059a02);
+        color: white;
+        box-shadow: 0 2px 10px rgba(6, 115, 2, 0.3);
+        border-color: transparent;
+      }
+
+      .filter-pill.active:hover {
+        background: linear-gradient(135deg, #059a02, #048a01);
+        color: white;
+      }
+
+      html.dark .filter-pill {
+        background: rgba(55, 65, 81, 0.6);
+        color: #9ca3af;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      html.dark .filter-pill:hover {
+        background: rgba(6, 115, 2, 0.2);
+        color: #2ea52b;
+        border-color: rgba(46, 165, 43, 0.3);
+      }
+
+      html.dark .filter-pill.active {
+        background: linear-gradient(135deg, #2ea52b, #36c93b);
+        color: white;
+      }
+
+      /* Filter toolbar container */
+      .filter-toolbar {
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+
+      html.dark .filter-toolbar {
+        background: rgba(30, 32, 36, 0.5);
+        border-color: rgba(255, 255, 255, 0.05);
+      }
+    </style>
+    <!-- Loading Screen -->
+    <style>
+      #page-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: #ffffff;
+        transition:
+          opacity 0.4s ease,
+          visibility 0.4s ease;
+      }
+      html.dark #page-loader {
+        background: #0f1117;
+      }
+      #page-loader.hidden-loader {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .loader-logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        object-fit: contain;
+        animation: loader-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes loader-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(0.92);
+          opacity: 0.7;
+        }
+      }
+      .loader-bar-track {
+        width: 160px;
+        height: 3px;
+        border-radius: 99px;
+        background: rgba(6, 115, 2, 0.15);
+        overflow: hidden;
+      }
+      .loader-bar-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #067302, #f2e205, #067302);
+        background-size: 200% 100%;
+        animation: loader-shimmer 1.4s linear infinite;
+      }
+      @keyframes loader-shimmer {
+        0% {
+          background-position: 200% center;
+        }
+        100% {
+          background-position: -200% center;
+        }
+      }
+      .loader-text {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: #9ca3af;
+      }
+    </style>
+  </head>
+  <body
+    class="flex min-h-screen relative dark:bg-dark-bg dark:text-dark-text"
+    x-data="{ 
+        sidebarOpen: window.innerWidth >= 768, 
+        darkMode: localStorage.getItem('darkMode') === 'true',
+        notificationsOpen: false,
+        userMenuOpen: false,
+        activity: [],
+        lastId: null,
+        unreadCount: 0,
+        init() {
+            if (this.darkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            
+            this.$watch('darkMode', val => {
+                localStorage.setItem('darkMode', val);
+                if (val) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            });
+
+            // Close sidebar on mobile resize, open on desktop resize, reflow charts
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    this.sidebarOpen = true;
+                } else {
+                    this.sidebarOpen = false;
+                }
+                // Force Chart.js to reflow after layout settles
+                setTimeout(() => {
+                    if (window.Chart) {
+                        Object.values(Chart.instances).forEach(chart => chart.resize());
+                    }
+                }, 300);
+            });
+
+            {% if session.get('user_id') %}
+            this.fetchActivity(true);
+            setInterval(() => this.fetchActivity(false), 5000);
+            {% endif %}
+        },
+        fetchActivity(isInitial) {
+            const endpoint = '{% if session.get('user_role') == 'admin' %}/api/admin/recent-activity{% else %}/api/user/recent-activity{% endif %}';
+            fetch(endpoint)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        if (isInitial) {
+                            this.activity = data;
+                            this.lastId = data[0].id;
+                        } else {
+                            const newEvents = data.filter(e => e.id > this.lastId);
+                            if (newEvents.length > 0) {
+                                newEvents.reverse().forEach(event => {
+                                    const msg = '{% if session.get('user_role') == 'admin' %}' + `${event.name} has ${event.action === 'Time In' ? 'timed in' : 'timed out'}!` + '{% else %}' + `Successfully ${event.action === 'Time In' ? 'timed in' : 'timed out'}!` + '{% endif %}';
+                                    showToast(msg, 'success');
+                                    this.unreadCount++;
+                                });
+                                this.activity = data;
+                                this.lastId = data[0].id;
+                            }
+                        }
+                    }
+                });
+        }
+    }"
+    x-init="init()"
+  >
+    <!-- ── Loading Screen ── -->
+    <div id="page-loader">
+      <img src="/images/nvsu gif.gif" alt="NVSU" class="loader-logo" />
+      <div class="loader-bar-track"><div class="loader-bar-fill"></div></div>
+      <span class="loader-text">Loading&hellip;</span>
+    </div>
+
+    <script>
+      // Hide loader once page is fully ready
+      function hideLoader() {
+        const loader = document.getElementById("page-loader");
+        if (!loader || loader.classList.contains("hidden-loader")) return;
+        loader.classList.add("hidden-loader");
+        triggerPageAnimations();
+      }
+
+      function triggerPageAnimations() {
+        // Re-trigger page-enter on <main>
+        const main = document.querySelector("main");
+        if (main) {
+          main.classList.remove("page-enter");
+          void main.offsetWidth;
+          main.classList.add("page-enter");
+        }
+
+        // Re-trigger every stagger-item so cards animate in on every navigation
+        document.querySelectorAll(".stagger-item").forEach((el) => {
+          el.style.animation = "none";
+          el.style.opacity = "0";
+          void el.offsetWidth; // force reflow per element
+          el.style.animation = "";
+          el.style.opacity = "";
+        });
+
+        // Re-trigger [data-stagger] children
+        document.querySelectorAll("[data-stagger] > *").forEach((el) => {
+          el.style.animation = "none";
+          el.style.opacity = "0";
+          void el.offsetWidth;
+          el.style.animation = "";
+          el.style.opacity = "";
+        });
+      }
+
+      // Also re-trigger on browser back/forward (bfcache restore)
+      window.addEventListener("pageshow", (e) => {
+        if (e.persisted) triggerPageAnimations();
+      });
+      // Hide on DOMContentLoaded (HTML parsed) — don't wait for CDN scripts/fonts.
+      // This prevents the white screen when external resources are slow.
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", hideLoader);
+      } else {
+        // readyState is 'interactive' or 'complete' — already past DOMContentLoaded
+        hideLoader();
+      }
+      // Backup: also hide on full load (images, fonts, etc.) for mobile browsers
+      window.addEventListener("load", hideLoader);
+      // Hard fallback: 800ms max — never leave the user on a blank screen
+      setTimeout(hideLoader, 800);
+    </script>
+
+    <!-- Decorative Blobs -->
+    <div class="bg-blob-1"></div>
+    <div class="bg-blob-2"></div>
+
+    <!-- Sidebar -->
+    {% if session.get('user_id') %}
+    <div
+      :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="fixed md:sticky md:top-0 z-30 inset-y-0 left-0 w-64 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] md:translate-x-0 text-white flex flex-col h-screen shadow-2xl"
+      style="
+        background: linear-gradient(
+          180deg,
+          #14532d 0%,
+          #0f3d22 60%,
+          #071d12 100%
+        );
+      "
+    >
+      <div
+        class="flex items-center justify-between p-6 border-b border-white/5"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="/images/nvsu gif.gif"
+            alt="NVSU"
+            class="w-10 h-10 rounded-xl object-contain"
+          />
+          <div>
+            <span class="font-headline font-semibold text-lg tracking-tight"
+              >NVSU DTR</span
+            >
+            <span class="block text-[11px] text-brand-light font-medium"
+              >Daily Time Record</span
+            >
+          </div>
+        </div>
+        <button
+          @click="sidebarOpen = false"
+          class="md:hidden text-gray-400 hover:text-white transition-colors"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <nav
+        class="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto custom-scrollbar"
+      >
+        {% if session.get('user_id') %}
+        <!-- Removed redundant welcome block as it's now in the Top Bar -->
+
+        {% if session.get('user_role') == 'admin' %}
+        <a
+          href="/admin"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/admin' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            ></path>
+          </svg>
+          <span class="text-sm">Dashboard</span>
+        </a>
+        <a
+          href="/admin/analytics"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/admin/analytics' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            ></path>
+          </svg>
+          <span class="text-sm">Analytics</span>
+        </a>
+        <a
+          href="/admin/users"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/admin/users' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          <span class="text-sm">Manage Users</span>
+        </a>
+        {% else %}
+        <a
+          href="/dashboard"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/dashboard' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            ></path>
+          </svg>
+          <span class="text-sm">My Dashboard</span>
+        </a>
+        <a
+          href="/dashboard/analytics"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/dashboard/analytics' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            ></path>
+          </svg>
+          <span class="text-sm">My Analytics</span>
+        </a>
+        <a
+          href="/profile"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/profile' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span class="text-sm">My Profile</span>
+        </a>
+        {% endif %}
+
+        <a
+          href="/kiosk"
+          data-analytics-event="nav_tap_kiosk"
+          data-analytics-details='{"target":"kiosk"}'
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-300 {{ 'nav-active text-brand-light font-semibold' if request.path == '/kiosk' else 'text-gray-400 hover:text-white hover:bg-white/5' }}"
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+            ></path>
+          </svg>
+          <span class="text-sm">Tap Kiosk</span>
+        </a>
+
+        <div class="mt-8 border-t border-white/5 pt-4 space-y-2">
+          <!-- Real-time Indicators -->
+          <div
+            class="px-4 py-3 bg-white/5 rounded-xl border border-white/5 mb-2 mx-2"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <span
+                class="text-[10px] text-gray-500 uppercase tracking-widest font-bold"
+                >Local Time</span
+              >
+              <span class="flex h-1.5 w-1.5 relative">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand/40 opacity-75"
+                ></span>
+                <span
+                  class="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand"
+                ></span>
+              </span>
+            </div>
+            <div
+              class="text-2xl font-bold text-brand-light tracking-tight realtime-epoch"
+            >
+              ----------
+            </div>
+            <div
+              class="mt-1 flex items-center gap-1.5 text-[10px] text-gray-500 font-mono"
+            >
+              <span class="opacity-60">12HR:</span>
+              <span class="text-white realtime-clock-12h">--:--:-- --</span>
+            </div>
+          </div>
+
+          <!-- Dark Mode and Logout moved to Top Bar user menu -->
+        </div>
+        {% else %}
+        <a
+          href="/login"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white hover:shadow-lg transition-all duration-300 shadow-md"
+          style="
+            background: linear-gradient(135deg, #067302, #055902);
+            box-shadow: 0 4px 15px rgba(6, 115, 2, 0.2);
+          "
+        >
+          <svg
+            class="w-[18px] h-[18px]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+            ></path>
+          </svg>
+          <span class="font-bold text-sm">Sign In</span>
+        </a>
+        {% endif %}
+
+        <a
+          href="{{ url_for('user_radar') }}"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all hover:bg-brand/5 dark:hover:bg-brand/10 text-gray-600 dark:text-gray-400 hover:text-brand"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            ></path>
+          </svg>
+          Habit Profile
+        </a>
+      </nav>
+
+      {% if session.get('user_id') %}
+      <div class="p-3 border-t border-white/5">
+        <a
+          href="/logout"
+          data-analytics-event="user_logout"
+          data-analytics-details='{"section":"sidebar"}'
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200 w-full group"
+        >
+          <svg
+            class="w-[18px] h-[18px] flex-shrink-0 group-hover:translate-x-0.5 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            ></path>
+          </svg>
+          <span class="text-sm font-semibold">Sign Out</span>
+        </a>
+        <p class="text-[10px] text-center text-gray-600 mt-2">
+          &copy; 2026 NVSU
+        </p>
+      </div>
+      {% else %}
+      <div
+        class="p-4 border-t border-white/5 text-[11px] text-center text-gray-600"
+      >
+        &copy; 2026 NVSU
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div
+      x-show="sidebarOpen"
+      @click="sidebarOpen = false"
+      x-transition.opacity
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-20 md:hidden"
+      x-cloak
+    ></div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 relative z-[1]">
+      <!-- Top Bar -->
+      {% if session.get('user_id') %}
+      <header
+        class="h-16 sticky top-0 z-20 shadow-lg border-b border-white/10 flex items-center justify-between px-4 md:px-8"
+        style="background: linear-gradient(90deg, #067302, #0ea805)"
+      >
+        <div class="flex items-center gap-3 md:hidden">
+          <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="p-2 text-white/80 hover:bg-white/10 rounded-xl transition-colors"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              ></path>
+            </svg>
+          </button>
+          <div class="flex items-center gap-2.5">
+            <img
+              src="/images/nvsu gif.gif"
+              alt="NVSU"
+              class="w-8 h-8 rounded-lg object-contain"
+            />
+            <span class="font-bold tracking-tight text-white text-sm"
+              >NVSU DTR</span
+            >
+          </div>
+        </div>
+        <div class="hidden md:block"></div>
+
+        <div class="flex items-center gap-2 md:gap-4">
+          <!-- Notifications -->
+          <div class="relative" @click.away="notificationsOpen = false">
+            <button
+              @click="notificationsOpen = !notificationsOpen; unreadCount = 0"
+              class="p-2.5 text-white/90 hover:bg-white/10 rounded-xl transition-all relative group"
+            >
+              <svg
+                class="w-5 h-5 group-hover:scale-110 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                ></path>
+              </svg>
+              <template x-if="unreadCount > 0">
+                <span
+                  class="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 bg-yellow-400 text-green-900 rounded-full border-2 border-green-700 text-[10px] font-bold flex items-center justify-center animate-pulse"
+                  x-text="unreadCount"
+                ></span>
+              </template>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div
+              x-show="notificationsOpen"
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+              class="fixed md:absolute right-4 md:right-0 mt-2 w-[calc(100vw-32px)] md:w-80 glass-modal border border-gray-100 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden z-[60]"
+              x-cloak
+            >
+              <div
+                class="p-4 border-b border-gray-100/60 dark:border-dark-border flex items-center justify-between"
+              >
+                <h3 class="font-bold text-gray-800 dark:text-white">
+                  Event Logs
+                </h3>
+                <span
+                  class="text-[10px] bg-brand/10 text-brand px-2 py-0.5 rounded-full font-bold uppercase"
+                  >Live</span
+                >
+              </div>
+              <div class="max-h-96 overflow-y-auto custom-scrollbar">
+                <template x-for="event in activity" :key="event.id">
+                  <div
+                    class="p-4 border-b border-gray-50 dark:border-dark-border/50 hover:bg-gray-50 dark:hover:bg-dark-card/50 transition-colors"
+                  >
+                    <div class="flex items-start gap-3">
+                      <div
+                        :class="event.action === 'Time In' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'"
+                        class="p-2 rounded-lg"
+                      >
+                        <svg
+                          x-show="event.action === 'Time In'"
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14"
+                          ></path>
+                        </svg>
+                        <svg
+                          x-show="event.action === 'Time Out'"
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7"
+                          ></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <p
+                          class="text-sm font-semibold text-gray-800 dark:text-gray-200"
+                        >
+                          <span x-text="event.name || 'You'"></span>
+                        </p>
+                        <p
+                          class="text-xs text-gray-500 dark:text-dark-muted"
+                          x-text="event.action + ' recorded'"
+                        ></p>
+                        <p
+                          class="text-[10px] text-gray-400 mt-1"
+                          x-text="(event.timestamp && event.timestamp > 0) ? new Date(event.timestamp * 1000).toLocaleTimeString() : '—'"
+                        ></p>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template x-if="activity.length === 0">
+                  <div
+                    class="p-8 text-center text-gray-400 dark:text-dark-muted italic text-sm"
+                  >
+                    No recent activity
+                  </div>
+                </template>
+              </div>
+              <div class="p-3 bg-gray-50/50 dark:bg-dark-card/50 text-center">
+                <button
+                  @click="notificationsOpen = false"
+                  class="text-xs font-semibold text-brand hover:underline"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Actions -->
+          <div class="relative" @click.away="userMenuOpen = false">
+            <button
+              @click="userMenuOpen = !userMenuOpen"
+              class="flex items-center gap-2 p-1 pr-3 hover:bg-white/10 rounded-xl transition-all border border-transparent hover:border-white/20"
+            >
+              <div
+                class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-xs font-bold shadow-sm backdrop-blur-md"
+              >
+                {{ session.get('user_name', 'U')[0] }}
+              </div>
+              <div class="hidden sm:block text-left">
+                <p class="text-xs font-bold text-white leading-none">
+                  {{ session.get('user_name') }}
+                </p>
+                <p
+                  class="text-[10px] text-white/70 mt-1 uppercase tracking-tighter"
+                >
+                  {{ session.get('user_role') }}
+                </p>
+              </div>
+              <svg
+                class="w-4 h-4 text-white/60 ml-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </button>
+
+            <!-- User Dropdown -->
+            <div
+              x-show="userMenuOpen"
+              x-transition:enter="transition ease-out duration-200"
+              x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+              class="absolute right-0 mt-2 w-56 glass-modal border border-gray-100 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden z-50 text-sm"
+              x-cloak
+            >
+              <div
+                class="p-4 border-b border-gray-100/60 dark:border-dark-border bg-gray-50/50 dark:bg-dark-card/50"
+              >
+                <p
+                  class="text-xs text-gray-500 dark:text-dark-muted font-medium"
+                >
+                  Logged in as
+                </p>
+                <p class="font-bold text-gray-800 dark:text-white truncate">
+                  {{ session.get('user_email') }}
+                </p>
+              </div>
+              <div class="p-2 space-y-1">
+                <a
+                  href="/profile"
+                  class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand/5 hover:text-brand transition-colors"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                  </svg>
+                  <span>Settings</span>
+                </a>
+                <button
+                  @click="darkMode = !darkMode"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-brand/5 hover:text-brand transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <svg
+                      x-show="!darkMode"
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      ></path>
+                    </svg>
+                    <svg
+                      x-show="darkMode"
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      ></path>
+                    </svg>
+                    <span x-text="darkMode ? 'Light Mode' : 'Dark Mode'"></span>
+                  </div>
+                  <div
+                    :class="darkMode ? 'toggle-pill active' : 'toggle-pill'"
+                  ></div>
+                </button>
+              </div>
+              <div
+                class="p-2 border-t border-gray-100/60 dark:border-dark-border"
+              >
+                <a
+                  href="/logout"
+                  data-analytics-event="user_logout"
+                  data-analytics-details='{"section":"user_menu"}'
+                  class="flex items-center gap-3 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    ></path>
+                  </svg>
+                  <span class="font-semibold">Sign Out</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      {% endif %}
+
+      <main
+        class="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-8 custom-scrollbar page-enter"
+      >
+        <!-- Flash Messages -->
+        <div class="max-w-7xl mx-auto mb-4">
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %} {% for category, message in messages %}
+          <div
+            class="p-4 rounded-xl shadow-sm border animate-spring {{ 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800' if category == 'success' else 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800' }}"
+          >
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %} {% endwith %}
+        </div>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <!-- Toast JS -->
+    <script>
+      function showToast(message, type = "success", duration = 3000) {
+        const toast = document.createElement("div");
+        toast.className = "toast" + (type === "error" ? " error" : "");
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation =
+            "toast-out 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards";
+          toast.addEventListener("animationend", () => toast.remove());
+        }, duration);
+      }
+
+      function trackAnalyticsEvent(eventName, metadata = {}) {
+        if (!eventName) return;
+        try {
+          const payload = {
+            event: eventName,
+            metadata,
+            url: window.location.href,
+            timestamp: new Date().toISOString(),
+          };
+          const body = JSON.stringify(payload);
+
+          if (navigator.sendBeacon) {
+            const blob = new Blob([body], { type: "application/json" });
+            navigator.sendBeacon("/api/analytics", blob);
+          } else {
+            fetch("/api/analytics", {
+              method: "POST",
+              body,
+              headers: { "Content-Type": "application/json" },
+              keepalive: true,
+            }).catch(() => {});
+          }
+        } catch (err) {
+          console.warn("Analytics tracking failed", err);
+        }
+      }
+
+      function applyStagger(selector, delayMs = 50) {
+        document.querySelectorAll(selector).forEach((item, index) => {
+          item.style.animationDelay = `${index * delayMs}s`;
+        });
+      }
+
+      // Real-time Epoch & Clock Counter
+      function updateEpoch() {
+        const epochElements = document.querySelectorAll(".realtime-epoch");
+        const clockElements = document.querySelectorAll(".realtime-clock-12h");
+        const now = new Date();
+
+        const unix = Math.floor(now.getTime() / 1000);
+        const timeStr = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+
+        epochElements.forEach((el) => (el.textContent = unix));
+        clockElements.forEach((el) => (el.textContent = timeStr));
+      }
+      setInterval(updateEpoch, 1000);
+      document.addEventListener("DOMContentLoaded", updateEpoch);
+
+      // Global action analytics using data-analytics attributes
+      document.body.addEventListener("click", (event) => {
+        const actionable = event.target.closest("[data-analytics-event]");
+        if (!actionable) return;
+        const action = actionable.getAttribute("data-analytics-event");
+        let payload = {};
+        try {
+          const raw = actionable.getAttribute("data-analytics-details");
+          payload = raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          payload = {
+            label:
+              actionable.innerText || actionable.getAttribute("aria-label"),
+          };
+        }
+        trackAnalyticsEvent(action, payload);
+      });
+
+      // Initialize Select2 and Flatpickr
+      document.addEventListener("DOMContentLoaded", function () {
+        // Page view analytics event
+        trackAnalyticsEvent("page_view", {
+          path: location.pathname,
+          title: document.title,
+        });
+
+        // Initialize Select2 for styled dropdowns
+        $(".user-select-dropdown").select2({
+          placeholder: "Select a user",
+          allowClear: true,
+          theme: "bootstrap-5",
+        });
+
+        $(".time-filter-dropdown").select2({
+          placeholder: "Select time filter",
+          theme: "bootstrap-5",
+        });
+
+        $(".user-role-select").select2({
+          theme: "bootstrap-5",
+        });
+
+        $(".edit-user-role-select").select2({
+          theme: "bootstrap-5",
+        });
+
+        // Initialize Flatpickr for date pickers
+        $(".date-picker").flatpickr({
+          dateFormat: "Y-m-d",
+          allowInput: true,
+          clickOpens: true,
+          onChange: function (selectedDates, dateStr, instance) {
+            if (dateStr) {
+              const form = instance.element.closest("form");
+              if (form) form.submit();
+            }
+          },
+        });
+
+        // Style search inputs (HeroUI style)
+        $(".user-search-input").addClass(
+          "px-4 py-2 bg-gray-50 dark:bg-dark-surface/50 border border-gray-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none text-sm",
+        );
+
+        // Style form inputs (HeroUI style)
+        $(
+          ".user-name-input, .user-email-input, .user-rfid-input, .user-password-input, .edit-user-name-input, .edit-user-email-input, .edit-user-rfid-input, .edit-user-password-input, .password-input",
+        ).addClass(
+          "w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-surface/50 border border-gray-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all outline-none text-sm",
+        );
+      });
+    </script>
+
+    <script>
+      // Lock background on every navigation to prevent white flash
+      // No animation delay — just instant background lock then navigate
+      document.addEventListener("click", function (e) {
+        const link = e.target.closest("a[href]");
+        if (!link) return;
+        const href = link.getAttribute("href");
+        if (
+          !href ||
+          href.startsWith("#") ||
+          href.startsWith("mailto") ||
+          href.startsWith("http")
+        )
+          return;
+
+        // Lock bg color before browser unloads current page
+        const isDark = document.documentElement.classList.contains("dark");
+        const bg = isDark ? "#0f1117" : "#ffffff";
+        document.documentElement.style.background = bg;
+        document.body.style.background = bg;
+        // Let the browser navigate normally — no setTimeout, no animation blocking
+      });
+
+      // Also lock bg on unload (catches form submits, back button, etc.)
+      window.addEventListener("beforeunload", function () {
+        const isDark = document.documentElement.classList.contains("dark");
+        const bg = isDark ? "#0f1117" : "#ffffff";
+        document.documentElement.style.background = bg;
+        document.body.style.background = bg;
+      });
+    </script>
+  </body>
+</html>

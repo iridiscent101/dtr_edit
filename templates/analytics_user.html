@@ -1,0 +1,1113 @@
+{% extends "base.html" %} {% block title %}My Analytics | NVSU DTR{% endblock %}
+{% block content %} {% set active_log = (logs or []) | selectattr("time_out",
+"equalto", none) | first %} {% set completed_logs = (logs or []) |
+selectattr("time_out") | list %} {% set late_logs = completed_logs |
+selectattr("is_late") | list %} {% set ontime_logs = completed_logs |
+rejectattr("is_late") | list %} {% set on_time_rate = ((ontime_logs|length /
+completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
+%} {% set total_hours_val = total_hours | default(0) %}
+
+<style>
+  .stat-card {
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
+  }
+  .ana-tab {
+    transition: all 0.2s;
+  }
+  .ana-tab.active {
+    background: linear-gradient(135deg, #067302, #055902);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(6, 115, 2, 0.25);
+  }
+  .hm-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    transition: transform 0.15s;
+    cursor: default;
+  }
+  .hm-cell:hover {
+    transform: scale(1.35);
+  }
+  .progress-bar {
+    transition: width 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Arrival gauge */
+  #gauge-needle {
+    transform-origin: 50% 100%;
+    transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+</style>
+
+<div class="max-w-7xl mx-auto space-y-7">
+  <!-- ── Profile Hero Banner ── -->
+  <div
+    class="rounded-2xl overflow-hidden stagger-item relative"
+    style="
+      animation-delay: 0.02s;
+      background: linear-gradient(135deg, #067302 0%, #055902 100%);
+      box-shadow: 0 8px 32px rgba(6, 115, 2, 0.28);
+    "
+  >
+    <div
+      class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10"
+      style="
+        background: radial-gradient(circle, #fff, transparent 70%);
+        transform: translate(30%, -30%);
+      "
+    ></div>
+    <div
+      class="absolute bottom-0 left-20 w-40 h-40 rounded-full opacity-5"
+      style="background: #fff; transform: translate(-20%, 40%)"
+    ></div>
+    <div class="relative p-7">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-5"
+      >
+        <!-- Left: identity -->
+        <div class="flex items-center gap-4">
+          <div
+            class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-extrabold flex-shrink-0"
+            style="
+              background: rgba(255, 255, 255, 0.18);
+              border: 2px solid rgba(255, 255, 255, 0.3);
+            "
+          >
+            {{ session.get('user_name', 'U')[0] | upper }}
+          </div>
+          <div>
+            <p
+              class="text-white/70 text-xs font-semibold uppercase tracking-wider"
+            >
+              Personal Analytics
+            </p>
+            <h1
+              class="text-2xl font-headline font-extrabold text-white tracking-tight leading-none mt-0.5"
+            >
+              {{ session.get('user_name', 'You') }}
+            </h1>
+            <div class="flex items-center gap-2 mt-1.5">
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style="background: rgba(255, 255, 255, 0.18); color: #fff"
+              >
+                {% if active_log %}
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-yellow-300 inline-block"
+                ></span
+                >Clocked In {% else %}
+                <span
+                  class="w-1.5 h-1.5 rounded-full bg-white/60 inline-block"
+                ></span
+                >Clocked Out {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- Right: quick stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+          {% for label, value in [ ('Sessions', completed_logs|length),
+          ('Hours', total_hours_val ~ 'h'), ('Lates', late_logs|length),
+          ('On-Time', on_time_rate ~ '%') ] %}
+          <div
+            class="text-center px-2 sm:px-3 py-2 rounded-xl min-w-0 overflow-hidden"
+            style="background: rgba(255, 255, 255, 0.12)"
+          >
+            <div class="text-base sm:text-lg md:text-xl font-extrabold text-white leading-none truncate">
+              {{ value }}
+            </div>
+            <div
+              class="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5 truncate"
+            >
+              {{ label }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- Bottom accent line -->
+    <div
+      class="h-0.5 w-full"
+      style="
+        background: linear-gradient(
+          90deg,
+          rgba(242, 226, 5, 0.8),
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+      "
+    ></div>
+  </div>
+
+  <!-- ── Stat Cards ── -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.06s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(6, 115, 2, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        On-Time Rate
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-brand">
+        {{ on_time_rate }}<span class="text-base text-gray-400 ml-0.5">%</span>
+      </p>
+      <p class="text-xs text-gray-400 mt-1">
+        {{ ontime_logs|length }} / {{ completed_logs|length }} sessions
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.09s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(59, 130, 246, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Total Hours
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-blue-500">
+        {{ total_hours_val }}<span class="text-base text-gray-400 ml-0.5"
+          >h</span
+        >
+      </p>
+      <p class="text-xs text-gray-400 mt-1">Rendered in range</p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.12s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(245, 158, 11, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Late Count
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-amber-500">
+        {{ late_logs|length }}
+      </p>
+      <p class="text-xs text-gray-400 mt-1">In selected range</p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.15s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(139, 92, 246, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Avg Clock-In
+      </p>
+      <p
+        class="text-2xl font-headline font-extrabold text-violet-500 tracking-tight"
+      >
+        {{ avg_clock_in }}
+      </p>
+      <p class="text-xs text-gray-400 mt-1">
+        Avg Clock-Out: {{ avg_clock_out }}
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Tab Nav ── -->
+  <div
+    class="flex gap-2 p-1.5 glass-strong rounded-2xl w-full overflow-x-auto stagger-item"
+    style="animation-delay: 0.18s"
+  >
+    {% for t in
+    [('summary','Summary'),('heatmap','Heatmap'),('history','History')] %}
+    <button
+      onclick="switchTab('{{ t[0] }}')"
+      id="tab-{{ t[0] }}"
+      class="ana-tab px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-dark-muted whitespace-nowrap {{ 'active' if loop.first else '' }}"
+    >
+      {{ t[1] }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- ══════════════════ SUMMARY TAB ══════════════════ -->
+  <div id="panel-summary">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Hours Bar Chart -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.2s"
+      >
+        <div class="mb-5">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            This Period
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white"
+          >
+            Hours per Day
+          </h3>
+        </div>
+        <div class="flex gap-3 text-[10px] font-semibold text-gray-400 mb-3">
+          <span class="flex items-center gap-1.5"
+            ><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span
+            >On Time</span
+          >
+          <span class="flex items-center gap-1.5"
+            ><span
+              class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"
+            ></span
+            >Late</span
+          >
+          <span
+            class="flex items-center gap-1.5 ml-2 border-l border-gray-200 dark:border-dark-border pl-2"
+            ><span
+              class="w-8 border-t-2 border-dashed border-gray-400 inline-block"
+            ></span
+            >8h target</span
+          >
+        </div>
+        <div class="relative h-52">
+          <canvas id="chartHoursBar"></canvas>
+        </div>
+      </div>
+
+      <!-- Punctuality Donut + Gauge stack -->
+      <div class="flex flex-col gap-5">
+        <!-- Donut -->
+        <div
+          class="glass-strong rounded-2xl p-6 stagger-item flex items-center gap-6"
+          style="animation-delay: 0.24s"
+        >
+          <div class="relative w-28 h-28 flex-shrink-0">
+            <canvas id="chartPuncDonut"></canvas>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-xl font-extrabold text-brand"
+                >{{ on_time_rate }}%</span
+              >
+            </div>
+          </div>
+          <div class="flex-1">
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+            >
+              Punctuality
+            </p>
+            <h3
+              class="text-base font-headline font-bold text-gray-900 dark:text-white mb-3"
+            >
+              Your Score
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-gray-600 dark:text-dark-muted"
+                  ><span
+                    class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"
+                  ></span
+                  >On Time</span
+                >
+                <span class="font-bold text-gray-900 dark:text-white"
+                  >{{ ontime_logs|length }}</span
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-gray-600 dark:text-dark-muted"
+                  ><span
+                    class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"
+                  ></span
+                  >Late</span
+                >
+                <span class="font-bold text-gray-900 dark:text-white"
+                  >{{ late_logs|length }}</span
+                >
+              </div>
+              {% if active_log %}
+              <div class="flex items-center justify-between">
+                <span
+                  class="flex items-center gap-2 text-gray-600 dark:text-dark-muted"
+                  ><span
+                    class="w-2.5 h-2.5 rounded-sm bg-blue-400 inline-block"
+                  ></span
+                  >Active</span
+                >
+                <span class="font-bold text-gray-900 dark:text-white">1</span>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Avg Arrival Gauge -->
+        <div
+          class="glass-strong rounded-2xl p-6 stagger-item flex flex-col items-center"
+          style="animation-delay: 0.28s"
+        >
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5 self-start"
+          >
+            Avg Arrival
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white mb-3 self-start"
+          >
+            When Do You Usually Arrive?
+          </h3>
+          <div class="flex items-end gap-6">
+            <svg
+              id="arrival-gauge"
+              viewBox="0 0 160 90"
+              class="w-44 overflow-visible"
+              style="height: 90px"
+            >
+              <!-- Track -->
+              <path
+                d="M 20 80 A 60 60 0 0 1 140 80"
+                fill="none"
+                stroke="#e5e7eb"
+                stroke-width="10"
+                stroke-linecap="round"
+                class="dark:stroke-dark-border"
+              />
+              <!-- Fill (green = early, amber = on time, red = late) -->
+              <path
+                id="gauge-fill"
+                d="M 20 80 A 60 60 0 0 1 140 80"
+                fill="none"
+                stroke="#067302"
+                stroke-width="10"
+                stroke-linecap="round"
+                stroke-dasharray="0 188"
+              />
+              <!-- Needle -->
+              <line
+                id="gauge-needle"
+                x1="80"
+                y1="80"
+                x2="80"
+                y2="25"
+                stroke="#374151"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                class="dark:stroke-gray-200"
+              />
+              <circle cx="80" cy="80" r="5" fill="#067302" />
+              <!-- Labels -->
+              <text
+                x="12"
+                y="96"
+                font-size="9"
+                fill="#9ca3af"
+                text-anchor="middle"
+              >
+                7AM
+              </text>
+              <text
+                x="80"
+                y="14"
+                font-size="9"
+                fill="#9ca3af"
+                text-anchor="middle"
+              >
+                8AM
+              </text>
+              <text
+                x="148"
+                y="96"
+                font-size="9"
+                fill="#9ca3af"
+                text-anchor="middle"
+              >
+                9AM
+              </text>
+              <!-- Grace line -->
+              <line
+                x1="118"
+                y1="38"
+                x2="124"
+                y2="32"
+                stroke="#f59e0b"
+                stroke-width="1.5"
+                stroke-dasharray="2 2"
+              />
+              <text x="126" y="30" font-size="8" fill="#f59e0b">8:15</text>
+            </svg>
+            <div class="text-center">
+              <p class="text-3xl font-extrabold text-gray-900 dark:text-white">
+                {{ avg_clock_in }}
+              </p>
+              <p class="text-xs text-gray-400 mt-0.5">Average</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Radar Chart -->
+        <div
+          class="glass-strong rounded-2xl p-6 stagger-item"
+          style="animation-delay: 0.32s"
+        >
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            Performance
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white mb-4"
+          >
+            Weekly Metrics
+          </h3>
+          <div class="relative h-64">
+            <canvas id="chartRadar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session length distribution -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item lg:col-span-2"
+        style="animation-delay: 0.32s"
+      >
+        <div class="mb-5">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            Work Duration
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white"
+          >
+            Hours Rendered Distribution
+          </h3>
+        </div>
+        <div class="relative h-44">
+          <canvas id="chartDurationDist"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ HEATMAP TAB ══════════════════ -->
+  <div id="panel-heatmap" class="hidden">
+    <div class="glass-strong rounded-2xl p-6">
+      <div class="mb-5">
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Activity Map
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white"
+        >
+          Attendance Heatmap
+        </h3>
+        <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+          Each cell = one day. Hover for details.
+        </p>
+      </div>
+
+      <div id="heatmap-grid" class="flex gap-1.5 overflow-x-auto pb-2"></div>
+
+      <!-- Legend -->
+      <div
+        class="flex items-center gap-2 mt-4 text-xs text-gray-400 dark:text-dark-muted"
+      >
+        <span>Less</span>
+        <span
+          class="hm-cell"
+          style="background: #f3f4f6"
+          title="No data / absent"
+        ></span>
+        <span
+          class="hm-cell"
+          style="background: #bbf7d0"
+          title="Present (late)"
+        ></span>
+        <span
+          class="hm-cell"
+          style="background: #4ade80"
+          title="Present (on time)"
+        ></span>
+        <span
+          class="hm-cell"
+          style="background: #16a34a"
+          title="Present (early)"
+        ></span>
+        <span>More</span>
+      </div>
+
+      <!-- Heatmap insight strip -->
+      <div
+        class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-5 border-t border-gray-100/60 dark:border-dark-border"
+        id="heatmap-stats"
+      ></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ HISTORY TAB ══════════════════ -->
+  <div id="panel-history" class="hidden">
+    <div class="glass-strong rounded-2xl overflow-hidden">
+      <div class="p-6 border-b border-gray-100/60 dark:border-dark-border">
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Personal Ledger
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white"
+        >
+          Full Session History
+        </h3>
+      </div>
+      <!-- Table head -->
+      <div class="overflow-auto" style="max-height: 500px;">
+        <table class="w-full min-w-[600px]">
+          <thead class="sticky top-0 z-10">
+            <tr class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Date</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Time In</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Time Out</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Duration</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50" id="history-rows">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <div
+        id="history-pagination"
+        class="hidden flex items-center justify-between px-6 py-4 border-t border-gray-100/60 dark:border-dark-border"
+      >
+        <span
+          id="history-page-info"
+          class="text-xs text-gray-400 dark:text-dark-muted"
+        ></span>
+        <div class="flex items-center gap-2">
+          <button
+            id="hist-prev"
+            onclick="histChangePage(-1)"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            ← Prev
+          </button>
+          <div id="hist-page-btns" class="flex gap-1"></div>
+          <button
+            id="hist-next"
+            onclick="histChangePage(1)"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            Next →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /max-w -->
+
+<script>
+  const logsData    = {{ logs_data | tojson }};
+  const avgClockIn  = "{{ avg_clock_in }}";
+
+  const BRAND = '#067302';
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+  const gridColor = () => isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const tickColor = () => isDark() ? '#8892a4' : '#6b7280';
+  const baseOpts = () => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { cornerRadius: 8, padding: 10 } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor(), font: { size: 11 } } },
+      y: { beginAtZero: true, grid: { color: gridColor() }, ticks: { color: tickColor(), font: { size: 11 } } }
+    }
+  });
+
+  function fmt(epoch, opts) { return new Date(epoch * 1000).toLocaleString('en-US', opts); }
+  function fmtTime(epoch)   { return fmt(epoch, { hour:'2-digit', minute:'2-digit', hour12:true }); }
+  function fmtDate(epoch)   { return fmt(epoch, { weekday:'short', month:'short', day:'numeric' }); }
+  function fmtShort(epoch)  { return fmt(epoch, { month:'short', day:'numeric' }); }
+
+  const completed = logsData.filter(l => l.time_out);
+  const lates     = completed.filter(l => l.is_late);
+
+  // Daily aggregates
+  const dailyMap = {};
+  completed.forEach(l => {
+    const d = new Date(l.time_in * 1000).toLocaleDateString('en-CA');
+    if (!dailyMap[d]) dailyMap[d] = { hours: 0, late: false, timeIn: l.time_in };
+    dailyMap[d].hours += parseFloat(l.rendered_hours) || 0;
+    if (l.is_late) dailyMap[d].late = true;
+  });
+  const sortedDays = Object.keys(dailyMap).sort();
+  const last7 = sortedDays.slice(-7);
+
+  // ── Tab switch ─────────────────────────────────────────────────────────────
+  function switchTab(name) {
+    ['summary','heatmap','history'].forEach(t => {
+      document.getElementById('panel-' + t).classList.add('hidden');
+      document.getElementById('tab-' + t).classList.remove('active');
+    });
+    document.getElementById('panel-' + name).classList.remove('hidden');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'heatmap') initHeatmap();
+    if (name === 'history') initHistory();
+  }
+
+  // ── Summary Charts ─────────────────────────────────────────────────────────
+  function initSummary() {
+    // Hours bar with 8h annotation line
+    new Chart(document.getElementById('chartHoursBar'), {
+      type: 'bar',
+      data: {
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})),
+        datasets: [
+          {
+            data: last7.map(d => +dailyMap[d].hours.toFixed(2)),
+            backgroundColor: last7.map(d => dailyMap[d].late ? '#f59e0b' : BRAND),
+            borderRadius: 6, barThickness: 20
+          },
+          {
+            type: 'line', data: Array(last7.length).fill(8),
+            borderColor: 'rgba(107,114,128,0.4)', borderDash: [5,5],
+            borderWidth: 1.5, pointRadius: 0, fill: false
+          }
+        ]
+      },
+      options: { ...baseOpts(), plugins: { legend: { display: false }, tooltip: { cornerRadius: 8, padding: 10,
+        filter: (i) => i.datasetIndex === 0
+      }}}
+    });
+
+    // Punctuality donut
+    const cLogs = completed.length;
+    const lLogs = lates.length;
+    const oLogs = cLogs - lLogs;
+    new Chart(document.getElementById('chartPuncDonut'), {
+      type: 'doughnut',
+      data: {
+        datasets: [{ data: [oLogs, lLogs], backgroundColor: [BRAND, '#f59e0b'], borderColor: isDark() ? '#1a1d27' : '#fff', borderWidth: 3 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+    });
+
+    // Duration histogram (bucket by hours)
+    const buckets = { '<6h':0, '6-7h':0, '7-8h':0, '8h':0, '>8h':0 };
+    completed.forEach(l => {
+      const h = parseFloat(l.rendered_hours) || 0;
+      if (h < 6) buckets['<6h']++;
+      else if (h < 7) buckets['6-7h']++;
+      else if (h < 8) buckets['7-8h']++;
+      else if (h === 8) buckets['8h']++;
+      else buckets['>8h']++;
+    });
+    new Chart(document.getElementById('chartDurationDist'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(buckets),
+        datasets: [{ data: Object.values(buckets), backgroundColor: ['#ef4444','#f59e0b','#3b82f6',BRAND,'#8b5cf6'], borderRadius: 6, barThickness: 36 }]
+      },
+      options: { ...baseOpts(), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, ticks: { ...baseOpts().scales.y.ticks, stepSize: 1 } } } }
+    });
+
+    // Arrival gauge needle animation
+    animateGauge();
+
+    // Performance Radar Chart
+    const onTimeCount = completed.length - lates.length;
+    const avgHoursPerDay = last7.length > 0 
+      ? (last7.reduce((sum, d) => sum + (dailyMap[d]?.hours || 0), 0) / last7.length).toFixed(1)
+      : 0;
+    
+    new Chart(document.getElementById('chartRadar'), {
+      type: 'radar',
+      data: {
+        labels: ['Sessions', 'Hours', 'On-Time', 'Late', 'Avg/Day'],
+        datasets: [{
+          label: 'This Week',
+          data: [completed.length, parseFloat(totalHours || 0), onTimeCount, lates.length, parseFloat(avgHoursPerDay)],
+          backgroundColor: 'rgba(6, 115, 2, 0.2)',
+          borderColor: '#067302',
+          borderWidth: 2,
+          pointBackgroundColor: '#067302',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              display: true,
+              backdropColor: 'transparent',
+              color: '#9ca3af'
+            },
+            grid: {
+              color: 'rgba(156, 163, 175, 0.2)'
+            },
+            angleLines: {
+              color: 'rgba(156, 163, 175, 0.2)'
+            },
+            pointLabels: {
+              color: '#6b7280',
+              font: {
+                size: 11,
+                weight: '600'
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            cornerRadius: 8,
+            padding: 10
+          }
+        }
+      }
+    });
+  }
+
+  function animateGauge() {
+    const needle = document.getElementById('gauge-needle');
+    const fill   = document.getElementById('gauge-fill');
+    if (!needle || !avgClockIn || avgClockIn === '--:--') return;
+
+    // Parse avg_clock_in like "7:54 AM"
+    const match = avgClockIn.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return;
+    let h = parseInt(match[1]), m = parseInt(match[2]);
+    if (match[3].toUpperCase() === 'PM' && h < 12) h += 12;
+    if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
+
+    // Map 7:00 AM (0%) → 9:00 AM (100%) → needle angle -90deg → +90deg
+    const totalMins = (h - 7) * 60 + m; // 0 at 7AM, 120 at 9AM
+    const pct = Math.min(Math.max(totalMins / 120, 0), 1);
+    const angleDeg = -90 + pct * 180; // -90 = leftmost, +90 = rightmost
+
+    // Gauge is drawn around center (80,80), needle points up at 0deg
+    const rad = (angleDeg * Math.PI) / 180;
+    const len = 55;
+    const x2 = 80 + len * Math.sin(rad);
+    const y2 = 80 - len * Math.cos(rad);
+
+    setTimeout(() => {
+      needle.setAttribute('x2', x2.toFixed(1));
+      needle.setAttribute('y2', y2.toFixed(1));
+      // Color
+      const color = totalMins <= 0 ? '#3b82f6' : totalMins <= 15 ? BRAND : '#f59e0b';
+      needle.setAttribute('stroke', color);
+      document.querySelector('circle[cx="80"][cy="80"]').setAttribute('fill', color);
+      // Fill arc (stroke-dasharray trick: arc circumference ≈ 188 for r=60)
+      const arcLen = pct * 188;
+      fill.setAttribute('stroke-dasharray', `${arcLen.toFixed(1)} 188`);
+      fill.setAttribute('stroke', color);
+    }, 400);
+  }
+
+  // ── Heatmap (lazy) ─────────────────────────────────────────────────────────
+  let hmInited = false;
+  function initHeatmap() {
+    if (hmInited) return; hmInited = true;
+
+    // Build set of all dates with status
+    const dateSet = {};
+    completed.forEach(l => {
+      const d = new Date(l.time_in * 1000).toLocaleDateString('en-CA');
+      const h = new Date(l.time_in * 1000).getHours();
+      const m = new Date(l.time_in * 1000).getMinutes();
+      const minsAfter7 = (h - 7) * 60 + m;
+      dateSet[d] = l.is_late ? 1 : minsAfter7 < 0 ? 3 : 2; // 1=late, 2=ontime, 3=early
+    });
+
+    // Build grid: last 16 weeks, Mon-Fri
+    const grid = document.getElementById('heatmap-grid');
+    const today = new Date();
+    const weeks = 16;
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - (weeks * 7));
+
+    let html = '';
+    let streak = 0, maxStreak = 0, curStreak = 0, perfectWeeks = 0;
+
+    for (let w = 0; w < weeks; w++) {
+      html += '<div class="flex flex-col gap-1">';
+      let weekPerfect = true;
+      for (let d = 1; d <= 5; d++) { // Mon=1 to Fri=5
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + w * 7 + d);
+        const isoDate = date.toLocaleDateString('en-CA');
+        const isFuture = date > today;
+        const status = dateSet[isoDate];
+        const colors = {
+          undefined: isDark() ? '#2a2d3a' : '#f3f4f6',
+          1: isDark() ? '#78350f' : '#fde68a',
+          2: isDark() ? '#14532d' : '#4ade80',
+          3: isDark() ? '#166534' : '#16a34a',
+        };
+        const labels = { undefined: 'Absent/No record', 1: 'Late', 2: 'On-Time', 3: 'Early' };
+        const bg = isFuture ? 'transparent' : (colors[status] || colors[undefined]);
+        const tip = isFuture ? '' : `${date.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} — ${labels[status] || 'No record'}`;
+        html += `<div class="hm-cell" style="background:${bg};${isFuture?'opacity:0.2':''}" title="${tip}"></div>`;
+        if (!isFuture) {
+          if (status === 2 || status === 3) curStreak++; else { maxStreak = Math.max(maxStreak, curStreak); curStreak = 0; if (status === 1) weekPerfect = false; }
+        }
+      }
+      if (weekPerfect) perfectWeeks++;
+      html += '</div>';
+    }
+    maxStreak = Math.max(maxStreak, curStreak);
+    grid.innerHTML = html;
+
+    // Add day labels before grid
+    const dayLabels = document.createElement('div');
+    dayLabels.className = 'flex flex-col gap-1 mr-1';
+    ['M','T','W','T','F'].forEach(l => {
+      dayLabels.innerHTML += `<div class="flex items-center justify-center text-[9px] text-gray-400 dark:text-dark-muted" style="width:14px;height:14px">${l}</div>`;
+    });
+    grid.prepend(dayLabels);
+
+    // Stats strip
+    const statsEl = document.getElementById('heatmap-stats');
+    statsEl.innerHTML = [
+      { icon: '🔥', label: 'Best Streak', value: maxStreak + ' days' },
+      { icon: '✅', label: 'Current Streak', value: curStreak + ' days' },
+      { icon: '🏆', label: 'Perfect Weeks', value: perfectWeeks + ' / ' + weeks },
+      { icon: '⏰', label: 'Total Lates', value: lates.length },
+    ].map(s => `
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-white/50 dark:bg-dark-surface/50 border border-gray-100/40 dark:border-dark-border">
+        <span class="text-2xl">${s.icon}</span>
+        <div><p class="text-base font-extrabold text-gray-900 dark:text-white leading-none">${s.value}</p>
+        <p class="text-[10px] text-gray-400 dark:text-dark-muted mt-0.5">${s.label}</p></div>
+      </div>`).join('');
+  }
+
+  // ── History Table with Pagination ─────────────────────────────────────────
+  const HIST_PER_PAGE = 10;
+  let histInited = false;
+  let histPage = 1;
+
+  function histTotalPages() {
+    return Math.max(1, Math.ceil(logsData.length / HIST_PER_PAGE));
+  }
+
+  function renderHistPage() {
+    const rows = document.getElementById('history-rows');
+    const pagination = document.getElementById('history-pagination');
+    const pageInfo = document.getElementById('history-page-info');
+    const prevBtn = document.getElementById('hist-prev');
+    const nextBtn = document.getElementById('hist-next');
+    const pageBtns = document.getElementById('hist-page-btns');
+
+    if (!logsData.length) {
+      rows.innerHTML = '<p class="text-sm text-gray-400 p-6">No sessions found.</p>';
+      return;
+    }
+
+    const total = logsData.length;
+    const totalPages = histTotalPages();
+    const start = (histPage - 1) * HIST_PER_PAGE;
+    const pageData = logsData.slice(start, start + HIST_PER_PAGE);
+
+    rows.innerHTML = pageData.map(l => {
+      const isActive = !l.time_out;
+      const hrs = parseFloat(l.rendered_hours) || 0;
+      return `<tr class="hover:bg-gray-50 dark:hover:bg-dark-surface/50">
+        <td class="px-3 py-3 text-center text-sm font-semibold text-gray-800 dark:text-white">${fmtDate(l.time_in)}</td>
+        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${fmtTime(l.time_in)}</td>
+        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${l.time_out ? fmtTime(l.time_out) : '—'}</td>
+        <td class="px-3 py-3 text-center text-sm font-bold ${isActive ? 'text-blue-500' : 'text-gray-800 dark:text-white'}">${isActive ? 'Active' : hrs.toFixed(2) + 'h'}</td>
+        <td class="px-3 py-3 text-center">
+          ${isActive
+            ? `<span class="pill-badge bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">Active</span>`
+            : l.is_late
+              ? `<span class="pill-badge bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Late</span>`
+              : `<span class="pill-badge bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">On Time</span>`}
+        </td>
+      </tr>`;
+    }).join('');
+
+    // Update pagination controls
+    pagination.classList.remove('hidden');
+    pageInfo.textContent = `Showing ${start + 1}–${Math.min(start + HIST_PER_PAGE, total)} of ${total} records`;
+    prevBtn.disabled = histPage <= 1;
+    nextBtn.disabled = histPage >= totalPages;
+
+    // Page number buttons (show up to 5 around current)
+    const delta = 2;
+    let pages = [];
+    for (let i = Math.max(1, histPage - delta); i <= Math.min(totalPages, histPage + delta); i++) pages.push(i);
+    pageBtns.innerHTML = pages.map(p => `
+      <button onclick="histGoTo(${p})"
+        class="w-7 h-7 rounded-lg text-xs font-semibold transition-all
+          ${p === histPage
+            ? 'bg-brand text-white shadow'
+            : 'border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface'}">
+        ${p}
+      </button>`).join('');
+  }
+
+  function histGoTo(page) {
+    histPage = page;
+    renderHistPage();
+    document.getElementById('panel-history').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function histChangePage(delta) {
+    histGoTo(Math.max(1, Math.min(histTotalPages(), histPage + delta)));
+  }
+
+  function initHistory() {
+    if (histInited) return; histInited = true;
+    renderHistPage();
+  }
+
+  // ── Boot ───────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const go = () => { initSummary(); };
+    if (typeof Chart === 'undefined') setTimeout(go, 300); else go();
+  });
+</script>
+
+<style>
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+  }
+</style>
+{% endblock %}

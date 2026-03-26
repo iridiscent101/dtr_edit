@@ -1,0 +1,1042 @@
+{% extends "base.html" %} {% block title %}Analytics | NVSU DTR Admin{% endblock
+%} {% block content %}
+<style>
+  .stat-card {
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s;
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
+  }
+  .ana-tab {
+    transition: all 0.2s;
+  }
+  .ana-tab.active {
+    background: linear-gradient(135deg, #067302, #055902);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(6, 115, 2, 0.25);
+  }
+  .dept-bar {
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .rank-row {
+    transition: background 0.15s;
+  }
+  .rank-row:hover {
+    background: rgba(6, 115, 2, 0.04);
+  }
+  html.dark .rank-row:hover {
+    background: rgba(6, 115, 2, 0.08);
+  }
+</style>
+
+<div class="max-w-7xl mx-auto space-y-7">
+  <!-- ── Page Header ── -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring"
+  >
+    <div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1"
+      >
+        Insights & Metrics
+      </p>
+      <h1
+        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none"
+      >
+        Analytics
+      </h1>
+      <p class="text-gray-400 dark:text-dark-muted mt-1.5 text-sm">
+        University-wide attendance patterns and performance
+      </p>
+    </div>
+    <div class="flex items-center gap-3 flex-wrap">
+      <div
+        class="flex items-center gap-2 bg-brand/8 dark:bg-brand/15 border border-brand/20 rounded-xl px-4 py-2.5"
+      >
+        <span class="relative flex h-2 w-2">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"
+          ></span>
+          <span
+            class="relative inline-flex rounded-full h-2 w-2 bg-brand"
+          ></span>
+        </span>
+        <span
+          class="text-[11px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-wider"
+          >Active Now</span
+        >
+        <span class="text-sm font-extrabold text-brand"
+          >{{ active_staff }}</span
+        >
+      </div>
+      <a
+        href="/admin"
+        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
+        Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- ── KPI Cards ── -->
+  <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    {% set total_completed = logs | selectattr('time_out') | list %} {% set
+    total_on_time = total_completed | rejectattr('is_late') | list %} {% set
+    on_time_rate = ((total_on_time|length / total_completed|length) * 100) |
+    round(0) | int if total_completed|length > 0 else 0 %}
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.04s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(6, 115, 2, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-dark-border flex items-center justify-center text-gray-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Total Sessions
+      </p>
+      <p
+        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white"
+      >
+        {{ logs | length }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        In selected range
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.07s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(6, 115, 2, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Active Staff
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-brand">
+        {{ active_staff }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        Clocked in now
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.1s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(245, 158, 11, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Total Lates
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-amber-500">
+        {{ total_lates }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        In selected range
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.13s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(59, 130, 246, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 16l-4-4m0 0l4-4m-4 4h14"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Avg. Clock-In
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-blue-500">
+        {{ avg_clock_in }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        Staff avg arrival
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.16s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(99, 102, 241, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        Avg. Clock-Out
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-indigo-500">
+        {{ avg_clock_out }}
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        Staff avg departure
+      </p>
+    </div>
+
+    <div
+      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.19s"
+    >
+      <div
+        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
+        style="
+          background: radial-gradient(
+            circle at top right,
+            rgba(6, 115, 2, 0.08),
+            transparent 70%
+          );
+        "
+      ></div>
+      <div
+        class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <p
+        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
+      >
+        On-Time Rate
+      </p>
+      <p class="text-3xl font-headline font-extrabold text-brand">
+        {{ on_time_rate }}<span
+          class="text-base font-semibold text-gray-400 ml-0.5"
+          >%</span
+        >
+      </p>
+      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
+        Total hrs: {{ total_hours }}h
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Tab Nav ── -->
+  <div
+    class="flex gap-2 p-1.5 glass-strong rounded-2xl w-full overflow-x-auto stagger-item"
+    style="animation-delay: 0.18s"
+  >
+    {% for t in
+    [('overview','Overview'),('trends','Trends'),('punctuality','Punctuality'),('leaderboard','Leaderboard')]
+    %}
+    <button
+      onclick="switchTab('{{ t[0] }}')"
+      id="tab-{{ t[0] }}"
+      class="ana-tab px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-dark-muted whitespace-nowrap {{ 'active' if loop.first else '' }}"
+    >
+      {{ t[1] }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- ══════════════════ OVERVIEW TAB ══════════════════ -->
+  <div id="panel-overview" class="space-y-5">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Daily Attendance Bar Chart -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.2s"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+            >
+              Last 7 Days
+            </p>
+            <h3
+              class="text-base font-headline font-bold text-gray-900 dark:text-white"
+            >
+              Daily Sessions
+            </h3>
+          </div>
+          <div class="flex gap-3 text-[10px] font-semibold text-gray-400">
+            <span class="flex items-center gap-1.5"
+              ><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span
+              >Sessions</span
+            >
+          </div>
+        </div>
+        <div class="relative h-48">
+          <canvas id="chartDailyBar"></canvas>
+        </div>
+      </div>
+
+      <!-- Hours Rendered Line Chart -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.24s"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+            >
+              Rendered Hours
+            </p>
+            <h3
+              class="text-base font-headline font-bold text-gray-900 dark:text-white"
+            >
+              Hours Trend
+            </h3>
+          </div>
+          <div class="flex gap-3 text-[10px] font-semibold text-gray-400">
+            <span class="flex items-center gap-1.5"
+              ><span
+                class="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block"
+              ></span
+              >Hrs / Day</span
+            >
+          </div>
+        </div>
+        <div class="relative h-48">
+          <canvas id="chartHoursLine"></canvas>
+        </div>
+      </div>
+
+      <!-- Status Breakdown Doughnut -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.28s"
+      >
+        <div class="mb-5">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            Session Breakdown
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white"
+          >
+            Status Distribution
+          </h3>
+        </div>
+        <div class="flex items-center gap-8">
+          <div class="relative h-44 w-44 flex-shrink-0">
+            <canvas id="chartStatusDonut"></canvas>
+          </div>
+          <div class="space-y-3 flex-1" id="donut-legend"></div>
+        </div>
+      </div>
+
+      <!-- Live Activity Feed -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.32s"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+            >
+              Real-Time
+            </p>
+            <h3
+              class="text-base font-headline font-bold text-gray-900 dark:text-white"
+            >
+              Recent Activity
+            </h3>
+          </div>
+          <span class="relative flex h-2 w-2">
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"
+            ></span>
+            <span
+              class="relative inline-flex rounded-full h-2 w-2 bg-brand"
+            ></span>
+          </span>
+        </div>
+        <div id="activity-feed" class="space-y-3">
+          <div class="flex items-center gap-2 text-sm text-gray-400 dark:text-dark-muted">
+            <svg class="w-4 h-4 animate-spin text-brand flex-shrink-0" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <span>Loading activity…</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Radar Chart -->
+      <div
+        class="glass-strong rounded-2xl p-6 stagger-item"
+        style="animation-delay: 0.36s"
+      >
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Performance
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white mb-4"
+        >
+          Weekly Metrics Overview
+        </h3>
+        <div class="relative h-64">
+          <canvas id="chartRadar"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ TRENDS TAB ══════════════════ -->
+  <div id="panel-trends" class="space-y-5 hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Weekly Pattern Bar (On-Time vs Late) -->
+      <div class="glass-strong rounded-2xl p-6">
+        <div class="mb-5">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            Weekly Pattern
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white"
+          >
+            On-Time vs Late by Day
+          </h3>
+        </div>
+        <div class="flex gap-3 text-[10px] font-semibold text-gray-400 mb-3">
+          <span class="flex items-center gap-1.5"
+            ><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span
+            >On-Time</span
+          >
+          <span class="flex items-center gap-1.5"
+            ><span
+              class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"
+            ></span
+            >Late</span
+          >
+        </div>
+        <div class="relative h-52">
+          <canvas id="chartWeeklyGrouped"></canvas>
+        </div>
+      </div>
+
+      <!-- Hourly Arrival Heatmap-style Bar -->
+      <div class="glass-strong rounded-2xl p-6">
+        <div class="mb-5">
+          <p
+            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+          >
+            Arrival Distribution
+          </p>
+          <h3
+            class="text-base font-headline font-bold text-gray-900 dark:text-white"
+          >
+            When Do Staff Arrive?
+          </h3>
+        </div>
+        <div class="relative h-52">
+          <canvas id="chartArrivalDist"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Hours Total Line -->
+      <div class="glass-strong rounded-2xl p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+            >
+              All-Time
+            </p>
+            <h3
+              class="text-base font-headline font-bold text-gray-900 dark:text-white"
+            >
+              Cumulative Hours Rendered
+            </h3>
+          </div>
+        </div>
+        <div class="relative h-44">
+          <canvas id="chartCumulative"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PUNCTUALITY TAB ══════════════════ -->
+  <div id="panel-punctuality" class="space-y-5 hidden">
+    <!-- On-Time Rate by User (Top 10) -->
+    <div class="glass-strong rounded-2xl p-6">
+      <div class="mb-5">
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Punctuality Breakdown
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white"
+        >
+          On-Time Rate per Employee
+        </h3>
+      </div>
+      <div class="space-y-3" id="punc-list">
+        <!-- Populated by JS from logs_data -->
+      </div>
+    </div>
+
+    <!-- Late arrivals by hour of day -->
+    <div class="glass-strong rounded-2xl p-6">
+      <div class="mb-5">
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Late Analysis
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white"
+        >
+          How Late Were Late Arrivals?
+        </h3>
+      </div>
+      <div class="relative h-52">
+        <canvas id="chartLateMinutes"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ LEADERBOARD TAB ══════════════════ -->
+  <div id="panel-leaderboard" class="space-y-5 hidden">
+    <div class="glass-strong rounded-2xl overflow-hidden">
+      <div class="p-6 border-b border-gray-100/60 dark:border-dark-border">
+        <p
+          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
+        >
+          Performance
+        </p>
+        <h3
+          class="text-base font-headline font-bold text-gray-900 dark:text-white"
+        >
+          Top Performers — Ranked by Hours & Punctuality
+        </h3>
+      </div>
+      <!-- Table head -->
+      <div class="overflow-auto" style="max-height: 500px;">
+        <table class="w-full min-w-[600px]">
+          <thead class="sticky top-0 z-10">
+            <tr class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">#</th>
+              <th class="px-3 py-3 text-left text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Employee</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Sessions</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Hours</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Lates</th>
+              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Score</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50" id="leaderboard-list">
+            <tr id="leaderboard-placeholder">
+              <td colspan="6" class="px-4 py-8 text-center">
+                <div class="flex items-center justify-center gap-2 text-sm text-gray-400 dark:text-dark-muted">
+                  <svg class="w-4 h-4 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                  </svg>
+                  <span>Loading…</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /max-w -->
+
+<script>
+  // ── Data from Flask ────────────────────────────────────────────────────────
+  const logsData  = {{ logs_data | tojson }};
+  const allUsers  = {{ all_users | tojson }};
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function isDark() { return document.documentElement.classList.contains('dark'); }
+  const gc = (a) => isDark() ? a.dark : a.light;
+  const BRAND = '#067302';
+  const gridColor = () => isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const tickColor = () => isDark() ? '#8892a4' : '#6b7280';
+  const baseOpts = (extra = {}) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { cornerRadius: 8, padding: 10 } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor(), font: { size: 11 } } },
+      y: { beginAtZero: true, grid: { color: gridColor() }, ticks: { color: tickColor(), font: { size: 11 } } }
+    },
+    ...extra
+  });
+
+  // ── Pre-process logs ───────────────────────────────────────────────────────
+  const completed = logsData.filter(l => l.time_out);
+  const active    = logsData.filter(l => !l.time_out);
+  const lates     = completed.filter(l => l.is_late);
+  const ontime    = completed.filter(l => !l.is_late);
+
+  // Daily aggregates (last 7 days)
+  const dailyMap = {};
+  completed.forEach(l => {
+    const d = new Date(l.time_in * 1000).toLocaleDateString('en-CA'); // YYYY-MM-DD
+    if (!dailyMap[d]) dailyMap[d] = { sessions: 0, hours: 0, late: 0, ontime: 0 };
+    dailyMap[d].sessions++;
+    dailyMap[d].hours += parseFloat(l.rendered_hours) || 0;
+    l.is_late ? dailyMap[d].late++ : dailyMap[d].ontime++;
+  });
+  const last7 = Object.keys(dailyMap).sort().slice(-7);
+
+  // Arrival hour distribution
+  const arrivalHours = Array(24).fill(0);
+  logsData.forEach(l => { const h = new Date(l.time_in * 1000).getHours(); arrivalHours[h]++; });
+  const workHoursLabels = Array.from({length: 12}, (_, i) => {
+    const h = i + 6; return h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
+  });
+  const workHoursData = arrivalHours.slice(6, 18);
+
+  // Per-user stats
+  const userMap = {};
+  logsData.forEach(l => {
+    const u = l.name || `User #${l.user_id}`;
+    if (!userMap[u]) userMap[u] = { sessions: 0, hours: 0, lates: 0, ontime: 0 };
+    userMap[u].sessions++;
+    if (l.time_out) {
+      userMap[u].hours += parseFloat(l.rendered_hours) || 0;
+      l.is_late ? userMap[u].lates++ : userMap[u].ontime++;
+    }
+  });
+
+  // ── Tab switching ──────────────────────────────────────────────────────────
+  function switchTab(name) {
+    ['overview','trends','punctuality','leaderboard'].forEach(t => {
+      document.getElementById('panel-' + t).classList.add('hidden');
+      document.getElementById('tab-' + t).classList.remove('active');
+    });
+    document.getElementById('panel-' + name).classList.remove('hidden');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'trends')      initTrendsCharts();
+    if (name === 'punctuality') initPunctuality();
+    if (name === 'leaderboard') initLeaderboard();
+  }
+
+  // ── Overview Charts ────────────────────────────────────────────────────────
+  function initOverview() {
+    // Daily Sessions Bar
+    new Chart(document.getElementById('chartDailyBar'), {
+      type: 'bar',
+      data: {
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})),
+        datasets: [{ data: last7.map(d => dailyMap[d].sessions), backgroundColor: BRAND, borderRadius: 6, barThickness: 18 }]
+      },
+      options: baseOpts()
+    });
+
+    // Hours Line
+    new Chart(document.getElementById('chartHoursLine'), {
+      type: 'line',
+      data: {
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{weekday:'short'})),
+        datasets: [{
+          data: last7.map(d => +dailyMap[d].hours.toFixed(2)),
+          borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)',
+          borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#3b82f6',
+          tension: 0.35, fill: true
+        }]
+      },
+      options: baseOpts()
+    });
+
+    // Status Donut
+    const counts = [ontime.length, lates.length, active.length];
+    const dLabels = ['On-Time', 'Late', 'Active'];
+    const dColors = [BRAND, '#f59e0b', '#3b82f6'];
+    new Chart(document.getElementById('chartStatusDonut'), {
+      type: 'doughnut',
+      data: { labels: dLabels, datasets: [{ data: counts, backgroundColor: dColors, borderColor: isDark() ? '#1a1d27' : '#fff', borderWidth: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
+    });
+    // Custom legend
+    const legend = document.getElementById('donut-legend');
+    dLabels.forEach((l, i) => {
+      const pct = counts.reduce((a,b)=>a+b,0) > 0 ? Math.round(counts[i]/counts.reduce((a,b)=>a+b,0)*100) : 0;
+      legend.innerHTML += `<div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:${dColors[i]}"></span>
+          <span class="text-sm text-gray-600 dark:text-dark-muted font-medium">${l}</span>
+        </div>
+        <div class="text-right">
+          <span class="text-sm font-extrabold text-gray-900 dark:text-white">${counts[i]}</span>
+          <span class="text-xs text-gray-400 ml-1">${pct}%</span>
+        </div>
+      </div>`;
+    });
+
+    // Weekly Metrics Radar Chart
+    const totalSessions = last7.reduce((sum, d) => sum + (dailyMap[d]?.sessions || 0), 0);
+    const totalHours = last7.reduce((sum, d) => sum + (dailyMap[d]?.hours || 0), 0);
+    const onTimeCount = last7.reduce((sum, d) => sum + (dailyMap[d]?.ontime || 0), 0);
+    const lateCount = last7.reduce((sum, d) => sum + (dailyMap[d]?.lates || 0), 0);
+    const avgPerDay = totalSessions / 7;
+    const onTimeRate = totalSessions > 0 ? Math.round((onTimeCount / (onTimeCount + lateCount)) * 100) : 0;
+    
+    new Chart(document.getElementById('chartRadar'), {
+      type: 'radar',
+      data: {
+        labels: ['Sessions', 'Hours', 'On-Time', 'Late', 'Avg/Day'],
+        datasets: [{
+          data: [totalSessions, totalHours, onTimeRate, lateCount, avgPerDay],
+          backgroundColor: 'rgba(6, 130, 2, 0.15)',
+          borderColor: '#067302',
+          borderWidth: 2,
+          pointBackgroundColor: '#067302',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: { display: false },
+            grid: { color: isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+            angleLines: { color: isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
+            pointLabels: {
+              color: isDark() ? '#9ca3af' : '#6b7280',
+              font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
+            }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  // ── Activity Feed ──────────────────────────────────────────────────────────
+  function loadActivity() {
+    fetch('/api/admin/recent-activity')
+      .then(r => r.json())
+      .then(data => {
+        const feed = document.getElementById('activity-feed');
+        if (!data.length) { feed.innerHTML = '<p class="text-sm text-gray-400">No recent activity.</p>'; return; }
+        feed.innerHTML = data.map(item => {
+          const isIn = item.action === 'Time In';
+          const epochMs = (item.timestamp != null && item.timestamp > 0) ? item.timestamp * 1000 : null;
+          const d = epochMs ? new Date(epochMs) : null;
+          const ts = (d && !isNaN(d.getTime())) ? d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
+          const initials = (item.name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+          return `<div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0" style="background:linear-gradient(135deg,#067302,#055902)">${initials}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-900 dark:text-white truncate">${item.name}</p>
+              <p class="text-xs text-gray-400 dark:text-dark-muted">${isIn ? 'Timed in' : 'Timed out'} · ${ts}</p>
+            </div>
+            <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${isIn ? '#067302' : '#3b82f6'}"></div>
+          </div>`;
+        }).join('');
+      }).catch(() => {});
+  }
+
+  // ── Trends Charts (lazy) ───────────────────────────────────────────────────
+  let trendsInited = false;
+  function initTrendsCharts() {
+    if (trendsInited) return; trendsInited = true;
+
+    // Day-of-week grouped bar
+    const dowMap = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
+    const dowLate = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
+    logsData.forEach(l => {
+      const dow = new Date(l.time_in * 1000).toLocaleDateString('en-US',{weekday:'short'});
+      if (l.time_out) { l.is_late ? dowLate[dow]++ : dowMap[dow]++; }
+    });
+    const dowKeys = ['Mon','Tue','Wed','Thu','Fri'];
+    new Chart(document.getElementById('chartWeeklyGrouped'), {
+      type: 'bar',
+      data: {
+        labels: dowKeys,
+        datasets: [
+          { label: 'On-Time', data: dowKeys.map(d=>dowMap[d]), backgroundColor: BRAND, borderRadius: 5, barThickness: 16 },
+          { label: 'Late',    data: dowKeys.map(d=>dowLate[d]), backgroundColor: '#f59e0b', borderRadius: 5, barThickness: 16 }
+        ]
+      },
+      options: { ...baseOpts(), plugins: { legend: { display: false } } }
+    });
+
+    // Arrival distribution
+    new Chart(document.getElementById('chartArrivalDist'), {
+      type: 'bar',
+      data: {
+        labels: workHoursLabels,
+        datasets: [{ data: workHoursData, backgroundColor: workHoursData.map((_, i) => i === 2 ? '#ef4444' : i <= 2 ? BRAND : '#3b82f6'), borderRadius: 5, barThickness: 14 }]
+      },
+      options: { ...baseOpts(), plugins: { ...baseOpts().plugins, tooltip: { callbacks: { title: (c) => c[0].label + (c[0].dataIndex === 2 ? ' (Grace period ends)' : '') } } } }
+    });
+
+    // Cumulative hours
+    let cum = 0;
+    const cumData = last7.map(d => { cum += dailyMap[d].hours; return +cum.toFixed(2); });
+    new Chart(document.getElementById('chartCumulative'), {
+      type: 'line',
+      data: {
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'})),
+        datasets: [{
+          data: cumData, borderColor: BRAND, backgroundColor: 'rgba(6,115,2,0.07)',
+          borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: BRAND,
+          tension: 0.3, fill: true
+        }]
+      },
+      options: baseOpts()
+    });
+  }
+
+  // ── Punctuality breakdown (lazy) ───────────────────────────────────────────
+  let puncInited = false;
+  function initPunctuality() {
+    if (puncInited) return; puncInited = true;
+
+    // Per-user on-time rate bars
+    const sorted = Object.entries(userMap)
+      .filter(([, v]) => (v.ontime + v.lates) > 0)
+      .sort((a, b) => (b[1].ontime / (b[1].ontime + b[1].lates)) - (a[1].ontime / (a[1].ontime + a[1].lates)))
+      .slice(0, 10);
+
+    const list = document.getElementById('punc-list');
+    list.innerHTML = sorted.map(([name, v]) => {
+      const rate = Math.round((v.ontime / (v.ontime + v.lates)) * 100);
+      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      return `<div class="flex items-center gap-4">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0" style="background:linear-gradient(135deg,#067302,#055902)">${initials}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-sm font-bold text-gray-900 dark:text-white truncate">${name}</p>
+            <span class="text-sm font-extrabold ml-3 flex-shrink-0 ${rate >= 80 ? 'text-brand' : rate >= 60 ? 'text-amber-500' : 'text-red-500'}">${rate}%</span>
+          </div>
+          <div class="h-2 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden">
+            <div class="h-full rounded-full dept-bar ${rate >= 80 ? 'bg-brand' : rate >= 60 ? 'bg-amber-400' : 'bg-red-400'}" style="width:${rate}%"></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Late minutes distribution
+    const lateBuckets = {'0-5 min':0,'6-15 min':0,'16-30 min':0,'31-60 min':0,'60+ min':0};
+    lates.forEach(l => {
+      const inDt = new Date(l.time_in * 1000);
+      const graceEpoch = new Date(inDt).setHours(8, 15, 0, 0) / 1000;
+      const mins = Math.max(0, Math.round((l.time_in - graceEpoch) / 60));
+      if (mins <= 5) lateBuckets['0-5 min']++;
+      else if (mins <= 15) lateBuckets['6-15 min']++;
+      else if (mins <= 30) lateBuckets['16-30 min']++;
+      else if (mins <= 60) lateBuckets['31-60 min']++;
+      else lateBuckets['60+ min']++;
+    });
+    new Chart(document.getElementById('chartLateMinutes'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(lateBuckets),
+        datasets: [{ data: Object.values(lateBuckets), backgroundColor: ['#fde68a','#fbbf24','#f59e0b','#d97706','#b45309'], borderRadius: 6, barThickness: 32 }]
+      },
+      options: baseOpts()
+    });
+  }
+
+  // ── Leaderboard ────────────────────────────────────────────────────────────
+  function initLeaderboard() {
+    const sorted = Object.entries(userMap)
+      .filter(([, v]) => (v.ontime + v.lates) > 0 || v.sessions > 0)
+      .sort((a, b) => b[1].hours - a[1].hours);
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = sorted.map(([name, v], i) => {
+      const total = v.ontime + v.lates;
+      const rate = total > 0 ? Math.round((v.ontime / total) * 100) : 0;
+      const score = Math.round((v.hours * 0.6) + (rate * 0.4));
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="text-gray-400 font-bold">${i+1}</span>`;
+      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      return `<tr class="hover:bg-gray-50 dark:hover:bg-dark-surface/50">
+        <td class="px-3 py-3 text-center text-base">${medal}</td>
+        <td class="px-3 py-3">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0" style="background:linear-gradient(135deg,#067302,#055902)">${initials}</div>
+            <span class="text-sm font-bold text-gray-900 dark:text-white truncate">${name}</span>
+          </div>
+        </td>
+        <td class="px-3 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">${v.sessions}</td>
+        <td class="px-3 py-3 text-center text-sm font-bold text-blue-500">${v.hours.toFixed(1)}h</td>
+        <td class="px-3 py-3 text-center text-sm font-semibold ${v.lates > 0 ? 'text-amber-500' : 'text-brand'}">${v.lates}</td>
+        <td class="px-3 py-3 text-center">
+          <span class="inline-block px-2 py-0.5 rounded-lg text-xs font-extrabold ${rate >= 80 ? 'bg-brand/15 text-brand' : rate >= 60 ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400' : 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'}">${rate}%</span>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="px-4 py-6 text-center text-sm text-gray-400">No data available.</td></tr>';
+  }
+
+  // ── Boot ───────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Chart === 'undefined') {
+      setTimeout(()=>{ initOverview(); loadActivity(); initLeaderboard(); }, 300);
+    } else {
+      initOverview(); loadActivity(); initLeaderboard();
+    }
+    setInterval(loadActivity, 8000);
+  });
+</script>
+{% endblock %}

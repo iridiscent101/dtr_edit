@@ -1,0 +1,6 @@
+PGHOST='ep-morning-block-a1ad7dg5-pooler.ap-southeast-1.aws.neon.tech'
+PGDATABASE='neondb'
+PGUSER='neondb_owner'
+PGPASSWORD='npg_7NAow1alxfVB'
+PGSSLMODE='require'
+PGCHANNELBINDING='require'
