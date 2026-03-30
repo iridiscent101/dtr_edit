@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}QR Codes | NVSU DTR{% endblock %} {%
 block content %}
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-6 max-w-[1600px] mx-auto">
   <div class="mb-8">
     <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
       QR Codes for Attendance
@@ -10,9 +10,7 @@ block content %}
     </p>
   </div>
 
-  <div
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-  >
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     {% for user in users %}
     <div class="glass-strong p-6 rounded-2xl shadow-lg dark:shadow-black/30">
       <div class="text-center">
@@ -23,16 +21,11 @@ block content %}
           ID: {{ user.rfid_tag }}
         </p>
 
-        <img
-          src="data:image/png;base64,{{ user.qr_code }}"
-          alt="QR Code for {{ user.name }}"
-          class="w-40 h-40 mx-auto mb-4 rounded-lg border-2 border-gray-200 dark:border-dark-border"
-        />
+        <img src="data:image/png;base64,{{ user.qr_code }}" alt="QR Code for {{ user.name }}"
+          class="w-40 h-40 mx-auto mb-4 rounded-lg border-2 border-gray-200 dark:border-dark-border" />
 
-        <button
-          onclick="printQR('{{ user.name }}', '{{ user.rfid_tag }}', '{{ user.qr_code }}')"
-          class="w-full py-2.5 px-4 rounded-xl transition-all duration-300 border border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface text-sm font-medium"
-        >
+        <button onclick="printQR('{{ user.name }}', '{{ user.rfid_tag }}', '{{ user.qr_code }}')"
+          class="w-full py-2.5 px-4 rounded-xl transition-all duration-300 border border-gray-200 dark:border-dark-border text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface text-sm font-medium">
           Print QR Code
         </button>
       </div>

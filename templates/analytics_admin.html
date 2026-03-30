@@ -6,46 +6,47 @@
       transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.25s;
   }
+
   .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
   }
+
   .ana-tab {
     transition: all 0.2s;
   }
+
   .ana-tab.active {
     background: linear-gradient(135deg, #067302, #055902);
     color: #fff;
     box-shadow: 0 4px 14px rgba(6, 115, 2, 0.25);
   }
+
   .dept-bar {
     transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+
   .rank-row {
     transition: background 0.15s;
   }
+
   .rank-row:hover {
     background: rgba(6, 115, 2, 0.04);
   }
+
   html.dark .rank-row:hover {
     background: rgba(6, 115, 2, 0.08);
   }
 </style>
 
-<div class="max-w-7xl mx-auto space-y-7">
+<div class="max-w-[1600px] mx-auto space-y-7">
   <!-- ── Page Header ── -->
-  <div
-    class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring"
-  >
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring">
     <div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1"
-      >
+      <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1">
         Insights & Metrics
       </p>
-      <h1
-        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none"
-      >
+      <h1 class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none">
         Analytics
       </h1>
       <p class="text-gray-400 dark:text-dark-muted mt-1.5 text-sm">
@@ -53,41 +54,19 @@
       </p>
     </div>
     <div class="flex items-center gap-3 flex-wrap">
-      <div
-        class="flex items-center gap-2 bg-brand/8 dark:bg-brand/15 border border-brand/20 rounded-xl px-4 py-2.5"
-      >
+      <div class="flex items-center gap-2 bg-brand/8 dark:bg-brand/15 border border-brand/20 rounded-xl px-4 py-2.5">
         <span class="relative flex h-2 w-2">
-          <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"
-          ></span>
-          <span
-            class="relative inline-flex rounded-full h-2 w-2 bg-brand"
-          ></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
         </span>
-        <span
-          class="text-[11px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-wider"
-          >Active Now</span
-        >
-        <span class="text-sm font-extrabold text-brand"
-          >{{ active_staff }}</span
-        >
+        <span class="text-[11px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-wider">Active
+          Now</span>
+        <span class="text-sm font-extrabold text-brand">{{ active_staff }}</span>
       </div>
-      <a
-        href="/admin"
-        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10 19l-7-7m0 0l7-7m-7 7h18"
-          />
+      <a href="/admin"
+        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 text-sm hover:bg-gray-50 dark:hover:bg-dark-surface transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
         Dashboard
       </a>
@@ -95,51 +74,32 @@
   </div>
 
   <!-- ── KPI Cards ── -->
-  <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     {% set total_completed = logs | selectattr('time_out') | list %} {% set
     total_on_time = total_completed | rejectattr('is_late') | list %} {% set
     on_time_rate = ((total_on_time|length / total_completed|length) * 100) |
     round(0) | int if total_completed|length > 0 else 0 %}
 
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.04s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
+    <div class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.04s">
+      <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(6, 115, 2, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div
-        class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-dark-border flex items-center justify-center text-gray-500 mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
+        class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-dark-border flex items-center justify-center text-gray-500 mb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
+      <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1">
         Total Sessions
       </p>
-      <p
-        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white"
-      >
+      <p class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white">
         {{ logs | length }}
       </p>
       <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
@@ -147,129 +107,23 @@
       </p>
     </div>
 
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.07s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
-          background: radial-gradient(
-            circle at top right,
-            rgba(6, 115, 2, 0.08),
-            transparent 70%
-          );
-        "
-      ></div>
-      <div
-        class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-      </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
-        Active Staff
-      </p>
-      <p class="text-3xl font-headline font-extrabold text-brand">
-        {{ active_staff }}
-      </p>
-      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
-        Clocked in now
-      </p>
-    </div>
-
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.1s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
-          background: radial-gradient(
-            circle at top right,
-            rgba(245, 158, 11, 0.08),
-            transparent 70%
-          );
-        "
-      ></div>
-      <div
-        class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500 mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
-        Total Lates
-      </p>
-      <p class="text-3xl font-headline font-extrabold text-amber-500">
-        {{ total_lates }}
-      </p>
-      <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
-        In selected range
-      </p>
-    </div>
-
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.13s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
+    <div class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.07s">
+      <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(59, 130, 246, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div
-        class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M11 16l-4-4m0 0l4-4m-4 4h14"
-          />
+        class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 mb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14" />
         </svg>
       </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
-        Avg. Clock-In
+      <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1">
+        Avg. Clock-In (All-Time)
       </p>
       <p class="text-3xl font-headline font-extrabold text-blue-500">
         {{ avg_clock_in }}
@@ -279,41 +133,23 @@
       </p>
     </div>
 
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.16s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
+    <div class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.1s">
+      <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(99, 102, 241, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div
-        class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 16l4-4m0 0l-4-4m4 4H7"
-          />
+        class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 mb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
         </svg>
       </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
-        Avg. Clock-Out
+      <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1">
+        Avg. Clock-Out (All-Time)
       </p>
       <p class="text-3xl font-headline font-extrabold text-indigo-500">
         {{ avg_clock_out }}
@@ -323,67 +159,42 @@
       </p>
     </div>
 
-    <div
-      class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
-      style="animation-delay: 0.19s"
-    >
-      <div
-        class="absolute top-0 right-0 w-16 h-16 rounded-bl-full"
-        style="
+    <div class="stat-card glass-strong p-5 rounded-2xl stagger-item relative overflow-hidden"
+      style="animation-delay: 0.13s">
+      <div class="absolute top-0 right-0 w-16 h-16 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(6, 115, 2, 0.08),
             transparent 70%
           );
-        "
-      ></div>
-      <div
-        class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
+        "></div>
+      <div class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand mb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1"
-      >
+      <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1">
         On-Time Rate
       </p>
       <p class="text-3xl font-headline font-extrabold text-brand">
-        {{ on_time_rate }}<span
-          class="text-base font-semibold text-gray-400 ml-0.5"
-          >%</span
-        >
+        {{ on_time_rate }}<span class="text-base font-semibold text-gray-400 ml-0.5">%</span>
       </p>
       <p class="text-xs text-gray-400 dark:text-dark-muted mt-1">
         Total hrs: {{ total_hours }}h
       </p>
     </div>
+
   </div>
 
   <!-- ── Tab Nav ── -->
-  <div
-    class="flex gap-2 p-1.5 glass-strong rounded-2xl w-full overflow-x-auto stagger-item"
-    style="animation-delay: 0.18s"
-  >
+  <div class="flex gap-2 p-1.5 glass-strong rounded-2xl w-full overflow-x-auto stagger-item"
+    style="animation-delay: 0.18s">
     {% for t in
     [('overview','Overview'),('trends','Trends'),('punctuality','Punctuality'),('leaderboard','Leaderboard')]
     %}
-    <button
-      onclick="switchTab('{{ t[0] }}')"
-      id="tab-{{ t[0] }}"
-      class="ana-tab px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-dark-muted whitespace-nowrap {{ 'active' if loop.first else '' }}"
-    >
+    <button onclick="switchTab('{{ t[0] }}')" id="tab-{{ t[0] }}"
+      class="ana-tab px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-gray-500 dark:text-dark-muted whitespace-nowrap {{ 'active' if loop.first else '' }}">
       {{ t[1] }}
     </button>
     {% endfor %}
@@ -393,28 +204,19 @@
   <div id="panel-overview" class="space-y-5">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <!-- Daily Attendance Bar Chart -->
-      <div
-        class="glass-strong rounded-2xl p-6 stagger-item"
-        style="animation-delay: 0.2s"
-      >
+      <div class="glass-strong rounded-2xl p-6 stagger-item" style="animation-delay: 0.2s">
         <div class="flex items-center justify-between mb-5">
           <div>
-            <p
-              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-            >
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
               Last 7 Days
             </p>
-            <h3
-              class="text-base font-headline font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
               Daily Sessions
             </h3>
           </div>
           <div class="flex gap-3 text-[10px] font-semibold text-gray-400">
-            <span class="flex items-center gap-1.5"
-              ><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span
-              >Sessions</span
-            >
+            <span class="flex items-center gap-1.5"><span
+                class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span>Sessions</span>
           </div>
         </div>
         <div class="relative h-48">
@@ -423,30 +225,19 @@
       </div>
 
       <!-- Hours Rendered Line Chart -->
-      <div
-        class="glass-strong rounded-2xl p-6 stagger-item"
-        style="animation-delay: 0.24s"
-      >
+      <div class="glass-strong rounded-2xl p-6 stagger-item" style="animation-delay: 0.24s">
         <div class="flex items-center justify-between mb-5">
           <div>
-            <p
-              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-            >
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
               Rendered Hours
             </p>
-            <h3
-              class="text-base font-headline font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
               Hours Trend
             </h3>
           </div>
           <div class="flex gap-3 text-[10px] font-semibold text-gray-400">
-            <span class="flex items-center gap-1.5"
-              ><span
-                class="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block"
-              ></span
-              >Hrs / Day</span
-            >
+            <span class="flex items-center gap-1.5"><span
+                class="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block"></span>Hrs / Day</span>
           </div>
         </div>
         <div class="relative h-48">
@@ -455,19 +246,12 @@
       </div>
 
       <!-- Status Breakdown Doughnut -->
-      <div
-        class="glass-strong rounded-2xl p-6 stagger-item"
-        style="animation-delay: 0.28s"
-      >
+      <div class="glass-strong rounded-2xl p-6 stagger-item" style="animation-delay: 0.28s">
         <div class="mb-5">
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
             Session Breakdown
           </p>
-          <h3
-            class="text-base font-headline font-bold text-gray-900 dark:text-white"
-          >
+          <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
             Status Distribution
           </h3>
         </div>
@@ -479,34 +263,58 @@
         </div>
       </div>
 
-      <!-- Live Activity Feed -->
-      <div
-        class="glass-strong rounded-2xl p-6 stagger-item"
-        style="animation-delay: 0.32s"
-      >
+      <!-- Shift Distribution (Morning vs Afternoon) -->
+      <div class="glass-strong rounded-2xl p-6 stagger-item" style="animation-delay: 0.32s">
         <div class="flex items-center justify-between mb-5">
           <div>
-            <p
-              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-            >
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
+              Shift Patterns
+            </p>
+            <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
+              Shift Distribution
+            </h3>
+          </div>
+          <div class="flex gap-3 text-[10px] font-semibold text-gray-400">
+            <span class="flex items-center gap-1.5"><span
+                class="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block"></span>Morning</span>
+            <span class="flex items-center gap-1.5"><span
+                class="w-2.5 h-2.5 rounded-sm bg-orange-400 inline-block"></span>Afternoon</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-8">
+          <div class="relative h-44 w-44 flex-shrink-0">
+            <canvas id="chartShiftDonut"></canvas>
+          </div>
+          <div class="space-y-3 flex-1">
+             <div class="p-3 bg-gray-50 dark:bg-dark-border/30 rounded-xl border border-gray-100 dark:border-dark-border/50">
+               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Morning Lates</p>
+               <p class="text-xl font-bold text-amber-500" id="morning-late-val">0</p>
+             </div>
+             <div class="p-3 bg-gray-50 dark:bg-dark-border/30 rounded-xl border border-gray-100 dark:border-dark-border/50">
+               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Afternoon Lates</p>
+               <p class="text-xl font-bold text-amber-500" id="afternoon-late-val">0</p>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity Feed -->
+      <div class="glass-strong rounded-2xl p-6 stagger-item lg:col-span-2" style="animation-delay: 0.36s">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
               Real-Time
             </p>
-            <h3
-              class="text-base font-headline font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
               Recent Activity
             </h3>
           </div>
           <span class="relative flex h-2 w-2">
-            <span
-              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"
-            ></span>
-            <span
-              class="relative inline-flex rounded-full h-2 w-2 bg-brand"
-            ></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
           </span>
         </div>
-        <div id="activity-feed" class="space-y-3">
+        <div id="activity-feed" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="flex items-center gap-2 text-sm text-gray-400 dark:text-dark-muted">
             <svg class="w-4 h-4 animate-spin text-brand flex-shrink-0" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -517,25 +325,6 @@
         </div>
       </div>
 
-      <!-- Performance Radar Chart -->
-      <div
-        class="glass-strong rounded-2xl p-6 stagger-item"
-        style="animation-delay: 0.36s"
-      >
-        <p
-          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-        >
-          Performance
-        </p>
-        <h3
-          class="text-base font-headline font-bold text-gray-900 dark:text-white mb-4"
-        >
-          Weekly Metrics Overview
-        </h3>
-        <div class="relative h-64">
-          <canvas id="chartRadar"></canvas>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -545,28 +334,18 @@
       <!-- Weekly Pattern Bar (On-Time vs Late) -->
       <div class="glass-strong rounded-2xl p-6">
         <div class="mb-5">
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
             Weekly Pattern
           </p>
-          <h3
-            class="text-base font-headline font-bold text-gray-900 dark:text-white"
-          >
+          <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
             On-Time vs Late by Day
           </h3>
         </div>
         <div class="flex gap-3 text-[10px] font-semibold text-gray-400 mb-3">
-          <span class="flex items-center gap-1.5"
-            ><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span
-            >On-Time</span
-          >
-          <span class="flex items-center gap-1.5"
-            ><span
-              class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"
-            ></span
-            >Late</span
-          >
+          <span class="flex items-center gap-1.5"><span
+              class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span>On-Time</span>
+          <span class="flex items-center gap-1.5"><span
+              class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span>Late</span>
         </div>
         <div class="relative h-52">
           <canvas id="chartWeeklyGrouped"></canvas>
@@ -576,14 +355,10 @@
       <!-- Hourly Arrival Heatmap-style Bar -->
       <div class="glass-strong rounded-2xl p-6">
         <div class="mb-5">
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
             Arrival Distribution
           </p>
-          <h3
-            class="text-base font-headline font-bold text-gray-900 dark:text-white"
-          >
+          <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
             When Do Staff Arrive?
           </h3>
         </div>
@@ -596,14 +371,10 @@
       <div class="glass-strong rounded-2xl p-6 lg:col-span-2">
         <div class="flex items-center justify-between mb-5">
           <div>
-            <p
-              class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-            >
+            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
               All-Time
             </p>
-            <h3
-              class="text-base font-headline font-bold text-gray-900 dark:text-white"
-            >
+            <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
               Cumulative Hours Rendered
             </h3>
           </div>
@@ -620,14 +391,10 @@
     <!-- On-Time Rate by User (Top 10) -->
     <div class="glass-strong rounded-2xl p-6">
       <div class="mb-5">
-        <p
-          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-        >
+        <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
           Punctuality Breakdown
         </p>
-        <h3
-          class="text-base font-headline font-bold text-gray-900 dark:text-white"
-        >
+        <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
           On-Time Rate per Employee
         </h3>
       </div>
@@ -639,14 +406,10 @@
     <!-- Late arrivals by hour of day -->
     <div class="glass-strong rounded-2xl p-6">
       <div class="mb-5">
-        <p
-          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-        >
+        <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
           Late Analysis
         </p>
-        <h3
-          class="text-base font-headline font-bold text-gray-900 dark:text-white"
-        >
+        <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">
           How Late Were Late Arrivals?
         </h3>
       </div>
@@ -657,22 +420,17 @@
   </div>
 
   <!-- ══════════════════ LEADERBOARD TAB ══════════════════ -->
-  <div id="panel-leaderboard" class="space-y-5 hidden">
-    <div class="glass-strong rounded-2xl overflow-hidden">
-      <div class="p-6 border-b border-gray-100/60 dark:border-dark-border">
-        <p
-          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-        >
-          Performance
-        </p>
-        <h3
-          class="text-base font-headline font-bold text-gray-900 dark:text-white"
-        >
-          Top Performers — Ranked by Hours & Punctuality
-        </h3>
+  <div id="panel-leaderboard" class="space-y-7 hidden">
+    <!-- 1. Employee Rankings (Top) -->
+    <div class="glass-strong rounded-2xl overflow-hidden shadow-sm">
+      <div class="p-6 border-b border-gray-100/60 dark:border-dark-border flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">Top Talent</p>
+          <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">Individual Rankings</h3>
+        </div>
+        <div class="px-3 py-1 bg-brand/10 rounded-full text-[10px] font-bold text-brand uppercase tracking-widest">Employee Excellence</div>
       </div>
-      <!-- Table head -->
-      <div class="overflow-auto" style="max-height: 500px;">
+      <div class="overflow-auto" style="max-height: 400px;">
         <table class="w-full min-w-[600px]">
           <thead class="sticky top-0 z-10">
             <tr class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
@@ -685,29 +443,145 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50" id="leaderboard-list">
-            <tr id="leaderboard-placeholder">
-              <td colspan="6" class="px-4 py-8 text-center">
-                <div class="flex items-center justify-center gap-2 text-sm text-gray-400 dark:text-dark-muted">
-                  <svg class="w-4 h-4 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                  </svg>
-                  <span>Loading…</span>
-                </div>
-              </td>
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. Insight Cards (Middle) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+       <!-- Highest Presence Fraction -->
+       <div id="card-presence-high" class="stat-card glass-strong rounded-2xl p-5 relative overflow-hidden group border border-blue-500/10 hover:border-blue-500/30 transition-all">
+          <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full blur-xl"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform group-hover:scale-110">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            </div>
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-blue-500">Top Presence</p>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate max-w-[120px]" id="presence-leader-name">...</h4>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+             <span class="text-2xl font-black text-gray-900 dark:text-white" id="presence-leader-val">0/0</span>
+             <span class="text-[10px] font-bold text-gray-400 uppercase">On Duty</span>
+          </div>
+       </div>
+
+       <!-- Lowest Presence Fraction -->
+       <div id="card-presence-low" class="stat-card glass-strong rounded-2xl p-5 relative overflow-hidden group border border-red-500/10 hover:border-red-500/30 transition-all">
+          <div class="absolute -right-4 -top-4 w-20 h-20 bg-red-500/5 rounded-full blur-xl"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500 transition-transform group-hover:scale-110">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            </div>
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-red-500">Lowest Presence</p>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate max-w-[120px]" id="tardiness-focus-name">...</h4>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+             <span class="text-2xl font-black text-gray-900 dark:text-white" id="tardiness-focus-val">0/0</span>
+             <span class="text-[10px] font-bold text-gray-400 uppercase">On Duty</span>
+          </div>
+       </div>
+
+       <!-- Punctuality Champion -->
+       <div id="card-punc-high" class="stat-card glass-strong rounded-2xl p-5 relative overflow-hidden group border border-brand/10 hover:border-brand/30 transition-all">
+          <div class="absolute -right-4 -top-4 w-20 h-20 bg-brand/5 rounded-full blur-xl"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand transition-transform group-hover:scale-110">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-brand">Punctuality</p>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate max-w-[120px]" id="top-dept-name">...</h4>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+             <span class="text-2xl font-black text-gray-900 dark:text-white" id="top-dept-score">0%</span>
+             <span class="text-[10px] font-bold text-gray-400 uppercase">On-Time</span>
+          </div>
+       </div>
+
+       <!-- Lates Unit -->
+       <div id="card-late-count" class="stat-card glass-strong rounded-2xl p-5 relative overflow-hidden group border border-amber-500/10 hover:border-amber-500/30 transition-all">
+          <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/5 rounded-full blur-xl"></div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 transition-transform group-hover:scale-110">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-500">Late Count</p>
+              <h4 class="text-sm font-bold text-gray-900 dark:text-white mt-0.5 truncate max-w-[120px]" id="worst-dept-name">...</h4>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1">
+             <span class="text-2xl font-black text-gray-900 dark:text-white" id="worst-dept-score">0</span>
+             <span class="text-[10px] font-bold text-gray-400 uppercase">Total Lates</span>
+          </div>
+       </div>
+    </div>
+
+    <!-- 3. Department Leaderboard (Bottom) -->
+    <div class="glass-strong rounded-2xl overflow-hidden shadow-sm">
+      <div class="p-6 border-b border-gray-100/60 dark:border-dark-border">
+        <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-blue-500 mb-0.5">Unit Performance</p>
+        <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white">Departmental Efficiency</h3>
+      </div>
+      <div class="overflow-auto" style="max-height: 480px;">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+              <th class="px-6 py-3 text-left text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest">Department</th>
+              <th class="px-6 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest">Total Hours</th>
+              <th class="px-6 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest">Late Rate</th>
+              <th class="px-6 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest">Efficiency</th>
             </tr>
+          </thead>
+          <tbody id="dept-leaderboard-list" class="divide-y divide-gray-100 dark:divide-dark-border/50">
+            <!-- Populated by JS -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
+<!-- Tie Details Modal -->
+<div id="tieModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" 
+     style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px)">
+  <div class="glass-strong rounded-[2rem] w-full max-w-sm p-7 animate-spring shadow-2xl border border-white/20">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-lg font-headline font-black text-gray-900 dark:text-white" id="tieModalTitle">Tied Units</h3>
+        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Performance Equality</p>
+      </div>
+      <button onclick="closeTieModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-dark-border flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div id="tieModalList" class="space-y-2.5 max-height-[300px] overflow-auto custom-scrollbar pr-2">
+      <!-- Tied units will be listed here -->
+    </div>
+  </div>
+</div>
+
+<script>
+  function closeTieModal() {
+    document.getElementById('tieModal').classList.add('hidden');
+    document.getElementById('tieModal').classList.remove('flex');
+  }
+</script>
+
 </div>
 <!-- /max-w -->
 
 <script>
   // ── Data from Flask ────────────────────────────────────────────────────────
-  const logsData  = {{ logs_data | tojson }};
-  const allUsers  = {{ all_users | tojson }};
+  const logsData = {{ logs_data | tojson }};
+  const allUsers = {{ all_users | tojson }};
+  const deptMembership = {{ dept_membership | tojson }};
+  const deptActive = {{ dept_active | tojson }};
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function isDark() { return document.documentElement.classList.contains('dark'); }
@@ -727,9 +601,15 @@
 
   // ── Pre-process logs ───────────────────────────────────────────────────────
   const completed = logsData.filter(l => l.time_out);
-  const active    = logsData.filter(l => !l.time_out);
-  const lates     = completed.filter(l => l.is_late);
-  const ontime    = completed.filter(l => !l.is_late);
+  const active = logsData.filter(l => !l.time_out);
+  const lates = completed.filter(l => l.is_late);
+  const ontime = completed.filter(l => !l.is_late);
+
+  // Shift Analysis
+  const morningSessions = completed.filter(l => new Date(l.time_in * 1000).getHours() < 12);
+  const afternoonSessions = completed.filter(l => new Date(l.time_in * 1000).getHours() >= 12);
+  const morningLates = morningSessions.filter(l => l.is_late).length;
+  const afternoonLates = afternoonSessions.filter(l => l.is_late).length;
 
   // Daily aggregates (last 7 days)
   const dailyMap = {};
@@ -745,8 +625,8 @@
   // Arrival hour distribution
   const arrivalHours = Array(24).fill(0);
   logsData.forEach(l => { const h = new Date(l.time_in * 1000).getHours(); arrivalHours[h]++; });
-  const workHoursLabels = Array.from({length: 12}, (_, i) => {
-    const h = i + 6; return h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h-12} PM`;
+  const workHoursLabels = Array.from({ length: 12 }, (_, i) => {
+    const h = i + 6; return h < 12 ? `${h} AM` : h === 12 ? '12 PM' : `${h - 12} PM`;
   });
   const workHoursData = arrivalHours.slice(6, 18);
 
@@ -764,13 +644,13 @@
 
   // ── Tab switching ──────────────────────────────────────────────────────────
   function switchTab(name) {
-    ['overview','trends','punctuality','leaderboard'].forEach(t => {
+    ['overview', 'trends', 'punctuality', 'leaderboard'].forEach(t => {
       document.getElementById('panel-' + t).classList.add('hidden');
       document.getElementById('tab-' + t).classList.remove('active');
     });
     document.getElementById('panel-' + name).classList.remove('hidden');
     document.getElementById('tab-' + name).classList.add('active');
-    if (name === 'trends')      initTrendsCharts();
+    if (name === 'trends') initTrendsCharts();
     if (name === 'punctuality') initPunctuality();
     if (name === 'leaderboard') initLeaderboard();
   }
@@ -781,7 +661,7 @@
     new Chart(document.getElementById('chartDailyBar'), {
       type: 'bar',
       data: {
-        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})),
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })),
         datasets: [{ data: last7.map(d => dailyMap[d].sessions), backgroundColor: BRAND, borderRadius: 6, barThickness: 18 }]
       },
       options: baseOpts()
@@ -791,7 +671,7 @@
     new Chart(document.getElementById('chartHoursLine'), {
       type: 'line',
       data: {
-        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{weekday:'short'})),
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US', { weekday: 'short' })),
         datasets: [{
           data: last7.map(d => +dailyMap[d].hours.toFixed(2)),
           borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)',
@@ -811,10 +691,29 @@
       data: { labels: dLabels, datasets: [{ data: counts, backgroundColor: dColors, borderColor: isDark() ? '#1a1d27' : '#fff', borderWidth: 3 }] },
       options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
     });
+
+    // Shift Donut
+    new Chart(document.getElementById('chartShiftDonut'), {
+      type: 'doughnut',
+      data: { 
+        labels: ['Morning', 'Afternoon'], 
+        datasets: [{ 
+          data: [morningSessions.length, afternoonSessions.length], 
+          backgroundColor: ['#6366f1', '#fb923c'], 
+          borderColor: isDark() ? '#1a1d27' : '#fff', 
+          borderWidth: 3 
+        }] 
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
+    });
+
+    // Set Shift Stats values
+    document.getElementById('morning-late-val').textContent = morningLates;
+    document.getElementById('afternoon-late-val').textContent = afternoonLates;
     // Custom legend
     const legend = document.getElementById('donut-legend');
     dLabels.forEach((l, i) => {
-      const pct = counts.reduce((a,b)=>a+b,0) > 0 ? Math.round(counts[i]/counts.reduce((a,b)=>a+b,0)*100) : 0;
+      const pct = counts.reduce((a, b) => a + b, 0) > 0 ? Math.round(counts[i] / counts.reduce((a, b) => a + b, 0) * 100) : 0;
       legend.innerHTML += `<div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:${dColors[i]}"></span>
@@ -827,48 +726,7 @@
       </div>`;
     });
 
-    // Weekly Metrics Radar Chart
-    const totalSessions = last7.reduce((sum, d) => sum + (dailyMap[d]?.sessions || 0), 0);
-    const totalHours = last7.reduce((sum, d) => sum + (dailyMap[d]?.hours || 0), 0);
-    const onTimeCount = last7.reduce((sum, d) => sum + (dailyMap[d]?.ontime || 0), 0);
-    const lateCount = last7.reduce((sum, d) => sum + (dailyMap[d]?.lates || 0), 0);
-    const avgPerDay = totalSessions / 7;
-    const onTimeRate = totalSessions > 0 ? Math.round((onTimeCount / (onTimeCount + lateCount)) * 100) : 0;
-    
-    new Chart(document.getElementById('chartRadar'), {
-      type: 'radar',
-      data: {
-        labels: ['Sessions', 'Hours', 'On-Time', 'Late', 'Avg/Day'],
-        datasets: [{
-          data: [totalSessions, totalHours, onTimeRate, lateCount, avgPerDay],
-          backgroundColor: 'rgba(6, 130, 2, 0.15)',
-          borderColor: '#067302',
-          borderWidth: 2,
-          pointBackgroundColor: '#067302',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            beginAtZero: true,
-            ticks: { display: false },
-            grid: { color: isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
-            angleLines: { color: isDark() ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' },
-            pointLabels: {
-              color: isDark() ? '#9ca3af' : '#6b7280',
-              font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
-            }
-          }
-        },
-        plugins: { legend: { display: false } }
-      }
-    });
+    // Weekly Metrics calculated (radar chart removed)
   }
 
   // ── Activity Feed ──────────────────────────────────────────────────────────
@@ -882,8 +740,8 @@
           const isIn = item.action === 'Time In';
           const epochMs = (item.timestamp != null && item.timestamp > 0) ? item.timestamp * 1000 : null;
           const d = epochMs ? new Date(epochMs) : null;
-          const ts = (d && !isNaN(d.getTime())) ? d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
-          const initials = (item.name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+          const ts = (d && !isNaN(d.getTime())) ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '—';
+          const initials = (item.name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
           return `<div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-extrabold flex-shrink-0" style="background:linear-gradient(135deg,#067302,#055902)">${initials}</div>
             <div class="flex-1 min-w-0">
@@ -893,7 +751,7 @@
             <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${isIn ? '#067302' : '#3b82f6'}"></div>
           </div>`;
         }).join('');
-      }).catch(() => {});
+      }).catch(() => { });
   }
 
   // ── Trends Charts (lazy) ───────────────────────────────────────────────────
@@ -902,20 +760,20 @@
     if (trendsInited) return; trendsInited = true;
 
     // Day-of-week grouped bar
-    const dowMap = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
-    const dowLate = { Mon:0, Tue:0, Wed:0, Thu:0, Fri:0, Sat:0, Sun:0 };
+    const dowMap = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+    const dowLate = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
     logsData.forEach(l => {
-      const dow = new Date(l.time_in * 1000).toLocaleDateString('en-US',{weekday:'short'});
+      const dow = new Date(l.time_in * 1000).toLocaleDateString('en-US', { weekday: 'short' });
       if (l.time_out) { l.is_late ? dowLate[dow]++ : dowMap[dow]++; }
     });
-    const dowKeys = ['Mon','Tue','Wed','Thu','Fri'];
+    const dowKeys = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
     new Chart(document.getElementById('chartWeeklyGrouped'), {
       type: 'bar',
       data: {
         labels: dowKeys,
         datasets: [
-          { label: 'On-Time', data: dowKeys.map(d=>dowMap[d]), backgroundColor: BRAND, borderRadius: 5, barThickness: 16 },
-          { label: 'Late',    data: dowKeys.map(d=>dowLate[d]), backgroundColor: '#f59e0b', borderRadius: 5, barThickness: 16 }
+          { label: 'On-Time', data: dowKeys.map(d => dowMap[d]), backgroundColor: BRAND, borderRadius: 5, barThickness: 16 },
+          { label: 'Late', data: dowKeys.map(d => dowLate[d]), backgroundColor: '#f59e0b', borderRadius: 5, barThickness: 16 }
         ]
       },
       options: { ...baseOpts(), plugins: { legend: { display: false } } }
@@ -937,7 +795,7 @@
     new Chart(document.getElementById('chartCumulative'), {
       type: 'line',
       data: {
-        labels: last7.map(d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'})),
+        labels: last7.map(d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
         datasets: [{
           data: cumData, borderColor: BRAND, backgroundColor: 'rgba(6,115,2,0.07)',
           borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: BRAND,
@@ -978,7 +836,7 @@
     }).join('');
 
     // Late minutes distribution
-    const lateBuckets = {'0-5 min':0,'6-15 min':0,'16-30 min':0,'31-60 min':0,'60+ min':0};
+    const lateBuckets = { '0-5 min': 0, '6-15 min': 0, '16-30 min': 0, '31-60 min': 0, '60+ min': 0 };
     lates.forEach(l => {
       const inDt = new Date(l.time_in * 1000);
       const graceEpoch = new Date(inDt).setHours(8, 15, 0, 0) / 1000;
@@ -993,7 +851,7 @@
       type: 'bar',
       data: {
         labels: Object.keys(lateBuckets),
-        datasets: [{ data: Object.values(lateBuckets), backgroundColor: ['#fde68a','#fbbf24','#f59e0b','#d97706','#b45309'], borderRadius: 6, barThickness: 32 }]
+        datasets: [{ data: Object.values(lateBuckets), backgroundColor: ['#fde68a', '#fbbf24', '#f59e0b', '#d97706', '#b45309'], borderRadius: 6, barThickness: 32 }]
       },
       options: baseOpts()
     });
@@ -1001,6 +859,7 @@
 
   // ── Leaderboard ────────────────────────────────────────────────────────────
   function initLeaderboard() {
+    // 1. Employee Leaderboard
     const sorted = Object.entries(userMap)
       .filter(([, v]) => (v.ontime + v.lates) > 0 || v.sessions > 0)
       .sort((a, b) => b[1].hours - a[1].hours);
@@ -1009,7 +868,7 @@
       const total = v.ontime + v.lates;
       const rate = total > 0 ? Math.round((v.ontime / total) * 100) : 0;
       const score = Math.round((v.hours * 0.6) + (rate * 0.4));
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="text-gray-400 font-bold">${i+1}</span>`;
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="text-gray-400 font-bold">${i + 1}</span>`;
       const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
       return `<tr class="hover:bg-gray-50 dark:hover:bg-dark-surface/50">
         <td class="px-3 py-3 text-center text-base">${medal}</td>
@@ -1027,12 +886,128 @@
         </td>
       </tr>`;
     }).join('') || '<tr><td colspan="6" class="px-4 py-6 text-center text-sm text-gray-400">No data available.</td></tr>';
+
+    // 2. Department Leaderboard
+    const deptMap = {};
+    logsData.forEach(l => {
+      const dept = l.department || 'General';
+      if (!deptMap[dept]) deptMap[dept] = { hours: 0, lates: 0, total: 0 };
+      if (l.time_out) {
+        deptMap[dept].hours += parseFloat(l.rendered_hours) || 0;
+        deptMap[dept].total++;
+        if (l.is_late) deptMap[dept].lates++;
+      }
+    });
+
+    const sortedDepts = Object.entries(deptMap).sort((a,b) => b[1].hours - a[1].hours);
+    const deptList = document.getElementById('dept-leaderboard-list');
+    deptList.innerHTML = sortedDepts.map(([name, v]) => {
+      const lateRate = v.total > 0 ? Math.round((v.lates / v.total) * 100) : 0;
+      const efficiency = 100 - lateRate;
+      return `<tr class="rank-row">
+        <td class="px-6 py-4">
+          <p class="text-sm font-bold text-gray-900 dark:text-white">${name}</p>
+        </td>
+        <td class="px-6 py-4 text-center">
+          <p class="text-sm font-extrabold text-blue-500">${v.hours.toFixed(1)}h</p>
+        </td>
+        <td class="px-6 py-4 text-center">
+           <span class="text-xs font-bold ${lateRate < 10 ? 'text-brand' : 'text-amber-500'}">${lateRate}% Late</span>
+        </td>
+        <td class="px-6 py-4 min-w-[120px]">
+          <div class="flex items-center gap-3">
+            <div class="flex-1 h-1.5 bg-gray-100 dark:bg-dark-border rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-1000" style="width: ${efficiency}%; background: ${efficiency > 85 ? '#067302' : efficiency > 60 ? '#f59e0b' : '#ef4444'}"></div>
+            </div>
+            <span class="text-[10px] font-black text-gray-700 dark:text-gray-300 w-8 text-right">${efficiency}%</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" class="px-4 py-10 text-center text-sm text-gray-400">No departmental data in current range.</td></tr>';
+
+      // Helper to show ties in modal
+      const setupTieClick = (cardId, tiedList, title, displayFn) => {
+        const card = document.getElementById(cardId);
+        if (tiedList.length > 1) {
+          card.classList.add('cursor-pointer', 'active:scale-95');
+          card.onclick = () => {
+            document.getElementById('tieModalTitle').innerText = title;
+            document.getElementById('tieModalList').innerHTML = tiedList.map(item => `
+              <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-border/40 rounded-2xl border border-gray-100 dark:border-dark-border group transition-all">
+                <span class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-brand">${item.name}</span>
+                <span class="text-xs font-black text-brand bg-brand/10 px-2.5 py-1 rounded-lg uppercase tracking-widest">${displayFn(item)}</span>
+              </div>
+            `).join('');
+            const m = document.getElementById('tieModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+          };
+        } else {
+          card.classList.remove('cursor-pointer', 'active:scale-95');
+          card.onclick = null;
+        }
+      };
+
+      // 3a. Most Punctual (Highest On-Time Rate %)
+      const punctualDepts = Object.entries(deptMap).map(([name, v]) => ({
+        name,
+        rate: Math.round((1 - (v.lates / v.total)) * 100),
+        total: v.total
+      })).sort((a, b) => b.rate - a.rate || b.total - a.total);
+
+      if (punctualDepts.length > 0) {
+        const topPuncVal = punctualDepts[0].rate;
+        const topPuncTied = punctualDepts.filter(d => d.rate === topPuncVal);
+        document.getElementById('top-dept-name').innerText = topPuncTied.length > 1 ? `${topPuncTied[0].name} (+${topPuncTied.length - 1})` : topPuncTied[0].name;
+        document.getElementById('top-dept-score').innerText = topPuncVal + '%';
+        setupTieClick('card-punc-high', topPuncTied, 'Top Punctuality', d => d.rate + '% On-Time');
+      }
+
+      // 3b. Highest Lates (Absolute Count)
+      const lateCountDepts = Object.entries(deptMap).map(([name, v]) => ({
+        name,
+        lates: v.lates,
+        total: v.total
+      })).sort((a, b) => b.lates - a.lates || b.total - a.total);
+
+      if (lateCountDepts.length > 0) {
+        const worstCountVal = lateCountDepts[0].lates;
+        const worstCountTied = lateCountDepts.filter(d => d.lates === worstCountVal);
+        document.getElementById('worst-dept-name').innerText = worstCountTied.length > 1 ? `${worstCountTied[0].name} (+${worstCountTied.length - 1})` : worstCountTied[0].name;
+        document.getElementById('worst-dept-score').innerText = worstCountVal;
+        setupTieClick('card-late-count', worstCountTied, 'Highest Late Count', d => d.lates + ' Lates');
+      }
+
+      // 3c. Top Presence Fraction (Live Duty Ratio)
+      const presDepts = Object.keys(deptMembership).map(d => {
+        const active = deptActive[d] || 0;
+        const total = deptMembership[d];
+        return { name: d, active, total, ratio: active / total };
+      }).sort((a, b) => b.ratio - a.ratio || b.total - a.total);
+
+      if (presDepts.length > 0) {
+        const topPresVal = presDepts[0].ratio;
+        const topPresTied = presDepts.filter(d => d.ratio === topPresVal);
+        const topPres = topPresTied[0];
+        document.getElementById('presence-leader-name').innerText = topPresTied.length > 1 ? `${topPres.name} (+${topPresTied.length - 1})` : topPres.name;
+        document.getElementById('presence-leader-val').innerText = `${topPres.active}/${topPres.total}`;
+        setupTieClick('card-presence-high', topPresTied, 'Top Presence Ratio', d => `${d.active}/${d.total}`);
+
+        // 3d. Lowest Presence Fraction
+        const lowPresVal = presDepts[presDepts.length - 1].ratio;
+        const lowPresTied = presDepts.filter(d => d.ratio === lowPresVal).sort((a,b) => b.total - a.total); // Priority to more staff in tie
+        const lowPres = lowPresTied[0];
+        document.getElementById('tardiness-focus-name').innerText = lowPresTied.length > 1 ? `${lowPres.name} (+${lowPresTied.length - 1})` : lowPres.name;
+        document.getElementById('tardiness-focus-val').innerText = `${lowPres.active}/${lowPres.total}`;
+        setupTieClick('card-presence-low', lowPresTied, 'Lowest Presence Ratio', d => `${d.active}/${d.total}`);
+      }
+
   }
 
   // ── Boot ───────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof Chart === 'undefined') {
-      setTimeout(()=>{ initOverview(); loadActivity(); initLeaderboard(); }, 300);
+      setTimeout(() => { initOverview(); loadActivity(); initLeaderboard(); }, 300);
     } else {
       initOverview(); loadActivity(); initLeaderboard();
     }

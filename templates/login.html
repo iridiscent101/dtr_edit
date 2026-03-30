@@ -1,27 +1,16 @@
 {% extends "base.html" %} {% block title %}Sign In | NVSU DTR{% endblock %} {%
 block content %}
-<div
-  class="h-[calc(100vh-100px)] flex flex-col items-center justify-center px-4"
->
+<div class="h-[calc(100vh-100px)] flex flex-col items-center justify-center px-4">
   <div
-    class="glass-strong p-10 rounded-3xl shadow-xl max-w-md w-full relative overflow-hidden animate-spring dark:shadow-black/30"
-  >
+    class="glass-strong p-10 rounded-3xl shadow-xl max-w-md w-full relative overflow-hidden animate-spring dark:shadow-black/30">
     <!-- Top gradient accent -->
-    <div
-      class="absolute top-0 left-0 w-full h-1.5"
-      style="background: linear-gradient(90deg, #067302, #f2e205, #067302)"
-    ></div>
+    <div class="absolute top-0 left-0 w-full h-1.5"
+      style="background: linear-gradient(90deg, #067302, #f2e205, #067302)"></div>
 
     <div class="text-center mb-8">
-      <img
-        src="/images/nvsu gif.gif"
-        alt="NVSU"
-        class="w-16 h-16 rounded-2xl mx-auto mb-5 object-contain animate-spring-scale"
-        style="animation-delay: 0.15s"
-      />
-      <h1
-        class="text-2xl font-headline font-semibold text-gray-900 dark:text-white tracking-tight"
-      >
+      <img src="/images/nvsu gif.gif" alt="NVSU"
+        class="w-16 h-16 rounded-2xl mx-auto mb-5 object-contain animate-spring-scale" style="animation-delay: 0.15s" />
+      <h1 class="text-2xl font-headline font-semibold text-gray-900 dark:text-white tracking-tight">
         Sign in to DTR
       </h1>
       <p class="text-gray-500 dark:text-dark-muted text-sm mt-1.5">
@@ -31,73 +20,40 @@ block content %}
 
     <form action="/login" method="POST" class="space-y-5">
       <div class="stagger-item" style="animation-delay: 0.1s">
-        <label
-          class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-          >Email Address</label
-        >
-        <input
-          type="email"
-          name="email"
-          required
-          placeholder="user@nvsu.edu.ph"
-          class="w-full px-4 py-3 border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-300 bg-white/70 dark:bg-dark-surface/70 dark:text-white backdrop-blur-sm"
-        />
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Email Address</label>
+        <input type="email" name="email" required placeholder="user@nvsu.edu.ph"
+          class="w-full px-4 py-3 border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-300 bg-white/70 dark:bg-dark-surface/70 dark:text-white backdrop-blur-sm" />
       </div>
 
       <div class="stagger-item" style="animation-delay: 0.15s">
-        <label
-          class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-          >Password</label
-        >
-        <input
-          type="password"
-          name="password"
-          required
-          placeholder="••••••••"
-          class="w-full px-4 py-3 border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-300 bg-white/70 dark:bg-dark-surface/70 dark:text-white backdrop-blur-sm"
-        />
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
+        <input type="password" name="password" required placeholder="••••••••"
+          class="w-full px-4 py-3 border border-gray-200 dark:border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all duration-300 bg-white/70 dark:bg-dark-surface/70 dark:text-white backdrop-blur-sm" />
       </div>
 
       <div class="stagger-item flex items-center" style="animation-delay: 0.18s">
-        <input
-          type="checkbox"
-          name="remember_me"
-          id="remember_me"
-          class="w-4 h-4 text-brand border-gray-300 dark:border-dark-border rounded focus:ring-brand/40"
-        />
-        <label
-          for="remember_me"
-          class="ml-2 text-sm text-gray-600 dark:text-gray-400"
-          >Remember me</label
-        >
+        <input type="checkbox" name="remember_me" id="remember_me"
+          class="w-4 h-4 text-brand border-gray-300 dark:border-dark-border rounded focus:ring-brand/40" />
+        <label for="remember_me" class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me</label>
       </div>
 
       <div class="stagger-item" style="animation-delay: 0.2s">
-        <button
-          type="submit"
-          class="w-full text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-500 shadow-lg mt-2"
-          style="
+        <button type="submit"
+          class="w-full text-white font-bold py-3.5 px-4 rounded-xl transition-all duration-500 shadow-lg mt-2" style="
             background: linear-gradient(135deg, #067302, #055902);
             box-shadow: 0 4px 20px rgba(6, 115, 2, 0.3);
-          "
-        >
+          ">
           Sign In
         </button>
       </div>
 
       <div class="stagger-item text-center mt-4" style="animation-delay: 0.25s">
-        <a
-          href="{{ url_for('tap_interface') }}"
-          class="text-sm text-brand hover:underline"
-          >Or tap RFID/QR at kiosk</a
-        >
+        <a href="{{ url_for('tap_interface') }}" class="text-sm text-brand hover:underline">Or tap RFID/QR at kiosk</a>
       </div>
     </form>
 
-    <div
-      class="mt-8 pt-6 border-t border-gray-100/80 dark:border-dark-border text-center stagger-item"
-      style="animation-delay: 0.25s"
-    >
+    <div class="mt-8 pt-6 border-t border-gray-100/80 dark:border-dark-border text-center stagger-item"
+      style="animation-delay: 0.25s">
       <p class="text-xs text-gray-400 dark:text-dark-muted">
         Need an account or troubleshooting?<br />Please contact your
         Administrator.

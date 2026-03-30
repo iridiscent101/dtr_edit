@@ -1,44 +1,28 @@
 {% extends "base.html" %} {% block content %}
-<div
-  class="h-[calc(100vh-130px)] flex flex-col items-center justify-center px-4"
->
+<div class="h-[calc(100vh-130px)] flex flex-col items-center justify-center px-4">
   <div
-    class="glass-strong p-10 rounded-3xl shadow-xl max-w-lg w-full text-center relative overflow-hidden animate-spring dark:shadow-black/30"
-  >
+    class="glass-strong p-10 rounded-3xl shadow-xl max-w-lg w-full text-center relative overflow-hidden animate-spring dark:shadow-black/30">
     <!-- Accent -->
-    <div
-      class="absolute top-0 left-0 w-full h-1.5"
-      style="background: linear-gradient(90deg, #067302, #f2e205, #067302)"
-    ></div>
+    <div class="absolute top-0 left-0 w-full h-1.5"
+      style="background: linear-gradient(90deg, #067302, #f2e205, #067302)"></div>
 
     <!-- Mode Toggle -->
     <div class="flex justify-center gap-2 mb-6">
-      <button
-        id="btn-rfid"
-        onclick="switchMode('rfid')"
-        class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-brand text-white"
-      >
+      <button id="btn-rfid" onclick="switchMode('rfid')"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-brand text-white">
         RFID Mode
       </button>
-      <button
-        id="btn-qr"
-        onclick="switchMode('qr')"
-        class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-gray-200 dark:bg-dark-border text-gray-700 dark:text-gray-300"
-      >
+      <button id="btn-qr" onclick="switchMode('qr')"
+        class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-gray-200 dark:bg-dark-border text-gray-700 dark:text-gray-300">
         QR Code Mode
       </button>
     </div>
 
     <div class="mb-8">
-      <h1
-        class="text-4xl font-headline font-semibold text-gray-900 dark:text-white mb-2 tracking-tight"
-      >
+      <h1 class="text-4xl font-headline font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">
         Time In / Out
       </h1>
-      <p
-        id="instruction-text"
-        class="text-gray-500 dark:text-dark-muted font-medium text-sm"
-      >
+      <p id="instruction-text" class="text-gray-500 dark:text-dark-muted font-medium text-sm">
         Please tap your NVSU ID to record attendance
       </p>
     </div>
@@ -47,95 +31,49 @@
     <div id="rfid-area" class="relative w-44 h-44 mx-auto mb-8">
       <div
         class="absolute inset-0 rounded-full bg-gradient-to-br from-brand/10 to-brand/5 dark:from-brand/15 dark:to-brand/5 border-4 border-dashed border-brand/30 flex items-center justify-center animate-spring-scale"
-        style="animation-delay: 0.2s"
-      >
-        <svg
-          class="w-20 h-20 text-brand"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="1.5"
-            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-          ></path>
+        style="animation-delay: 0.2s">
+        <svg class="w-20 h-20 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z">
+          </path>
         </svg>
       </div>
-      <div
-        class="absolute inset-[-8px] rounded-full border-2 border-brand/20 animate-ping"
-        style="animation-duration: 2s"
-      ></div>
-      <div
-        class="absolute inset-[-20px] rounded-full border border-brand/10 animate-ping"
-        style="animation-duration: 3s"
-      ></div>
+      <div class="absolute inset-[-8px] rounded-full border-2 border-brand/20 animate-ping"
+        style="animation-duration: 2s"></div>
+      <div class="absolute inset-[-20px] rounded-full border border-brand/10 animate-ping"
+        style="animation-duration: 3s"></div>
     </div>
 
     <!-- QR Scan Area -->
-    <div
-      id="qr-area"
-      class="hidden relative w-64 h-64 mx-auto mb-8 rounded-2xl overflow-hidden border-2 border-dashed border-brand/50"
-    >
+    <div id="qr-area"
+      class="hidden relative w-64 h-64 mx-auto mb-8 rounded-2xl overflow-hidden border-2 border-dashed border-brand/50">
       <video id="qr-video" class="w-full h-full object-cover"></video>
-      <div
-        id="qr-overlay"
-        class="absolute inset-0 flex items-center justify-center bg-black/50"
-      >
+      <div id="qr-overlay" class="absolute inset-0 flex items-center justify-center bg-black/50">
         <div class="w-48 h-48 border-2 border-green-500 rounded-lg"></div>
       </div>
-      <button
-        id="start-qr-btn"
-        onclick="startQRScanner()"
-        class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-          ></path>
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-          ></path>
+      <button id="start-qr-btn" onclick="startQRScanner()"
+        class="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white cursor-pointer">
+        <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+          </path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z">
+          </path>
         </svg>
         <span class="text-sm font-medium">Tap to start camera</span>
       </button>
     </div>
 
-    <input
-      type="text"
-      id="rfid_input"
-      autofocus
-      class="opacity-0 absolute -z-10"
-      autocomplete="off"
-    />
+    <input type="text" id="rfid_input" autofocus class="opacity-0 absolute -z-10" autocomplete="off" />
 
-    <div
-      id="status_message"
-      class="transition-all duration-500 opacity-0 min-h-[60px] flex items-center justify-center rounded-2xl font-semibold text-base"
-    ></div>
+    <div id="status_message"
+      class="transition-all duration-500 opacity-0 min-h-[60px] flex items-center justify-center rounded-2xl font-semibold text-base">
+    </div>
 
-    <div
-      class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400 dark:text-dark-muted"
-    >
+    <div class="mt-6 flex items-center justify-center gap-2 text-sm text-gray-400 dark:text-dark-muted">
       <span class="relative flex h-2.5 w-2.5">
-        <span
-          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand/60 opacity-75"
-        ></span>
-        <span
-          class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand"
-        ></span>
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand/60 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand"></span>
       </span>
       <span id="scanner-status">Scanner active. Ready for input...</span>
     </div>

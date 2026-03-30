@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block title %}My Dashboard | NVSU DTR
 <script>
-  // ── Live status polling (replaces static Jinja render) ──────────────────────
+  // -- Live status polling (replaces static Jinja render) --
   const CLOCKED_IN_CLASSES = [
     "bg-yellow-50",
     "border-yellow-200",
@@ -50,6 +50,25 @@
     el.textContent = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
+  // Work duration timer function
+  function updateWorkDuration() {
+    const durationEl = document.getElementById("liveWorkDuration");
+    if (durationEl && durationEl.dataset.startTime) {
+      const startTime = parseInt(durationEl.dataset.startTime) * 1000;
+      const now = Date.now();
+      const diff = now - startTime;
+
+      if (diff > 0) {
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        durationEl.textContent = `${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        durationEl.textContent = "0h 0m 0s";
+      }
+    }
+  }
+
   function pollLiveStatus() {
     fetch("/api/live-status")
       .then((r) => (r.ok ? r.json() : null))
@@ -60,7 +79,7 @@
         const el = document.getElementById("live-elapsed");
         if (el && data.time_in) el.dataset.timeIn = data.time_in;
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -68,6 +87,10 @@
     setInterval(tickElapsed, 1000);
     pollLiveStatus();
     setInterval(pollLiveStatus, 5000);
+
+    // Initialize work duration timer
+    updateWorkDuration();
+    setInterval(updateWorkDuration, 1000);
   });
 </script>
 
@@ -80,22 +103,27 @@ selectattr("time_out", "equalto", none) | first %}
       background 0.18s,
       box-shadow 0.18s;
   }
+
   .log-row:hover {
     background: rgba(6, 115, 2, 0.04);
     box-shadow: 0 2px 12px rgba(6, 115, 2, 0.07);
   }
+
   html.dark .log-row:hover {
     background: rgba(6, 115, 2, 0.08);
   }
+
   .stat-card {
     transition:
       transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.25s;
   }
+
   .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
   }
+
   .pill-badge {
     display: inline-flex;
     align-items: center;
@@ -106,26 +134,21 @@ selectattr("time_out", "equalto", none) | first %}
     padding: 0.25rem 0.65rem;
     border-radius: 999px;
   }
+
   /* Keep rows visible by default for no-JS fallback, JS pagination will hide/show accordingly */
   [data-log-row] {
     display: grid;
   }
 </style>
 
-<div class="max-w-7xl mx-auto space-y-7">
-  <!-- ── Page Header ── -->
-  <div
-    class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring"
-  >
+<div class="max-w-[1600px] mx-auto space-y-6">
+  <!-- -- Page Header -- -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring">
     <div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1"
-      >
+      <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1">
         Personal Ledger
       </p>
-      <h1
-        class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none"
-      >
+      <h1 class="text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none">
         My Dashboard
       </h1>
       <p class="text-gray-400 dark:text-dark-muted mt-1.5 text-sm">
@@ -134,145 +157,86 @@ selectattr("time_out", "equalto", none) | first %}
     </div>
     <!-- Status Badge + Clock In/Out Button -->
     <div class="flex items-center gap-3 flex-wrap">
-      <div
-        id="clock-badge"
-        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border {{ 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' if active_log else 'bg-brand/8 border-brand/20 dark:bg-brand/15' }}"
-      >
+      <div id="clock-badge"
+        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border {{ 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' if active_log else 'bg-brand/8 border-brand/20 dark:bg-brand/15' }}">
         <span class="relative flex h-2 w-2">
-          <span
-            id="clock-ping"
-            class="animate-ping absolute inline-flex h-full w-full rounded-full {{ 'bg-yellow-500' if active_log else 'bg-brand' }} opacity-75"
-          ></span>
-          <span
-            id="clock-dot"
-            class="relative inline-flex rounded-full h-2 w-2 {{ 'bg-yellow-500' if active_log else 'bg-brand' }}"
-          ></span>
+          <span id="clock-ping"
+            class="animate-ping absolute inline-flex h-full w-full rounded-full {{ 'bg-yellow-500' if active_log else 'bg-brand' }} opacity-75"></span>
+          <span id="clock-dot"
+            class="relative inline-flex rounded-full h-2 w-2 {{ 'bg-yellow-500' if active_log else 'bg-brand' }}"></span>
         </span>
-        <span
-          id="clock-label"
-          class="text-sm font-extrabold {{ 'text-yellow-700 dark:text-yellow-400' if active_log else 'text-brand' }}"
-        >
+        <span id="clock-label"
+          class="text-sm font-extrabold {{ 'text-yellow-700 dark:text-yellow-400' if active_log else 'text-brand' }}">
           {{ 'Clocked In' if active_log else 'Clocked Out' }}
         </span>
       </div>
+
+      <!-- Work Duration Timer -->
       {% if active_log %}
-      <div
-        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800"
-      >
-        <svg
-          class="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          ></path>
+      <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand/8 border border-brand/20">
+        <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <span
-          id="live-elapsed"
-          class="text-xs font-bold text-yellow-700 dark:text-yellow-400"
-          data-time-in="{{ active_log.time_in }}"
-          >--:--:--</span
-        >
+        <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted">Work
+          Duration</span>
+        <span id="liveWorkDuration" class="text-sm font-bold text-brand" data-start-time="{{ active_log.time_in }}">
+          0h 0m 0s
+        </span>
       </div>
-      <button
-        id="timeOutBtn"
+      {% endif %} {% if active_log %}
+      <div
+        class="flex items-center gap-2 px-3 py-2 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+        <svg class="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span id="live-elapsed" class="text-xs font-bold text-yellow-700 dark:text-yellow-400"
+          data-time-in="{{ active_log.time_in }}">--:--:--</span>
+      </div>
+      <button id="timeOutBtn"
         class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm text-white"
         style="
           background: linear-gradient(135deg, #067302, #055902);
           box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
-        "
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 16l4-4m0 0l-4-4m4 4H7"
-          ></path>
+        ">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
         </svg>
         Clock Out
       </button>
       {% endif %}
     </div>
-
-    <a
-      href="{{ url_for('user_radar') }}"
-      class="flex items-center gap-2 px-5 py-2.5 bg-brand text-white rounded-xl text-sm font-bold shadow-lg shadow-brand/20 hover:-translate-y-0.5 transition-all"
-    >
-      <svg
-        class="w-5 h-5"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        ></path>
-      </svg>
-      Habit Analysis
-    </a>
   </div>
 
-  <!-- ── Stats Row ── -->
-  <div
-    class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4"
-    style="align-items: stretch"
-  >
+  <!-- â”€â”€ Stats Row â”€â”€ -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4" style="align-items: stretch">
     <!-- Avg Clock In -->
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.05s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.05s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(209, 250, 229, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Avg. Clock-In
           </p>
           <p
-            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap"
-          >
+            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap">
             {{ avg_clock_in }}
           </p>
         </div>
@@ -282,45 +246,27 @@ selectattr("time_out", "equalto", none) | first %}
     <!-- Avg Clock Out -->
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.08s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.08s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(199, 210, 254, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Avg. Clock-Out
           </p>
           <p
-            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap"
-          >
+            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap">
             {{ avg_clock_out }}
           </p>
         </div>
@@ -330,45 +276,29 @@ selectattr("time_out", "equalto", none) | first %}
     <!-- Total Sessions -->
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.11s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.11s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(221, 214, 254, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+            </path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Total Sessions
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-violet-600 dark:text-violet-400 tracking-tight whitespace-nowrap"
-          >
+          <p id="total-sessions-val"
+            class="text-2xl font-headline font-extrabold text-violet-600 dark:text-violet-400 tracking-tight whitespace-nowrap">
             {{ logs | length }}
           </p>
         </div>
@@ -378,217 +308,151 @@ selectattr("time_out", "equalto", none) | first %}
     <!-- On-Time Rate -->
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.14s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.14s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(6, 115, 2, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
-        <div
-          class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+        <div class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             On-Time Rate
           </p>
           {% set completed = logs | selectattr('time_out') | list %} {% set
           on_time = completed | rejectattr('is_late') | list %} {% set rate =
           ((on_time | length / completed | length) * 100) | round(0) | int if
           completed | length > 0 else 0 %}
-          <p
-            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap"
-          >
-            {{ rate }}<span class="text-sm font-semibold text-gray-400 ml-0.5"
-              >%</span
-            >
+          <p id="ontime-rate-val"
+            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap">
+            {{ rate }}<span class="text-sm font-semibold text-gray-400 ml-0.5">%</span>
           </p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ── Main 2-Col Layout ── -->
+  <!-- â”€â”€ Main 2-Col Layout â”€â”€ -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:items-start">
-    <!-- ── Time Logs (left, 2/3) ── -->
-    <div
+    <!-- â”€â”€ Time Logs (left, 2/3) â”€â”€ -->
+    <div id="time-logs" hx-boost="true"
       class="glass-strong rounded-2xl overflow-hidden stagger-item lg:col-span-2 flex flex-col"
-      style="animation-delay: 0.15s"
-    >
+      style="animation-delay: 0.15s">
       <!-- Header -->
       <div
-        class="p-6 border-b border-gray-100/60 dark:border-dark-border flex-shrink-0"
-      >
-        <p
-          class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-        >
-          Personal Ledger
-        </p>
-        <h2
-          class="text-lg font-headline font-bold text-gray-900 dark:text-white tracking-tight"
-        >
-          My Recent Time Logs
-        </h2>
+        class="p-6 border-b border-gray-100/60 dark:border-dark-border flex-shrink-0 flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
+            Personal Ledger
+          </p>
+          <h2 class="text-lg font-headline font-bold text-gray-900 dark:text-white tracking-tight">
+            My Recent Time Logs
+          </h2>
+        </div>
+        <!-- Show Entries Dropdown -->
+        <div class="flex items-center gap-2">
+          <span
+            class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted whitespace-nowrap">Show:</span>
+          <div class="relative inline-block">
+            <select onchange="changePerPage(this.value)"
+              class="text-xs font-bold bg-gray-100/50 dark:bg-dark-border/50 border border-gray-200 dark:border-dark-border/50 rounded-xl px-3 py-1.5 pr-8 appearance-none focus:ring-2 focus:ring-brand/20 transition-all cursor-pointer">
+              {% for n in [20, 40, 60, 80, 100] %}
+              <option value="{{ n }}" {% if per_page==n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+              <option value="999999" {% if per_page==999999 %}selected{% endif %}>All</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Scrollable table wrapper -->
-      <div class="overflow-auto" style="max-height: 500px">
-        <table class="w-full min-w-[700px]">
-          <thead class="sticky top-0 z-10">
-            <tr
-              class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border"
-            >
-              <th
-                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
-              >
+      <!-- Fixed Height Scrollable Area -->
+      <div class="overflow-auto custom-scrollbar transition-all bg-white dark:bg-dark-surface" style="height: 480px;">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border border-separate border-spacing-0">
+          <thead class="sticky top-0 z-10 shadow-sm">
+            <tr>
+              <th scope="col"
+                class="px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
                 Date
               </th>
-              <th
-                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
-              >
+              <th scope="col"
+                class="px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
                 Time In
               </th>
-              <th
-                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
-              >
+              <th scope="col"
+                class="px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
                 Time Out
               </th>
-              <th
-                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
-              >
+              <th scope="col"
+                class="px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
                 Duration
-              </th>
-              <th
-                class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface"
-              >
-                Status
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50">
-            {% for log in logs[:50] %}
-            <tr class="log-row hover:bg-gray-50 dark:hover:bg-dark-surface/50">
-              <td class="px-3 py-3 text-center">
-                <div class="flex items-center gap-3 justify-left">
-                  <div
-                    class="w-10 h-10 rounded-xl flex items-center justify-center text-brand font-headline font-extrabold text-sm flex-shrink-0 bg-gray-100 dark:bg-dark-border group-hover:bg-brand/15 transition-colors"
-                  >
-                    <span class="format-epoch-day">{{ log.time_in }}</span>
-                  </div>
-                  <div class="min-w-0 text-left">
-                    <p
-                      class="text-sm font-bold text-gray-900 dark:text-white format-epoch-long truncate"
-                    >
-                      {{ log.time_in }}
-                    </p>
-                    <p class="text-[10px] text-gray-400 dark:text-dark-muted">
-                      Personal Record
-                    </p>
-                  </div>
-                </div>
+          <tbody id="logs-table-body"
+            class="divide-y divide-gray-100 dark:divide-dark-border/50 transition-opacity duration-300">
+            {% for log in logs %}
+            <tr class="log-row hover:bg-brand/5 dark:hover:bg-brand/10 transition-colors group">
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ log.time_in | format_epoch('%b %d, %Y')
+                  }}</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-tighter">{{ log.time_in | format_epoch('%A') }}
+                </p>
               </td>
-              <td class="px-3 py-3 text-center">
-                <p
-                  class="text-sm font-medium text-gray-700 dark:text-gray-300 format-epoch-time"
-                >
-                  {{ log.time_in }}
-                </p>
-                <p
-                  class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5"
-                  title="Unix epoch"
-                >
-                  {{ log.time_in }}
-                </p>
-                {% if log.is_late %}
-                <div class="mt-1">
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ log.time_in | format_epoch('%I:%M
+                  %p') }}</p>
+                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">{{ log.time_in }}</p>
+                <div class="mt-1.5 flex justify-center">
+                  {% if log.is_late %}
                   <span
-                    class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                    >Late</span
-                  >
+                    class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">LATE</span>
+                  {% else %}
+                  <span
+                    class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">ON
+                    TIME</span>
+                  {% endif %}
                 </div>
-                {% endif %}
               </td>
-              <td class="px-3 py-3 text-center">
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
                 {% if log.time_out %}
-                <span
-                  class="text-sm font-medium text-gray-500 dark:text-dark-muted format-epoch-time"
-                  >{{ log.time_out }}</span
-                >
-                <p
-                  class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5"
-                  title="Unix epoch"
-                >
+                <span class="text-sm font-medium text-gray-500 dark:text-dark-muted">
+                  {{ log.time_out | format_epoch('%I:%M %p') }}
+                </span>
+                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">
                   {{ log.time_out }}
                 </p>
-                {% else %}<span class="text-blue-500 font-bold text-sm"
-                  >Active</span
-                >{% endif %}
-              </td>
-              <td class="px-3 py-3 text-center">
-                <p class="text-sm font-headline font-extrabold text-brand">
-                  {{ log.rendered_hours if log.rendered_hours else '—' }}{% if
-                  log.rendered_hours %}<span
-                    class="text-xs font-semibold text-gray-400 ml-0.5"
-                    >h</span
-                  >{% endif %}
-                </p>
-              </td>
-              <td class="px-3 py-3 text-center">
-                {% if not log.time_out %}
-                <span
-                  class="pill-badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                  >Active</span
-                >
-                {% elif log.is_late %}
-                <span
-                  class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                  >Late Entry</span
-                >
                 {% else %}
                 <span
-                  class="pill-badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  >Approved</span
-                >
+                  class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse border border-blue-200 dark:border-blue-800/50">ACTIVE</span>
                 {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {{ log.rendered_hours if log.rendered_hours else '-' }}
+                </p>
               </td>
             </tr>
             {% else %}
             <tr>
-              <td colspan="5" class="px-4 py-12 text-center">
-                <svg
-                  class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  ></path>
+              <td colspan="4" class="px-4 py-12 text-center">
+                <svg class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                  </path>
                 </svg>
                 <p class="text-sm text-gray-400 dark:text-dark-muted">
                   No logs recorded yet.
@@ -600,146 +464,74 @@ selectattr("time_out", "equalto", none) | first %}
         </table>
       </div>
 
-      <!-- Pagination Footer -->
-      {% set qs = 'filter_time=' ~ (current_time_filter or 'all') ~
-      '&date_from=' ~ (current_date_from or '') ~ '&date_to=' ~ (current_date_to
-      or '') ~ '&status_filter=' ~ (current_status_filter or 'all') %}
-      <div
-        class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-100/60 dark:border-dark-border"
-      >
-        <span
-          class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-        >
-          {% if total_logs > 0 %} Showing {{ ((page - 1) * 30) + 1 }}–{{ [page *
-          30, total_logs] | min }} of {{ total_logs }} entries {% else %} No
-          entries {% endif %}
-        </span>
-        {% if total_pages > 1 %}
-        <div class="flex items-center gap-1">
+      <div id="logs-pagination-footer"
+        class="px-6 py-4 bg-gray-50 dark:bg-dark-surface/50 border-t border-gray-200 dark:border-dark-border flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div id="showing-info"
+          class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-dark-muted">
+          Showing <span class="text-gray-900 dark:text-white">{{ ((page - 1) * per_page) + 1 }}</span> to <span
+            class="text-gray-900 dark:text-white">{{ [page * per_page, total_logs] | min }}</span> of <span
+            class="text-brand">{{ total_logs }}</span> records
+        </div>
+
+        <div id="pagination-controls" class="flex items-center gap-2">
+          {% if total_pages > 1 %}
+          <!-- Previous Button -->
           {% if page > 1 %}
-          <a
-            href="/dashboard?{{ qs }}&page={{ page - 1 }}"
-            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
-            </svg>
+          <button onclick="changePage({{ page - 1 }})"
+            class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-surface hover:border-brand transition-all shadow-sm">
             Previous
-          </a>
+          </button>
           {% else %}
           <span
-            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              ></path>
-            </svg>
+            class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 dark:bg-dark-card text-xs font-bold text-gray-300 dark:text-dark-muted cursor-not-allowed">
             Previous
-          </span>
-          {% endif %} {% set start_pg = [1, page - 2] | max %} {% set end_pg =
-          [total_pages, start_pg + 4] | min %} {% for p in range(start_pg,
-          end_pg + 1) %} {% if p == page %}
-          <span
-            class="w-8 h-8 rounded-lg text-xs font-bold text-white flex items-center justify-center"
-            style="background: linear-gradient(135deg, #067302, #055902)"
-            >{{ p }}</span
-          >
-          {% else %}
-          <a
-            href="/dashboard?{{ qs }}&page={{ p }}"
-            class="w-8 h-8 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-surface transition-all flex items-center justify-center"
-            >{{ p }}</a
-          >
-          {% endif %} {% endfor %} {% if page < total_pages %}
-          <a
-            href="/dashboard?{{ qs }}&page={{ page + 1 }}"
-            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-          >
-            Next
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              ></path>
-            </svg>
-          </a>
-          {% else %}
-          <span
-            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
-          >
-            Next
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              ></path>
-            </svg>
           </span>
           {% endif %}
+
+          <div class="flex gap-1">
+            {% set start_pg = [1, page - 1] | max %}
+            {% set end_pg = [total_pages, start_pg + 2] | min %}
+            {% if end_pg - start_pg < 2 %}{% set start_pg=[1, end_pg - 2] | max %}{% endif %} {% for p in
+              range(start_pg, end_pg + 1) %} <button onclick="changePage({{ p }})"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all {{ 'bg-brand text-white shadow-md' if page == p else 'bg-white dark:bg-dark-card text-gray-600 dark:text-dark-muted border border-gray-200 dark:border-dark-border hover:border-brand hover:text-brand' }}">
+              {{ p }}
+              </button>
+              {% endfor %}
+          </div>
+
+          <!-- Next Button -->
+          {% if page < total_pages %} <button onclick="changePage({{ page + 1 }})"
+            class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-surface hover:border-brand transition-all shadow-sm">
+            Next
+            </button>
+            {% else %}
+            <span
+              class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 dark:bg-dark-card text-xs font-bold text-gray-300 dark:text-dark-muted cursor-not-allowed">
+              Next
+            </span>
+            {% endif %}
+            {% endif %}
         </div>
-        {% endif %}
       </div>
     </div>
 
-    <!-- ── Right Column ── -->
+    <!-- â”€â”€ Right Column â”€â”€ -->
     <div class="lg:col-span-1 space-y-5">
       <!-- Rendered Hours Metric -->
-      <div
-        class="glass-strong rounded-2xl p-7 stagger-item relative overflow-hidden"
-        style="animation-delay: 0.2s"
-      >
-        <div
-          class="absolute top-0 right-0 w-40 h-40 rounded-full -mr-16 -mt-16"
-          style="
+      <div id="hours-metric" hx-swap-oob="true"
+        class="glass-strong rounded-2xl p-7 stagger-item relative overflow-hidden" style="animation-delay: 0.2s">
+        <div class="absolute top-0 right-0 w-40 h-40 rounded-full -mr-16 -mt-16" style="
             background: radial-gradient(
               circle,
               rgba(6, 115, 2, 0.08) 0%,
               transparent 70%
             );
-          "
-        ></div>
+          "></div>
         <div class="relative z-10">
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-dark-muted mb-1"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-dark-muted mb-1">
             Rendered Hours Metric
           </p>
-          <h3
-            class="text-xl font-headline font-bold text-gray-800 dark:text-white mb-1"
-          >
+          <h3 class="text-xl font-headline font-bold text-gray-800 dark:text-white mb-1">
             My Hours
           </h3>
           <p class="text-sm text-gray-400 mb-6">
@@ -747,26 +539,19 @@ selectattr("time_out", "equalto", none) | first %}
           </p>
           <div class="flex items-end justify-between">
             <div>
-              <p
-                class="text-5xl font-headline font-extrabold text-brand leading-none tracking-tighter"
-              >
-                {{ total_hours or '—' }}
+              <p class="text-5xl font-headline font-extrabold text-brand leading-none tracking-tighter">
+                {{ total_hours or 'â€”' }}
               </p>
-              <p
-                class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2"
-              >
+              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2">
                 Total Hours
               </p>
             </div>
             <div class="text-right">
               <p
-                class="text-lg font-headline font-extrabold {% if total_lates > 0 %}text-red-500{% else %}text-emerald-500{% endif %}"
-              >
+                class="text-lg font-headline font-extrabold {% if total_lates > 0 %}text-red-500{% else %}text-emerald-500{% endif %}">
                 {{ total_lates }}
               </p>
-              <p
-                class="text-[10px] font-bold uppercase tracking-wider text-gray-400"
-              >
+              <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                 Lates
               </p>
             </div>
@@ -775,64 +560,38 @@ selectattr("time_out", "equalto", none) | first %}
       </div>
 
       <!-- Parameters Filter Card -->
-      <div
-        class="glass-strong rounded-2xl overflow-hidden stagger-item"
-        style="animation-delay: 0.25s"
-      >
+      <div class="glass-strong rounded-2xl overflow-hidden stagger-item" style="animation-delay: 0.25s">
         <div class="p-6 space-y-6">
           <!-- Card Title -->
           <div class="flex items-center gap-2">
-            <svg
-              class="w-4 h-4 text-brand"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
-              ></path>
+            <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z">
+              </path>
             </svg>
-            <h3
-              class="font-headline font-bold text-gray-900 dark:text-white tracking-tight"
-            >
+            <h3 class="font-headline font-bold text-gray-900 dark:text-white tracking-tight">
               Parameters
             </h3>
           </div>
 
           <!-- Timeline -->
-          <form method="GET" action="/dashboard" id="filterForm">
+          <form method="GET" action="/dashboard" id="filterForm" hx-boost="true" hx-target="#time-logs"
+            hx-select="#time-logs" hx-swap="outerHTML" hx-push-url="true" hx-select-oob="#hours-metric">
             <div class="space-y-3">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Timeline</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Timeline</label>
               <div class="space-y-2">
                 <div>
                   <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
-                    >From</label
-                  >
-                  <input
-                    type="date"
-                    name="date_from"
-                    value="{{ current_date_from or '' }}"
-                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all"
-                  />
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">From</label>
+                  <input type="date" name="date_from" value="{{ current_date_from or '' }}"
+                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
                 </div>
                 <div>
                   <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
-                    >To</label
-                  >
-                  <input
-                    type="date"
-                    name="date_to"
-                    value="{{ current_date_to or '' }}"
-                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all"
-                  />
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">To</label>
+                  <input type="date" name="date_to" value="{{ current_date_to or '' }}"
+                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -840,273 +599,294 @@ selectattr("time_out", "equalto", none) | first %}
             <!-- Quick Filter Pills -->
             <div class="space-y-2 mt-5">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Quick Filter</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Quick
+                Filter</label>
               <div class="flex flex-wrap gap-2">
-                <a
-                  href="/dashboard"
-                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_time_filter or current_time_filter == 'all' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
-                  >All Time</a
-                >
-                <a
-                  href="/dashboard?filter_time=year"
-                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'year' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
-                  >This Year</a
-                >
-                <a
-                  href="/dashboard?filter_time=month"
-                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'month' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
-                  >This Month</a
-                >
-                <a
-                  href="/dashboard?filter_time=week"
-                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'week' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
-                  >This Week</a
-                >
-                <a
-                  href="/dashboard?filter_time=today"
-                  class="px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'today' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}"
-                  >This Day</a
-                >
+                <button type="button" onclick="setTimeFilter('all')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_time_filter or current_time_filter == 'all' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">All
+                  Time</button>
+                <button type="button" onclick="setTimeFilter('year')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'year' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                  Year</button>
+                <button type="button" onclick="setTimeFilter('month')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'month' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                  Month</button>
+                <button type="button" onclick="setTimeFilter('week')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'week' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                  Week</button>
+                <button type="button" onclick="setTimeFilter('today')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'today' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                  Day</button>
               </div>
             </div>
 
             <!-- Attendance Status Filter -->
             <div class="space-y-2 mt-5">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Attendance Status</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Attendance
+                Status</label>
               <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onclick="setStatusFilter('all')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_status_filter or current_status_filter == 'all' %}bg-gray-700 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
-                >
+                <button type="button" onclick="applyStatusFilter('all')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_status_filter or current_status_filter == 'all' %}bg-gray-700 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
                   All
                 </button>
-                <button
-                  type="button"
-                  onclick="setStatusFilter('ontime')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'ontime' %}bg-emerald-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
-                >
+                <button type="button" onclick="applyStatusFilter('ontime')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'ontime' %}bg-emerald-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
                   On Time
                 </button>
-                <button
-                  type="button"
-                  onclick="setStatusFilter('late')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'late' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}"
-                >
+                <button type="button" onclick="applyStatusFilter('late')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'late' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
                   Late
                 </button>
               </div>
-              <input
-                type="hidden"
-                name="status_filter"
-                id="status_filter_input"
-                value="{{ current_status_filter or 'all' }}"
-              />
+              <input type="hidden" name="status_filter" id="status_filter_input"
+                value="{{ current_status_filter or 'all' }}" />
             </div>
 
             <!-- Apply / Clear Buttons -->
-            <div
-              class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2"
-            >
-              <button
-                type="submit"
+            <div class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2">
+              <button type="submit"
                 class="w-full py-3.5 font-headline font-bold text-sm text-white rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
                 style="
                   background: linear-gradient(135deg, #067302, #055902);
                   box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
-                "
-              >
+                ">
                 Apply Filters
               </button>
-              <a
-                href="/dashboard"
-                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
-              >
+              <a href="/dashboard"
+                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all">
                 Clear All
               </a>
             </div>
           </form>
 
           <!-- Live Status Chip -->
-          <div
-            class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between"
-          >
+          <div class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between">
             <div>
               <span
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Real-time Status</span
-              >
-              <span class="text-sm font-bold text-brand"
-                >Live Monitoring Active</span
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Real-time
+                Status</span>
+              <span class="text-sm font-bold text-brand">Live Monitoring Active</span>
             </div>
-            <div
-              class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
-              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"
-            ></div>
+            <div class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
+              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 <script>
-  const logsData = {{ logs_data | tojson | safe }};
-
-  // ── Run immediately on script parse — no waiting ──────────────────────────
-
-  function formatEpochs() {
-    document.querySelectorAll(".format-epoch-day").forEach(el => {
-      const epoch = parseInt(el.textContent.trim());
-      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).getDate();
-    });
-    document.querySelectorAll(".format-epoch-long").forEach(el => {
-      const epoch = parseInt(el.textContent.trim());
-      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-    });
-    document.querySelectorAll(".format-epoch-time").forEach(el => {
-      const epoch = parseInt(el.textContent.trim());
-      if (!isNaN(epoch)) el.textContent = new Date(epoch * 1000).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
-    });
-  }
-
-  // ── Pagination ─────────────────────────────────────────────────────────────
-  const ROWS_PER_PAGE = 30;
-  let currentPage = 1;
-
-  function initPagination() {
-    const rows = document.querySelectorAll('[data-log-row]');
-    const total = rows.length;
-    const totalPages = Math.ceil(total / ROWS_PER_PAGE);
-
-    if (total === 0) {
-      const footer = document.getElementById('pagination-footer');
-      if (footer) footer.classList.add('hidden');
-      return;
-    }
-
-    function renderPageNumbers(page) {
-      const container = document.getElementById('page-numbers');
-      if (!container) return;
-      container.innerHTML = '';
-      let start = Math.max(1, page - 2);
-      let end = Math.min(totalPages, start + 4);
-      if (end - start < 4) start = Math.max(1, end - 4);
-      for (let p = start; p <= end; p++) {
-        const btn = document.createElement('button');
-        btn.textContent = p;
-        btn.onclick = () => renderPage(p);
-        btn.className = p === page
-          ? 'w-8 h-8 rounded-lg text-xs font-bold text-white transition-all'
-          : 'w-8 h-8 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 transition-all';
-        if (p === page) btn.style.background = 'linear-gradient(135deg, #067302, #055902)';
-        container.appendChild(btn);
-      }
-    }
-
-    function renderPage(page) {
-      currentPage = page;
-      const start = (page - 1) * ROWS_PER_PAGE;
-      const end = start + ROWS_PER_PAGE;
-      const rowsOnPage = Math.min(end, total) - start;
-
-      rows.forEach((row, i) => {
-        row.style.display = (i >= start && i < end) ? '' : 'none';
-      });
-
-      const rowContainer = document.querySelector('[data-log-row]')?.parentElement;
-      if (rowContainer) rowContainer.style.minHeight = (rowsOnPage * 80) + 'px';
-
-      const info = document.getElementById('pagination-info');
-      if (info) info.textContent = `Showing ${start + 1}–${Math.min(end, total)} of ${total} entries`;
-
-      const prevBtn = document.getElementById('prev-btn');
-      const nextBtn = document.getElementById('next-btn');
-      if (prevBtn) prevBtn.disabled = page === 1;
-      if (nextBtn) nextBtn.disabled = page === totalPages;
-      renderPageNumbers(page);
-    }
-
-    window.changePage = function(dir) {
-      const next = currentPage + dir;
-      if (next >= 1 && next <= totalPages) renderPage(next);
-    };
-
-    renderPage(1);
-  }
-
-  // ── Charts (only thing that needs to wait for Chart.js) ───────────────────
   function initCharts() {
-    if (typeof Chart === "undefined") { setTimeout(initCharts, 100); return; }
-    const isDark = document.documentElement.classList.contains("dark");
-
-    let hoursByDate = {}, totalOnTime = 0, totalLate = 0, totalActive = 0;
-    if (typeof logsData !== "undefined" && Array.isArray(logsData)) {
-      logsData.forEach(log => {
-        if (log.time_out) {
-          const d = new Date(log.time_in * 1000).toISOString().split('T')[0];
-          hoursByDate[d] = (hoursByDate[d] || 0) + (parseFloat(log.rendered_hours) || 0);
-          log.is_late ? totalLate++ : totalOnTime++;
-        } else { totalActive++; }
-      });
-    }
-
-    const sorted = Object.keys(hoursByDate).sort().slice(-7);
-
-    const barCanvas = document.getElementById("hoursChart");
-    if (barCanvas) {
-      new Chart(barCanvas.getContext("2d"), {
-        type: "bar",
-        data: { labels: sorted.length ? sorted : ["No Data"], datasets: [{ data: sorted.length ? sorted.map(d => hoursByDate[d]) : [0], backgroundColor: "#067302", borderRadius: 6, barThickness: 14 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: isDark ? "#8892a4" : "#6b7280" }, grid: { color: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)" } }, x: { grid: { display: false }, ticks: { color: isDark ? "#8892a4" : "#6b7280" } } } }
-      });
-    }
-
-    const pieCanvas = document.getElementById("statusChart");
-    if (pieCanvas) {
-      new Chart(pieCanvas.getContext("2d"), {
-        type: "doughnut",
-        data: { labels: ["On Time", "Late", "Active"], datasets: [{ data: [totalOnTime, totalLate, totalActive], backgroundColor: ["#067302", "#ef4444", "#3b82f6"], borderColor: isDark ? "#1a1d27" : "#fff", borderWidth: 3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { color: isDark ? "#8892a4" : "#6b7280", padding: 12, font: { size: 11 } } } } }
-      });
-    }
-
     const timeOutBtn = document.getElementById("timeOutBtn");
     if (timeOutBtn) {
-      timeOutBtn.addEventListener("click", () => {
+      timeOutBtn.onclick = () => {
         fetch("/api/dashboard-tap", { method: "POST" })
           .then(r => r.json())
           .then(data => {
-            if (data.success && data.rfid) return fetch("/api/tap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ rfid_tag: data.rfid }) });
+            if (data.success && data.rfid) {
+              return fetch("/api/tap", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rfid_tag: data.rfid })
+              });
+            }
             throw new Error(data.message || "Could not get RFID.");
           })
           .then(r => r.json())
-          .then(data => { showToast(data.message, data.success ? "success" : "error"); if (data.success) setTimeout(() => location.reload(), 1500); })
-          .catch(err => showToast(err.message, "error"));
-      });
+          .then(data => {
+            if (typeof showToast === "function") {
+              showToast(data.message, data.success ? "success" : "error");
+            } else {
+              alert(data.message);
+            }
+            if (data.success) setTimeout(() => location.reload(), 1500);
+          })
+          .catch(err => {
+            if (typeof showToast === "function") {
+              showToast(err.message, "error");
+            } else {
+              alert(err.message);
+            }
+          });
+      };
     }
   }
 
-  function setStatusFilter(value) {
-    document.getElementById('status_filter_input').value = value;
-    document.querySelectorAll('.status-pill').forEach(btn => {
-      btn.classList.remove('bg-gray-700', 'bg-emerald-500', 'bg-amber-500', 'text-white', 'shadow-sm');
-      btn.classList.add('bg-gray-100', 'text-gray-500');
-    });
-    const colors = { all: 'bg-gray-700', ontime: 'bg-emerald-500', late: 'bg-amber-500' };
-    event.currentTarget.classList.add(colors[value], 'text-white', 'shadow-sm');
-    event.currentTarget.classList.remove('bg-gray-100', 'text-gray-500');
+  const state = {
+    page: {{ page or 1 }},
+    per_page: {{ per_page or 20 }},
+    status_filter: "{{ current_status_filter or 'all' }}",
+    filter_time: "{{ current_time_filter or 'all' }}",
+    date_from: "{{ current_date_from or '' }}",
+    date_to: "{{ current_date_to or '' }}",
+    isLoading: false
+  };
+
+  async function fetchLogs(updateUrl = true) {
+    if (state.isLoading) return;
+    state.isLoading = true;
+    const tbody = document.getElementById('logs-table-body');
+    if (tbody) tbody.classList.add('opacity-40');
+    try {
+      const params = new URLSearchParams({
+        page: state.page,
+        per_page: state.per_page,
+        status_filter: state.status_filter,
+        filter_time: state.filter_time,
+        date_from: state.date_from,
+        date_to: state.date_to
+      });
+      const response = await fetch(`/api/user/logs?${params.toString()}`);
+      const data = await response.json();
+      if (data.success) {
+        renderLogs(data.logs);
+        renderPagination(data.pagination);
+        updateSummaryCards(data.stats, data.pagination);
+        if (updateUrl) {
+          const newUrl = new URL(window.location.href);
+          params.forEach((val, key) => {
+            if (val) newUrl.searchParams.set(key, val);
+            else newUrl.searchParams.delete(key);
+          });
+          window.history.pushState({}, '', newUrl);
+        }
+      }
+    } catch (error) { console.error('API Error:', error); }
+    finally {
+      state.isLoading = false;
+      if (tbody) tbody.classList.remove('opacity-40');
+    }
   }
 
-  // ── Boot — script is at bottom of page so DOM is always ready ───────────
-  formatEpochs();
-  initPagination();
-  initCharts();
+  function renderLogs(logs) {
+    const tbody = document.getElementById('logs-table-body');
+    if (!tbody) return;
+    if (!logs || logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">No records found.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = logs.map(log => `
+      <tr class="log-row hover:bg-brand/5 dark:hover:bg-brand/10 transition-colors group">
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-bold text-gray-800 dark:text-gray-200">${log.date}</p>
+          <p class="text-[10px] text-gray-400 uppercase tracking-tighter">${log.day}</p>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">${log.time_in_label}</p>
+          <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">${log.time_in_raw}</p>
+          <div class="mt-1.5 flex justify-center">
+            ${log.is_late
+        ? '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200">LATE</span>'
+        : '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200">ON TIME</span>'
+      }
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          ${log.time_out_label
+        ? `<span class="text-sm font-medium text-gray-500">${log.time_out_label}</span>
+               <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">${log.time_out_raw}</p>`
+        : '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse border border-blue-200">ACTIVE</span>'
+      }
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-bold text-gray-800 dark:text-gray-200">${log.rendered_hours || '-'}</p>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function renderPagination(p) {
+    const info = document.getElementById('showing-info');
+    if (info) info.innerHTML = `Showing <span class="text-gray-900 dark:text-white">${p.start_entry}</span> to <span class="text-gray-900 dark:text-white">${p.end_entry}</span> of <span class="text-brand">${p.total_logs}</span> records`;
+    const controls = document.getElementById('pagination-controls');
+    if (!controls) return;
+    if (p.total_pages <= 1) { controls.innerHTML = ''; return; }
+    let html = `
+      ${p.page > 1 ? `<button onclick="changePage(${p.page - 1})" class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 hover:bg-gray-100 transition-all shadow-sm">Previous</button>` : `<span class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 text-xs font-bold text-gray-300 cursor-not-allowed">Previous</span>`}
+      <div class="flex gap-1">
+        ${Array.from({ length: p.total_pages }, (_, i) => i + 1).filter(n => Math.abs(n - p.page) <= 1 || n === 1 || n === p.total_pages).map(n => `<button onclick="changePage(${n})" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${p.page === n ? "bg-brand text-white shadow-md" : "bg-white dark:bg-dark-card text-gray-600 border border-gray-200 hover:border-brand hover:text-brand"}">${n}</button>`).join('')}
+      </div>
+      ${p.page < p.total_pages ? `<button onclick="changePage(${p.page + 1})" class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 hover:bg-gray-100 transition-all shadow-sm">Next</button>` : `<span class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 text-xs font-bold text-gray-300 cursor-not-allowed">Next</span>`}
+    `;
+    controls.innerHTML = html;
+  }
+
+  function updateSummaryCards(stats, p) {
+    const latesVal = document.getElementById('total-lates-val');
+    const hoursVal = document.getElementById('total-hours-val');
+    const sessionsVal = document.getElementById('total-sessions-val');
+    if (latesVal) latesVal.innerText = stats.total_lates;
+    if (hoursVal) hoursVal.innerHTML = `${stats.total_hours}<span class="text-xs text-gray-400 font-semibold ml-1">hrs</span>`;
+    if (sessionsVal) sessionsVal.innerText = p.total_logs;
+  }
+
+  function changePage(p) { state.page = p; fetchLogs(); document.getElementById('time-logs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function changePerPage(val) { state.per_page = parseInt(val); state.page = 1; fetchLogs(); }
+  function applyStatusFilter(status) {
+    state.status_filter = status;
+    state.page = 1;
+    fetchLogs();
+
+    // Update UI active state for status pills
+    document.querySelectorAll('.status-pill').forEach(btn => {
+      const btnText = btn.innerText.toLowerCase();
+      const isActive = (btnText.includes('all') && status === 'all') ||
+                       (btnText.includes('on time') && status === 'ontime') ||
+                       (btnText.includes('late') && status === 'late');
+      
+      if (isActive) {
+        btn.classList.remove('bg-gray-100', 'text-gray-500');
+        if (status === 'all') btn.classList.add('bg-gray-700', 'text-white');
+        else if (status === 'ontime') btn.classList.add('bg-emerald-500', 'text-white');
+        else if (status === 'late') btn.classList.add('bg-amber-500', 'text-white');
+      } else {
+        btn.classList.add('bg-gray-100', 'text-gray-500');
+        btn.classList.remove('bg-gray-700', 'bg-emerald-500', 'bg-amber-500', 'text-white');
+      }
+    });
+  }
+  function setTimeFilter(type) {
+    state.filter_time = type;
+    state.date_from = '';
+    state.date_to = '';
+    state.page = 1;
+    
+    // Clear date inputs visually
+    const fromInput = document.querySelector('input[name="date_from"]');
+    const toInput = document.querySelector('input[name="date_to"]');
+    if (fromInput) fromInput.value = '';
+    if (toInput) toInput.value = '';
+
+    fetchLogs();
+
+    // Update UI for quick pills
+    document.querySelectorAll('.quick-pill').forEach(btn => {
+      const btnText = btn.innerText.toLowerCase();
+      let isMatch = false;
+      if (type === 'all') isMatch = btnText.includes('all');
+      else if (type === 'year') isMatch = btnText.includes('year');
+      else if (type === 'month') isMatch = btnText.includes('month');
+      else if (type === 'week') isMatch = btnText.includes('week');
+      else if (type === 'today') isMatch = btnText.includes('day');
+
+      if (isMatch) {
+        btn.classList.add('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.remove('bg-gray-100', 'text-gray-500');
+      } else {
+        btn.classList.remove('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-gray-100', 'text-gray-500');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) { filterForm.addEventListener('submit', (e) => { e.preventDefault(); const formData = new FormData(filterForm); state.date_from = formData.get('date_from'); state.date_to = formData.get('date_to'); state.page = 1; fetchLogs(); }); }
+    if (typeof tickElapsed === 'function') { tickElapsed(); setInterval(tickElapsed, 1000); }
+    if (typeof pollLiveStatus === 'function') { pollLiveStatus(); setInterval(pollLiveStatus, 5000); }
+    if (typeof updateWorkDuration === 'function') { updateWorkDuration(); setInterval(updateWorkDuration, 1000); }
+    initCharts();
+  });
 </script>
 {% endblock %}

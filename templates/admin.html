@@ -28,7 +28,7 @@
       .then((data) => {
         if (data) updateLiveStatus(data);
       })
-      .catch(() => {});
+      .catch(() => { });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -45,22 +45,27 @@
       background 0.18s,
       box-shadow 0.18s;
   }
+
   .log-row:hover {
     background: rgba(6, 115, 2, 0.04);
     box-shadow: 0 2px 12px rgba(6, 115, 2, 0.07);
   }
+
   html.dark .log-row:hover {
     background: rgba(6, 115, 2, 0.08);
   }
+
   .stat-card {
     transition:
       transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
       box-shadow 0.25s;
   }
+
   .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 32px rgba(6, 115, 2, 0.13);
   }
+
   .pill-badge {
     display: inline-flex;
     align-items: center;
@@ -71,142 +76,170 @@
     padding: 0.25rem 0.65rem;
     border-radius: 999px;
   }
+
+  /* Custom Select2 Dark Mode Styling */
+  /* Custom Select2 Modern Styling */
+  .select2-container--default .select2-selection--single {
+    background-color: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 0.75rem !important;
+    height: 44px !important;
+    /* Match Timeline inputs */
+    display: flex;
+    align-items: center;
+    padding-left: 40px !important;
+    /* Room for SVG icon */
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  html.dark .select2-container--default .select2-selection--single {
+    background-color: #1a1d27 !important;
+    border-color: #2a2d3a !important;
+  }
+
+  .select2-container--default.select2-container--focus .select2-selection--single,
+  .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #067302 !important;
+    box-shadow: 0 0 0 4px rgba(6, 115, 2, 0.15) !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #1f2937 !important;
+    padding-left: 0 !important;
+    font-weight: 500;
+    font-size: 0.875rem;
+  }
+
+  html.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #e5e7eb !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 42px !important;
+    right: 12px !important;
+  }
+
+  .select2-dropdown {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 1rem !important;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 1000 !important;
+    margin-top: 4px;
+    padding: 4px;
+  }
+
+  html.dark .select2-dropdown {
+    background-color: #1a1d27 !important;
+    border-color: #2a2d3a !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .select2-container--default .select2-search--dropdown .select2-search__field {
+    border-radius: 0.75rem !important;
+    background-color: #f3f4f6 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 8px 12px !important;
+    font-size: 0.875rem !important;
+    outline: none !important;
+  }
+
+  html.dark .select2-container--default .select2-search--dropdown .select2-search__field {
+    background-color: #0f1117 !important;
+    border-color: #2a2d3a !important;
+    color: white !important;
+  }
+
+  .select2-results__option {
+    font-size: 0.875rem !important;
+    padding: 10px 16px !important;
+    border-radius: 0.5rem;
+    margin: 2px 0;
+    transition: all 0.15s ease;
+  }
+
+  .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #067302 !important;
+    color: white !important;
+  }
+
+  .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: rgba(6, 115, 1, 0.1) !important;
+    color: #067302 !important;
+    font-weight: 600;
+  }
+
+  html.dark .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: rgba(6, 115, 1, 0.2) !important;
+  }
 </style>
 
-<div class="max-w-7xl mx-auto space-y-5 sm:space-y-7 px-3 sm:px-0">
+<div class="max-w-[1600px] mx-auto space-y-5 sm:space-y-7 px-3 sm:px-0">
   <!-- ── Page Header ── -->
-  <div
-    class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring"
-  >
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 animate-spring">
     <div>
-      <p
-        class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1"
-      >
+      <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-brand mb-1">
         Architectural Overview
       </p>
       <h1
-        class="text-2xl sm:text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none"
-      >
+        class="text-2xl sm:text-3xl font-headline font-extrabold text-gray-900 dark:text-white tracking-tight leading-none capitalize">
+        {% if current_user_name %}
+        Viewing {{ current_user_name }}'s Logs
+        {% else %}
         Admin Dashboard
+        {% endif %}
       </h1>
       <p class="text-gray-400 dark:text-dark-muted mt-1.5 text-sm">
+        {% if current_user_name %}
+        Personal attendance records and history
+        {% else %}
         Global time log analytics and employee management
+        {% endif %}
       </p>
     </div>
     <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-      <div
-        class="flex items-center gap-2 bg-brand/8 dark:bg-brand/15 border border-brand/20 rounded-xl px-4 py-2.5"
-      >
+      <div class="flex items-center gap-2 bg-brand/8 dark:bg-brand/15 border border-brand/20 rounded-xl px-4 py-2.5">
         <span class="relative flex h-2 w-2">
-          <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"
-          ></span>
-          <span
-            class="relative inline-flex rounded-full h-2 w-2 bg-brand"
-          ></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
         </span>
-        <span
-          class="text-[11px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-wider"
-          >Currently Active</span
-        >
-        <span id="live-active-badge" class="text-sm font-extrabold text-brand"
-          >{{ active_staff }}</span
-        >
+        <span class="text-[11px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-wider">Currently
+          Active</span>
+        <span id="live-active-badge" class="text-sm font-extrabold text-brand">{{ active_staff }}</span>
         <span class="text-[11px] text-gray-400">Employees</span>
       </div>
-      <a
-        href="/admin/qr-codes"
-        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm"
-        style="
-          background: linear-gradient(135deg, #f2e205, #e6d204);
-          color: #111;
-          box-shadow: 0 4px 15px rgba(242, 226, 5, 0.25);
-        "
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-          ></path>
-        </svg>
-        QR Codes
-      </a>
-      <a
-        href="/admin/users"
-        class="inline-flex items-center gap-2 font-bold py-2.5 px-5 rounded-xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm text-white"
-        style="
-          background: linear-gradient(135deg, #067302, #055902);
-          box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
-        "
-      >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-          ></path>
-        </svg>
-        Manage Users
-      </a>
     </div>
   </div>
 
   <!-- ── Stats Row ── -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4" style="align-items:stretch;">
+  <div id="admin-stats" hx-swap-oob="true" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+    style="align-items:stretch;">
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.05s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.05s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(209, 250, 229, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
-            Avg. Clock-In
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
+            Avg. Clock-In (Today)
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap"
-          >
+          <p id="avg-clock-in-val"
+            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap">
             {{ avg_clock_in }}
           </p>
         </div>
@@ -215,45 +248,27 @@
 
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.08s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.08s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(199, 210, 254, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
-            Avg. Clock-Out
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
+            Avg. Clock-Out (Today)
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap"
-          >
+          <p id="avg-clock-out-val"
+            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap">
             {{ avg_clock_out }}
           </p>
         </div>
@@ -263,45 +278,28 @@
     {% if current_filter %}
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.11s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.11s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(254, 202, 202, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Total Lates
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-red-600 dark:text-red-400 tracking-tight whitespace-nowrap"
-          >
+          <p id="total-lates-val"
+            class="text-2xl font-headline font-extrabold text-red-600 dark:text-red-400 tracking-tight whitespace-nowrap">
             {{ total_lates }}
           </p>
         </div>
@@ -309,49 +307,28 @@
     </div>
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.14s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.14s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(6, 115, 2, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
-        <div
-          class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-            ></path>
+        <div class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+            </path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Rendered Hours
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap"
-          >
-            {{ total_hours }}<span
-              class="text-xs text-gray-400 font-semibold ml-1"
-              >hrs</span
-            >
+          <p id="total-hours-val"
+            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap">
+            {{ total_hours }}<span class="text-xs text-gray-400 font-semibold ml-1">hrs</span>
           </p>
         </div>
       </div>
@@ -359,94 +336,59 @@
     {% else %}
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.11s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.11s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(191, 219, 254, 0.6),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
         <div
-          class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-            ></path>
+          class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-500 flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z">
+            </path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Active Staff
           </p>
           <p
-            class="text-2xl font-headline font-extrabold text-blue-600 dark:text-blue-400 tracking-tight whitespace-nowrap"
-          >
-            <span id="live-active-count">{{ active_staff }}</span
-            ><span class="text-xs text-gray-400 font-semibold ml-1"
-              >/ {{ all_users|length }}</span
-            >
+            class="text-2xl font-headline font-extrabold text-blue-600 dark:text-blue-400 tracking-tight whitespace-nowrap">
+            <span id="live-active-count">{{ active_staff }}</span><span
+              class="text-xs text-gray-400 font-semibold ml-1">/ <span id="total-employees-val">{{ all_users|length
+                }}</span></span>
           </p>
         </div>
       </div>
     </div>
     <div
       class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.14s"
-    >
-      <div
-        class="absolute top-0 right-0 w-20 h-20 rounded-bl-full"
-        style="
+      style="animation-delay: 0.14s">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
             rgba(6, 115, 2, 0.08),
             transparent 70%
           );
-        "
-      ></div>
+        "></div>
       <div class="flex flex-col gap-3">
-        <div
-          class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            ></path>
+        <div class="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center text-brand flex-shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
           </svg>
         </div>
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
             Total Employees
           </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap"
-          >
+          <p id="total-employees-card-val"
+            class="text-2xl font-headline font-extrabold text-brand tracking-tight whitespace-nowrap">
             {{ all_users|length }}
           </p>
         </div>
@@ -458,103 +400,149 @@
   <!-- ── Main 2-Col Layout ── -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-5 lg:items-start">
     <!-- ── Time Logs (left, 2/3) ── -->
-    <div
+    <div id="recent-logs" hx-boost="true"
       class="glass-strong rounded-2xl overflow-hidden stagger-item lg:col-span-2 flex flex-col"
-      style="animation-delay: 0.15s"
-    >
+      style="animation-delay: 0.15s">
       <!-- Header -->
       <div
-        class="p-4 sm:p-6 border-b border-gray-100/60 dark:border-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0"
-      >
+        class="p-4 sm:p-6 border-b border-gray-100/60 dark:border-dark-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 flex-shrink-0">
         <div>
-          <p
-            class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5"
-          >
+          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
             Architectural Ledger
           </p>
-          <h2
-            class="text-lg font-headline font-bold text-gray-900 dark:text-white tracking-tight"
-          >
-            {% if current_filter %}Filtered Time Logs{% else %}All Recent Time
-            Logs{% endif %}
+          <h2 class="text-lg font-headline font-bold text-gray-900 dark:text-white tracking-tight">
+            {% if current_filter %}Filtered Time Logs{% else %}All Recent Time Logs{% endif %}
           </h2>
         </div>
-        <a
-          href="/admin/export{% if current_filter %}?user_id={{ current_filter }}{% endif %}{% if current_time_filter %}&filter_time={{ current_time_filter }}{% endif %}"
-          class="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface transition-all whitespace-nowrap"
-        >
-          <svg
-            class="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            ></path>
-          </svg>
-          Export CSV
-        </a>
+        <div class="flex items-center gap-3">
+          <!-- Show Entries Dropdown -->
+          <div class="flex items-center gap-2 mr-1">
+            <span
+              class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted whitespace-nowrap">Show:</span>
+            <div class="relative inline-block w-full">
+              <select onchange="changePerPage(this.value)"
+                class="text-xs font-bold bg-gray-100/50 dark:bg-dark-border/50 border border-gray-200 dark:border-dark-border/50 rounded-xl px-3 py-1.5 pr-8 appearance-none focus:ring-2 focus:ring-brand/20 transition-all cursor-pointer">
+                {% for n in [20, 40, 60, 80, 100] %}
+                <option value="{{ n }}" {% if per_page==n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+                <option value="999999" {% if per_page==999999 %}selected{% endif %}>All</option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <a href="/admin/export{% if current_filter %}?user_id={{ current_filter }}{% endif %}{% if current_time_filter %}&filter_time={{ current_time_filter }}{% endif %}"
+            class="inline-flex items-center gap-2 text-xs font-bold px-4 py-2 rounded-xl border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface transition-all whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Export CSV
+          </a>
+        </div>
       </div>
 
-      <!-- Table Header -->
-      <div class="overflow-auto" style="max-height: 500px;">
-        <table class="w-full min-w-[700px]">
-          <thead class="sticky top-0 z-10">
-            <tr class="bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
-              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Employee</th>
-              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Time In</th>
-              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Time Out</th>
-              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Duration</th>
-              <th class="px-3 py-3 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface">Status</th>
+      <!-- Fixed Height Scrollable Area -->
+      <div class="overflow-auto custom-scrollbar transition-all bg-white dark:bg-dark-surface" style="height: 480px;">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-dark-border border-separate border-spacing-0">
+          <thead class="sticky top-0 z-10 shadow-sm">
+            <tr>
+              <th scope="col"
+                class="px-3 sm:px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+                Employee</th>
+              <th scope="col"
+                class="px-3 sm:px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+                Date</th>
+              <th scope="col"
+                class="px-3 sm:px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+                Time In</th>
+              <th scope="col"
+                class="hidden md:table-cell px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+                Time Out</th>
+              <th scope="col"
+                class="px-3 sm:px-6 py-4 text-center text-[10px] font-bold text-gray-500 dark:text-dark-muted uppercase tracking-widest bg-gray-50 dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border">
+                Duration</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100 dark:divide-dark-border/50">
-            {% for log in logs[:50] %}
-            <tr class="log-row hover:bg-gray-50 dark:hover:bg-dark-surface/50">
-              <td class="px-3 py-3 text-left">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-brand font-headline font-extrabold text-sm flex-shrink-0 bg-gray-100 dark:bg-dark-border">
+          <tbody id="logs-table-body"
+            class="divide-y divide-gray-100 dark:divide-dark-border/50 transition-opacity duration-300">
+            {% for log in logs %}
+            <tr class="log-row hover:bg-brand/5 dark:hover:bg-brand/10 transition-colors group">
+              <td class="px-6 py-4 whitespace-nowrap text-left border-b border-gray-100 dark:border-dark-border/50">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-xl flex items-center justify-center text-brand font-headline font-extrabold text-sm flex-shrink-0 bg-gray-100 dark:bg-dark-border group-hover:bg-brand/15 transition-colors">
                     {{ log.name[0]|upper if log.name else '?' }}
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm font-bold text-gray-900 dark:text-white leading-tight" style="overflow-wrap:break-word;word-break:break-word;">{{ log.name }}</p>
-                    <p class="text-[10px] text-gray-400 dark:text-dark-muted font-mono mt-0.5">ID: {{ log.rfid_tag }}</p>
+                    <p
+                      class="text-sm font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand transition-colors">
+                      {{ log.name }}
+                    </p>
+                    <p class="text-[10px] text-gray-400 dark:text-dark-muted font-mono mt-0.5 hidden sm:block">ID: {{
+                      log.rfid_tag }}
+                    </p>
                   </div>
                 </div>
               </td>
-              <td class="px-3 py-3 text-center">
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ log.time_in | format_epoch }}</p>
-                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5" title="Unix epoch">{{ log.time_in }}</p>
-                {% if log.is_late %}<div class="mt-1"><span class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Late</span></div>{% endif %}
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {{ log.time_in | format_epoch('%b %d, %Y') }}
+                </p>
+                <p class="text-[10px] text-gray-400 dark:text-dark-muted uppercase tracking-tighter">
+                  {{ log.time_in | format_epoch('%A') }}
+                </p>
               </td>
-              <td class="px-3 py-3 text-center">
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {{ log.time_in | format_epoch('%I:%M %p') }}
+                </p>
+                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">
+                  {{ log.time_in }}
+                </p>
+                <div class="mt-1.5 flex justify-center">
+                  {% if log.is_late %}
+                  <span
+                    class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50">LATE</span>
+                  {% else %}
+                  <span
+                    class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">ON
+                    TIME</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td
+                class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
                 {% if log.time_out %}
-                <span class="text-sm font-medium text-gray-500 dark:text-dark-muted">{{ log.time_out | format_epoch }}</span>
-                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5" title="Unix epoch">{{ log.time_out }}</p>
-                {% else %}<span class="text-blue-500 font-bold text-sm">Active</span>{% endif %}
-              </td>
-              <td class="px-3 py-3 text-center">
-                <p class="text-sm font-headline font-extrabold text-brand">{{ log.rendered_hours if log.rendered_hours else '—' }}{% if log.rendered_hours %}<span class="text-xs font-semibold text-gray-400 ml-0.5">h</span>{% endif %}</p>
-              </td>
-              <td class="px-3 py-3 text-center">
-                {% if not log.time_out %}
-                <span class="pill-badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Active</span>
-                {% elif log.is_late %}
-                <span class="pill-badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Late Entry</span>
+                <span class="text-sm font-medium text-gray-500 dark:text-dark-muted">
+                  {{ log.time_out | format_epoch('%I:%M %p') }}
+                </span>
+                <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">
+                  {{ log.time_out }}
+                </p>
                 {% else %}
-                <span class="pill-badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Approved</span>
+                <span
+                  class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse border border-blue-200 dark:border-blue-800/50">ACTIVE</span>
                 {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  {{ log.rendered_hours if log.rendered_hours else '-' }}
+                </p>
               </td>
             </tr>
             {% else %}
             <tr>
               <td colspan="5" class="px-4 py-12 text-center">
-                <svg class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                <svg class="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                  </path>
                 </svg>
                 <p class="text-sm text-gray-400 dark:text-dark-muted">No logs for this filter.</p>
               </td>
@@ -568,180 +556,120 @@
       {% set qs = 'user_id=' ~ (current_filter or '') ~ '&filter_time=' ~
       (current_time_filter or 'all') ~ '&date_from=' ~ (current_date_from or '')
       ~ '&date_to=' ~ (current_date_to or '') ~ '&status_filter=' ~
-      (current_status_filter or 'all') %}
-      <div
-        class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-100/60 dark:border-dark-border"
-      >
-        <span
-          class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-        >
-          {% if total_logs > 0 %} Showing {{ ((page - 1) * 30) + 1 }}–{{ [page * 30, total_logs] | min }} of {{ total_logs }} entries {% else %} No entries {% endif %}
-        </span>
-        {% if total_pages > 1 %}
-        <div class="flex items-center gap-1">
+      (current_status_filter or 'all') ~ '&per_page=' ~ (per_page or 20) %}
+      <div id="logs-pagination-footer"
+        class="flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-100/60 dark:border-dark-border bg-gray-50 dark:bg-dark-surface/50">
+        <div id="showing-info"
+          class="text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-dark-muted">
+          Showing <span class="text-gray-900 dark:text-white">{{ ((page - 1) * per_page) + 1 }}</span> to <span
+            class="text-gray-900 dark:text-white">{{ [page * per_page, total_logs] | min }}</span> of <span
+            class="text-brand">{{ total_logs }}</span> entries
+        </div>
+
+        <div id="pagination-controls" class="flex items-center gap-2">
+          {% if total_pages > 1 %}
+          <!-- Previous Button -->
           {% if page > 1 %}
-          <a
-            href="/admin?{{ qs }}&page={{ page - 1 }}"
-            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+          <button onclick="changePage({{ page - 1 }})"
+            class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-surface hover:border-brand transition-all shadow-sm">
             Previous
-          </a>
+          </button>
           {% else %}
           <span
-            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
-          >
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 dark:bg-dark-card text-xs font-bold text-gray-300 dark:text-dark-muted cursor-not-allowed">
             Previous
-          </span>
-          {% endif %} {% set start_pg = [1, page - 2] | max %} {% set end_pg =
-          [total_pages, start_pg + 4] | min %} {% for p in range(start_pg,
-          end_pg + 1) %} {% if p == page %}
-          <span
-            class="w-8 h-8 rounded-lg text-xs font-bold text-white flex items-center justify-center"
-            style="background: linear-gradient(135deg, #067302, #055902)"
-            >{{ p }}</span
-          >
-          {% else %}
-          <a
-            href="/admin?{{ qs }}&page={{ p }}"
-            class="w-8 h-8 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-100 dark:hover:bg-dark-surface transition-all flex items-center justify-center"
-            >{{ p }}</a
-          >
-          {% endif %} {% endfor %} {% if page < total_pages %}
-          <a
-            href="/admin?{{ qs }}&page={{ page + 1 }}"
-            class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-bold text-gray-500 dark:text-dark-muted hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-          >
-            Next
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </a>
-          {% else %}
-          <span
-            class="inline-flex items-center gap-1 px-3 py-2 text-xs font-bold text-gray-300 dark:text-gray-600 cursor-not-allowed"
-          >
-            Next
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
           </span>
           {% endif %}
+
+          <div class="flex gap-1">
+            {% set start_pg = [1, page - 1] | max %}
+            {% set end_pg = [total_pages, start_pg + 2] | min %}
+            {% if end_pg - start_pg < 2 %}{% set start_pg=[1, end_pg - 2] | max %}{% endif %} {% for p in
+              range(start_pg, end_pg + 1) %} <button onclick="changePage({{ p }})"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all {{ 'bg-brand text-white shadow-md' if page == p else 'bg-white dark:bg-dark-card text-gray-600 dark:text-dark-muted border border-gray-200 dark:border-dark-border hover:border-brand hover:text-brand' }}">
+              {{ p }}
+              </button>
+              {% endfor %}
+          </div>
+
+          <!-- Next Button -->
+          {% if page < total_pages %} <button onclick="changePage({{ page + 1 }})"
+            class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-surface hover:border-brand transition-all shadow-sm">
+            Next
+            </button>
+            {% else %}
+            <span
+              class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 dark:bg-dark-card text-xs font-bold text-gray-300 dark:text-dark-muted cursor-not-allowed">
+              Next
+            </span>
+            {% endif %}
+            {% endif %}
         </div>
-        {% endif %}
       </div>
     </div>
 
     <!-- ── Right Column ── -->
     <div class="lg:col-span-1 space-y-5">
-      <div
-        class="glass-strong rounded-2xl overflow-hidden stagger-item"
-        style="animation-delay: 0.2s"
-      >
+      <div class="glass-strong rounded-2xl overflow-hidden stagger-item" style="animation-delay: 0.2s">
         <div class="p-4 sm:p-6 space-y-6">
           <div class="flex items-center gap-2">
-            <svg
-              class="w-4 h-4 text-brand"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"
-              ></path>
+            <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z">
+              </path>
             </svg>
-            <h3
-              class="font-headline font-bold text-gray-900 dark:text-white tracking-tight"
-            >
+            <h3 class="font-headline font-bold text-gray-900 dark:text-white tracking-tight">
               Parameters
             </h3>
           </div>
 
-          <form method="GET" action="/admin">
-            <input
-              type="hidden"
-              name="filter_time"
-              value="{{ current_time_filter or 'all' }}"
-            />
+          <form id="parameters-form" method="GET" action="/admin">
+            <input type="hidden" name="filter_time" value="{{ current_time_filter or 'all' }}" />
+
+            <div class="space-y-2 mb-4">
+              <label
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Search
+                Queries</label>
+              <div class="relative">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" name="search" value="{{ current_search or '' }}"
+                  placeholder="Search Dept, RFID, Name, Email..." list="search-suggestions" autocomplete="off"
+                  oninput="handleSearchInput(this.value)"
+                  class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
+                
+                <datalist id="search-suggestions">
+                  {% set depts = [] %}
+                  {% for u in all_users %}
+                    <option value="{{ u.name }}"></option>
+                    {% if u.department and u.department not in depts %}
+                      {% set _ = depts.append(u.department) %}
+                      <option value="{{ u.department }}"></option>
+                    {% endif %}
+                  {% endfor %}
+                </datalist>
+              </div>
+            </div>
 
             <div class="space-y-2 mb-5">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Employee</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Employee
+                (Optional)</label>
               <div class="relative">
-                <svg
-                  class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  ></path>
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
-                <select
-                  name="user_id"
-                  class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all appearance-none"
-                >
+                <select name="user_id" id="user-select"
+                  class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all appearance-none">
                   <option value="">All Employees</option>
                   {% for u in all_users %}
-                  <option
-                    value="{{ u.id }}"
-                    {% if current_filter and current_filter == u.id %}selected{% endif %}
-                  >
-                    {{ u.name }}
+                  <option value="{{ u.id }}" {% if current_filter and current_filter==u.id %}selected{% endif %}>
+                    {{ u.name }}{% if u.department %} [{{ u.department }}]{% endif %}
                   </option>
                   {% endfor %}
                 </select>
@@ -750,53 +678,34 @@
 
             <div class="space-y-3">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Timeline</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Timeline</label>
               <div class="space-y-2">
                 <div>
                   <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
-                    >From</label
-                  >
-                  <input
-                    type="date"
-                    name="date_from"
-                    value="{{ current_date_from or '' }}"
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">From</label>
+                  <input type="date" name="date_from" value="{{ current_date_from or '' }}"
                     class="w-full min-w-0 bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all box-border"
-                    style="max-width:100%;"
-                  />
+                    style="max-width:100%;" />
                 </div>
                 <div>
                   <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1"
-                    >To</label
-                  >
-                  <input
-                    type="date"
-                    name="date_to"
-                    value="{{ current_date_to or '' }}"
+                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">To</label>
+                  <input type="date" name="date_to" value="{{ current_date_to or '' }}"
                     class="w-full min-w-0 bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-3 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all box-border"
-                    style="max-width:100%;"
-                  />
+                    style="max-width:100%;" />
                 </div>
               </div>
             </div>
 
             <div class="space-y-2 mt-5">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Quick Filter</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Quick
+                Filter</label>
               <div class="flex flex-wrap gap-1.5 sm:gap-2">
-                {% for val, label in [('all','All Time'),('year','This
-                Year'),('month','This Month'),('week','This
+                {% for val, label in [('all','All Time'),('year','This Year'),('month','This Month'),('week','This
                 Week'),('today','Today')] %}
-                <button
-                  type="button"
-                  onclick="setQuickFilter('{{ val }}')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-brand text-white shadow-sm' if (not current_time_filter and val == 'all') or current_time_filter == val else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200' }}"
-                >
+                <button type="button" onclick="setTimeFilter('{{ val }}')"
+                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-brand text-white shadow-sm' if (not current_time_filter and val == 'all') or current_time_filter == val else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200' }}">
                   {{ label }}
                 </button>
                 {% endfor %}
@@ -805,101 +714,63 @@
 
             <div class="space-y-2 mt-5">
               <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Attendance Status</label
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Attendance
+                Status</label>
               <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onclick="setStatusFilter('all')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-gray-700 text-white shadow-sm' if not current_status_filter or current_status_filter == 'all' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}"
-                >
+                <button type="button" onclick="applyStatusFilter('all')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-gray-700 text-white shadow-sm' if not current_status_filter or current_status_filter == 'all' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}">
                   All
                 </button>
-                <button
-                  type="button"
-                  onclick="setStatusFilter('ontime')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-emerald-500 text-white shadow-sm' if current_status_filter == 'ontime' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}"
-                >
+                <button type="button" onclick="applyStatusFilter('ontime')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-emerald-500 text-white shadow-sm' if current_status_filter == 'ontime' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}">
                   On Time
                 </button>
-                <button
-                  type="button"
-                  onclick="setStatusFilter('late')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-amber-500 text-white shadow-sm' if current_status_filter == 'late' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}"
-                >
+                <button type="button" onclick="applyStatusFilter('late')"
+                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {{ 'bg-amber-500 text-white shadow-sm' if current_status_filter == 'late' else 'bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted' }}">
                   Late
                 </button>
               </div>
-              <input
-                type="hidden"
-                name="status_filter"
-                id="status_filter_input"
-                value="{{ current_status_filter or 'all' }}"
-              />
+              <input type="hidden" name="status_filter" id="status_filter_input"
+                value="{{ current_status_filter or 'all' }}" />
             </div>
 
-            <div
-              class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2"
-            >
-              <button
-                type="submit"
+            <div class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2">
+              <button type="submit"
                 class="w-full py-3.5 font-headline font-bold text-sm text-white rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
                 style="
                   background: linear-gradient(135deg, #067302, #055902);
                   box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
-                "
-              >
+                ">
                 Apply Filters
               </button>
-              <a
-                href="/admin"
-                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
-              >
+              <a href="/admin"
+                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all">
                 Clear All
               </a>
             </div>
           </form>
 
           <div class="pt-2 border-t border-gray-100/60 dark:border-dark-border">
-            <button
-              type="button"
-              onclick="openClearModal()"
-              class="w-full inline-flex items-center justify-center gap-2 text-xs font-bold px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all"
-            >
-              <svg
-                class="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                ></path>
+            <button type="button" onclick="openClearModal()"
+              class="w-full inline-flex items-center justify-center gap-2 text-xs font-bold px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                </path>
               </svg>
               Clear Logs
             </button>
           </div>
 
-          <div
-            class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between"
-          >
+          <div class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between">
             <div>
               <span
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted"
-                >Real-time Status</span
-              >
-              <span class="text-sm font-bold text-brand"
-                >Live Monitoring Active</span
-              >
+                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Real-time
+                Status</span>
+              <span class="text-sm font-bold text-brand">Live Monitoring Active</span>
             </div>
-            <div
-              class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
-              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"
-            ></div>
+            <div class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
+              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"></div>
           </div>
         </div>
       </div>
@@ -908,31 +779,15 @@
 </div>
 
 <!-- ── Clear Logs Modal ── -->
-<div
-  id="clearLogsModal"
-  class="fixed inset-0 z-50 hidden items-center justify-center p-4"
-  style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(6px)"
->
-  <div
-    class="glass-strong rounded-2xl shadow-2xl w-full max-w-md p-7 relative animate-spring dark:shadow-black/40"
-  >
+<div id="clearLogsModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+  style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(6px)">
+  <div class="glass-strong rounded-2xl shadow-2xl w-full max-w-md p-7 relative animate-spring dark:shadow-black/40">
     <!-- Warning icon -->
     <div class="flex items-center gap-4 mb-5">
-      <div
-        class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0"
-      >
-        <svg
-          class="w-6 h-6 text-red-600 dark:text-red-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-          />
+      <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
         </svg>
       </div>
       <div>
@@ -949,8 +804,7 @@
 
     <!-- Scope description -->
     <div
-      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-5 text-sm text-red-700 dark:text-red-300"
-    >
+      class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-5 text-sm text-red-700 dark:text-red-300">
       {% if current_filter %} You are about to permanently delete
       <strong>all time logs for the selected employee</strong>. {% else %} You
       are about to permanently delete
@@ -960,122 +814,343 @@
 
     <!-- Type to confirm -->
     <div class="mb-5">
-      <label
-        class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2"
-      >
+      <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">
         Type
         <span
-          class="font-mono bg-gray-100 dark:bg-dark-border px-1.5 py-0.5 rounded text-red-600 dark:text-red-400"
-          >CLEAR</span
-        >
+          class="font-mono bg-gray-100 dark:bg-dark-border px-1.5 py-0.5 rounded text-red-600 dark:text-red-400">CLEAR</span>
         to confirm
       </label>
-      <input
-        type="text"
-        id="clearConfirmInput"
-        placeholder="Type CLEAR here"
-        autocomplete="off"
+      <input type="text" id="clearConfirmInput" placeholder="Type CLEAR here" autocomplete="off"
         oninput="onClearInput(this.value)"
-        class="w-full px-4 py-3 border-2 border-gray-200 dark:border-dark-border rounded-xl text-sm font-mono bg-white dark:bg-dark-surface text-gray-900 dark:text-white focus:outline-none focus:border-red-400 dark:focus:border-red-500 transition-colors"
-      />
+        class="w-full px-4 py-3 border-2 border-gray-200 dark:border-dark-border rounded-xl text-sm font-mono bg-white dark:bg-dark-surface text-gray-900 dark:text-white focus:outline-none focus:border-red-400 dark:focus:border-red-500 transition-colors" />
     </div>
 
     <!-- Action buttons -->
     <div class="flex gap-3">
-      <button
-        type="button"
-        onclick="closeClearModal()"
-        class="flex-1 py-3 rounded-xl text-sm font-bold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface transition-all"
-      >
+      <button type="button" onclick="closeClearModal()"
+        class="flex-1 py-3 rounded-xl text-sm font-bold border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface transition-all">
         Cancel
       </button>
-      <form
-        id="clearLogsForm"
-        action="/admin/logs/clear{% if current_filter %}?user_id={{ current_filter }}{% endif %}"
-        method="POST"
-        class="flex-1"
-      >
-        <button
-          type="submit"
-          id="clearConfirmBtn"
-          disabled
+      <form id="clearLogsForm" action="/admin/logs/clear{% if current_filter %}?user_id={{ current_filter }}{% endif %}"
+        method="POST" class="flex-1">
+        <button type="submit" id="clearConfirmBtn" disabled
           class="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           style="
             background: linear-gradient(135deg, #dc2626, #b91c1c);
             box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
-          "
-        >
+          ">
           Delete Permanently
         </button>
       </form>
     </div>
 
     <!-- Close X -->
-    <button
-      onclick="closeClearModal()"
-      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-border transition-all"
-    >
-      <svg
-        class="w-4 h-4"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M6 18L18 6M6 6l12 12"
-        />
+    <button onclick="closeClearModal()"
+      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-dark-border transition-all">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
   </div>
 </div>
 
+<!-- ── Real-Time Dashboard Synchronization Script ── -->
 <script>
-  function setQuickFilter(value) {
-    document.querySelector('input[name="filter_time"]').value = value;
-    document.querySelector('input[name="date_from"]').value = "";
-    document.querySelector('input[name="date_to"]').value = "";
-    document.querySelectorAll(".quick-pill").forEach((btn) => {
-      btn.classList.remove("bg-brand", "text-white", "shadow-sm");
-      btn.classList.add(
-        "bg-gray-100",
-        "text-gray-500",
-        "dark:bg-dark-border",
-        "dark:text-dark-muted",
-      );
-    });
-    event.currentTarget.classList.add("bg-brand", "text-white", "shadow-sm");
-    event.currentTarget.classList.remove(
-      "bg-gray-100",
-      "text-gray-500",
-      "dark:bg-dark-border",
-      "dark:text-dark-muted",
-    );
+  // 1. DASHBOARD STATE: Tracks filters, pagination, and current view
+  const state = {
+    page: {{ page or 1 }},
+    per_page: {{ per_page or 20 }},
+    status_filter: "{{ current_status_filter or 'all' }}",
+    user_id: "{{ current_filter or '' }}",
+    search: "{{ current_search or '' }}",
+    filter_time: "{{ current_time_filter or 'all' }}",
+    date_from: "{{ current_date_from or '' }}",
+    date_to: "{{ current_date_to or '' }}",
+    isLoading: false
+  };
+
+  /**
+   * CORE: FETCH DATA FROM JSON API
+   * Eliminates the "blinking" by updating elements in the background.
+   */
+  async function fetchLogs(updateUrl = true) {
+    if (state.isLoading) return;
+    state.isLoading = true;
+
+    const tbody = document.getElementById('logs-table-body');
+    if (tbody) tbody.classList.add('opacity-40');
+
+    try {
+      const params = new URLSearchParams({
+        page: state.page,
+        per_page: state.per_page,
+        status_filter: state.status_filter,
+        user_id: state.user_id,
+        search: state.search,
+        filter_time: state.filter_time,
+        date_from: state.date_from,
+        date_to: state.date_to
+      });
+
+      const response = await fetch(`/api/admin/logs?${params.toString()}`);
+      const data = await response.json();
+
+      if (data.success) {
+        renderLogs(data.logs);
+        renderPagination(data.pagination);
+        updateSummaryCards(data.stats, data.pagination);
+
+        if (updateUrl) {
+          const newUrl = new URL(window.location.href);
+          params.forEach((val, key) => {
+            if (val) newUrl.searchParams.set(key, val);
+            else newUrl.searchParams.delete(key);
+          });
+          window.history.pushState({}, '', newUrl);
+        }
+      }
+    } catch (error) {
+      console.error('API Error:', error);
+    } finally {
+      state.isLoading = false;
+      if (tbody) tbody.classList.remove('opacity-40');
+    }
   }
 
-  function setStatusFilter(value) {
-    document.getElementById("status_filter_input").value = value;
-    document.querySelectorAll(".status-pill").forEach((btn) => {
-      btn.classList.remove(
-        "bg-gray-700",
-        "bg-emerald-500",
-        "bg-amber-500",
-        "text-white",
-        "shadow-sm",
-      );
-      btn.classList.add("bg-gray-100", "text-gray-500");
-    });
-    const colors = {
-      all: "bg-gray-700",
-      ontime: "bg-emerald-500",
-      late: "bg-amber-500",
-    };
-    event.currentTarget.classList.add(colors[value], "text-white", "shadow-sm");
-    event.currentTarget.classList.remove("bg-gray-100", "text-gray-500");
+  /**
+   * RENDER: Updates the table body with fresh HTML
+   */
+  function renderLogs(logs) {
+    const tbody = document.getElementById('logs-table-body');
+    if (!tbody) return;
+
+    if (!logs || logs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-12 text-center text-gray-400">No logs found.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = logs.map(log => `
+      <tr class="log-row hover:bg-brand/5 dark:hover:bg-brand/10 transition-colors group">
+        <td class="px-6 py-4 whitespace-nowrap text-left border-b border-gray-100 dark:border-dark-border/50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-brand font-headline font-extrabold text-sm flex-shrink-0 bg-gray-100 dark:bg-dark-border">
+              ${(log.name ? log.name[0] : '?').toUpperCase()}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-gray-900 dark:text-white leading-tight">${log.name}</p>
+              <p class="text-[10px] text-gray-400 font-mono mt-0.5">ID: ${log.rfid_tag}</p>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-bold text-gray-800 dark:text-gray-200">${log.date}</p>
+          <p class="text-[10px] text-gray-400 uppercase tracking-tighter">${log.day}</p>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-300">${log.time_in_label}</p>
+          <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">${log.time_in_raw}</p>
+          <div class="mt-1.5 flex justify-center">
+            ${log.is_late
+        ? '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200">LATE</span>'
+        : '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200">ON TIME</span>'
+      }
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          ${log.time_out_label
+        ? `<span class="text-sm font-medium text-gray-500">${log.time_out_label}</span>
+               <p class="text-[10px] font-mono text-green-700 dark:text-green-500 mt-0.5">${log.time_out_raw}</p>`
+        : '<span class="px-3 py-1 inline-flex text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse border border-blue-200">ACTIVE</span>'
+      }
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-center border-b border-gray-100 dark:border-dark-border/50">
+          <p class="text-sm font-bold text-gray-800 dark:text-gray-200">${log.rendered_hours || '-'}</p>
+        </td>
+      </tr>
+    `).join('');
   }
 
+  /**
+   * RENDER: Updates pagination buttons
+   */
+  function renderPagination(p) {
+    const info = document.getElementById('showing-info');
+    if (info) {
+      info.innerHTML = `Showing <span class="text-gray-900 dark:text-white">${p.start_entry}</span> to <span class="text-gray-900 dark:text-white">${p.end_entry}</span> of <span class="text-brand">${p.total_logs}</span> entries`;
+    }
+
+    const controls = document.getElementById('pagination-controls');
+    if (!controls) return;
+
+    if (p.total_pages <= 1) {
+      controls.innerHTML = '';
+      return;
+    }
+
+    let html = `
+      ${p.page > 1
+        ? `<button onclick="changePage(${p.page - 1})" class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 hover:bg-gray-100 hover:border-brand transition-all shadow-sm">Previous</button>`
+        : `<span class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 text-xs font-bold text-gray-300 cursor-not-allowed">Previous</span>`
+      }
+      <div class="flex gap-1">
+        ${Array.from({ length: p.total_pages }, (_, i) => i + 1)
+        .filter(n => Math.abs(n - p.page) <= 1 || n === 1 || n === p.total_pages)
+        .map(n => `
+            <button onclick="changePage(${n})" 
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${p.page === n ? 'bg-brand text-white shadow-md' : 'bg-white dark:bg-dark-card text-gray-600 border border-gray-200 hover:border-brand hover:text-brand'}">
+              ${n}
+            </button>
+          `).join('')}
+      </div>
+      ${p.page < p.total_pages
+        ? `<button onclick="changePage(${p.page + 1})" class="px-4 py-1.5 border border-gray-300 dark:border-dark-border rounded-lg bg-white dark:bg-dark-card text-xs font-bold text-gray-700 hover:bg-gray-100 hover:border-brand transition-all shadow-sm">Next</button>`
+        : `<span class="px-4 py-1.5 border border-gray-200 dark:border-dark-border rounded-lg bg-gray-50/50 text-xs font-bold text-gray-300 cursor-not-allowed">Next</span>`
+      }
+    `;
+    controls.innerHTML = html;
+  }
+
+  function updateSummaryCards(stats, p) {
+    const latesVal = document.getElementById('total-lates-val');
+    const hoursVal = document.getElementById('total-hours-val');
+    const avgInVal = document.getElementById('avg-clock-in-val');
+    const avgOutVal = document.getElementById('avg-clock-out-val');
+    const employeesVal = document.getElementById('total-employees-val');
+    const employeesCardVal = document.getElementById('total-employees-card-val');
+
+    if (latesVal) latesVal.innerText = stats.total_lates;
+    if (hoursVal) hoursVal.innerHTML = `${stats.total_hours}<span class="text-xs text-gray-400 font-semibold ml-1">hrs</span>`;
+    if (avgInVal) avgInVal.innerText = stats.avg_clock_in;
+    if (avgOutVal) avgOutVal.innerText = stats.avg_clock_out;
+    if (employeesVal) employeesVal.innerText = stats.total_users || {{ all_users | length }};
+    if (employeesCardVal) employeesCardVal.innerText = stats.total_users || {{ all_users | length }};
+  }
+
+  // EVENT HANDLERS
+  let searchTimeout;
+  function handleSearchInput(val) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      state.search = val;
+      state.page = 1;
+      fetchLogs();
+    }, 450); // Automatically trigger after typing pauses
+  }
+
+  function changePage(p) {
+    state.page = p;
+    fetchLogs();
+    document.getElementById('recent-logs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function changePerPage(val) {
+    state.per_page = parseInt(val);
+    state.page = 1;
+    fetchLogs();
+  }
+
+  function applyStatusFilter(status) {
+    state.status_filter = status;
+    state.page = 1;
+    fetchLogs();
+
+    // Update UI active state for pills
+    document.querySelectorAll('.status-pill').forEach(btn => {
+      const btnText = btn.innerText.toLowerCase();
+      const isActive = (btnText.includes('all') && status === 'all') ||
+        (btnText.includes('on time') && status === 'ontime') ||
+        (btnText.includes('late') && status === 'late');
+
+      if (isActive) {
+        btn.classList.remove('bg-gray-100', 'text-gray-500');
+        if (status === 'all') btn.classList.add('bg-gray-700', 'text-white');
+        else if (status === 'ontime') btn.classList.add('bg-emerald-500', 'text-white');
+        else if (status === 'late') btn.classList.add('bg-amber-500', 'text-white');
+      } else {
+        btn.classList.add('bg-gray-100', 'text-gray-500');
+        btn.classList.remove('bg-gray-700', 'bg-emerald-500', 'bg-amber-500', 'text-white');
+      }
+    });
+  }
+
+  function setTimeFilter(type) {
+    state.filter_time = type;
+    state.date_from = '';
+    state.date_to = '';
+    state.page = 1;
+
+    // Clear date inputs visually
+    const fromInput = document.querySelector('input[name="date_from"]');
+    const toInput = document.querySelector('input[name="date_to"]');
+    if (fromInput) fromInput.value = '';
+    if (toInput) toInput.value = '';
+
+    fetchLogs();
+
+    // Update UI for quick pills
+    document.querySelectorAll('.quick-pill').forEach(btn => {
+      const btnText = btn.innerText.toLowerCase();
+      let isMatch = false;
+      if (type === 'all') isMatch = btnText.includes('all');
+      else if (type === 'year') isMatch = btnText.includes('year');
+      else if (type === 'month') isMatch = btnText.includes('month');
+      else if (type === 'week') isMatch = btnText.includes('week');
+      else if (type === 'today') isMatch = btnText.includes('today');
+
+      if (isMatch) {
+        btn.classList.add('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.remove('bg-gray-100', 'text-gray-500');
+      } else {
+        btn.classList.remove('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-gray-100', 'text-gray-500');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Select2 for the user dropdown
+    if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+      const $userSelect = jQuery('#user-select');
+      $userSelect.select2({
+        placeholder: 'Search for an employee...',
+        allowClear: true,
+        width: '100%'
+      });
+
+      // Sync Select2 changes with our form and state
+      $userSelect.on('change', function () {
+        const val = jQuery(this).val();
+        state.user_id = val;
+        state.page = 1;
+        fetchLogs();
+
+        // Sync hidden form if needed or just use JS to trigger
+        const form = document.getElementById('parameters-form');
+        if (form) {
+          const hiddenInput = form.querySelector('input[name="user_id"]');
+          if (hiddenInput) hiddenInput.value = val;
+        }
+      });
+    }
+
+    const form = document.getElementById('parameters-form');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        state.user_id = formData.get('user_id');
+        state.date_from = formData.get('date_from');
+        state.date_to = formData.get('date_to');
+        state.page = 1;
+        fetchLogs();
+        document.getElementById('recent-logs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  });
+
+  /**
+   * CLEAR MODAL HELPERS
+   */
   function openClearModal() {
     const modal = document.getElementById("clearLogsModal");
     modal.classList.remove("hidden");
@@ -1089,24 +1164,19 @@
     const modal = document.getElementById("clearLogsModal");
     modal.classList.add("hidden");
     modal.classList.remove("flex");
-    document.getElementById("clearConfirmInput").value = "";
-    document.getElementById("clearConfirmBtn").disabled = true;
   }
 
   function onClearInput(value) {
-    document.getElementById("clearConfirmBtn").disabled =
-      value.trim() !== "CLEAR";
+    const btn = document.getElementById("clearConfirmBtn");
+    if (btn) btn.disabled = value.trim() !== "CLEAR";
   }
 
   // Close on backdrop click
-  document
-    .getElementById("clearLogsModal")
-    .addEventListener("click", function (e) {
-      if (e.target === this) closeClearModal();
-    });
-
+  document.getElementById("clearLogsModal").addEventListener("click", e => {
+    if (e.target.id === "clearLogsModal") closeClearModal();
+  });
   // Close on Escape key
-  document.addEventListener("keydown", function (e) {
+  document.addEventListener("keydown", e => {
     if (e.key === "Escape") closeClearModal();
   });
 </script>

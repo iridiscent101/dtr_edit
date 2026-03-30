@@ -2,9 +2,7 @@
 block content %}
 <div class="max-w-4xl mx-auto space-y-6">
   <div class="animate-spring">
-    <h1
-      class="text-3xl font-headline font-semibold text-gray-900 dark:text-white tracking-tight"
-    >
+    <h1 class="text-3xl font-headline font-semibold text-gray-900 dark:text-white tracking-tight">
       My Profile
     </h1>
     <p class="text-gray-500 dark:text-dark-muted mt-1 text-sm">
@@ -14,13 +12,9 @@ block content %}
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Profile Info -->
-    <div
-      class="md:col-span-2 glass-strong rounded-2xl p-6 stagger-item"
-      style="animation-delay: 0.05s"
-    >
+    <div class="md:col-span-2 glass-strong rounded-2xl p-6 stagger-item" style="animation-delay: 0.05s">
       <h2
-        class="text-lg font-headline font-semibold text-gray-800 dark:text-white border-b border-gray-100/60 dark:border-dark-border pb-4 mb-5 tracking-tight"
-      >
+        class="text-lg font-headline font-semibold text-gray-800 dark:text-white border-b border-gray-100/60 dark:border-dark-border pb-4 mb-5 tracking-tight">
         Account Information
       </h2>
 
@@ -31,19 +25,15 @@ block content %}
             style="
               background: linear-gradient(135deg, #067302, #055902);
               box-shadow: 0 6px 18px rgba(6, 115, 2, 0.25);
-            "
-          >
+            ">
             {{ user.name[0] | upper if user.name else '?' }}
           </div>
           <div class="space-y-3 flex-1 pt-1">
             <div>
               <label
-                class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider"
-                >Full Name</label
-              >
-              <p
-                class="text-base font-bold text-gray-900 dark:text-white mt-0.5"
-              >
+                class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">Full
+                Name</label>
+              <p class="text-base font-bold text-gray-900 dark:text-white mt-0.5">
                 {{ user.name }}
               </p>
             </div>
@@ -52,69 +42,47 @@ block content %}
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
           <div
-            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border"
-          >
+            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border">
             <label
-              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider"
-              >NVSU Email</label
-            >
+              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">NVSU
+              Email</label>
             <p class="text-sm font-semibold text-gray-900 dark:text-white mt-1">
               {{ user.email }}
             </p>
           </div>
           <div
-            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border"
-          >
+            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border">
             <label
-              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider"
-              >System Role</label
-            >
+              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">System
+              Role</label>
             <p class="mt-1">
               <span
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold {{ 'bg-brand/15 text-brand-dark dark:text-brand-light' if user.role == 'admin' else 'bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-dark-muted' }} uppercase"
-              >
-                {% if user.role == 'admin' %}<span
-                  class="w-2 h-2 rounded-full bg-brand"
-                ></span
-                >{% endif %} {{ user.role }}
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold {{ 'bg-brand/15 text-brand-dark dark:text-brand-light' if user.role == 'admin' else 'bg-gray-100 dark:bg-dark-border text-gray-600 dark:text-dark-muted' }} uppercase">
+                {% if user.role == 'admin' %}<span class="w-2 h-2 rounded-full bg-brand"></span>{% endif %} {{ user.role
+                }}
               </span>
             </p>
           </div>
           <div
-            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border sm:col-span-2"
-          >
+            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border sm:col-span-2">
             <label
-              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider"
-              >RFID Tag ID</label
-            >
+              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">RFID
+              Tag ID</label>
             <p
-              class="mt-1 font-mono text-sm text-gray-600 dark:text-dark-muted bg-gray-50 dark:bg-dark-border px-3 py-1.5 rounded-lg inline-block border border-gray-100 dark:border-dark-border"
-            >
+              class="mt-1 font-mono text-sm text-gray-600 dark:text-dark-muted bg-gray-50 dark:bg-dark-border px-3 py-1.5 rounded-lg inline-block border border-gray-100 dark:border-dark-border">
               {{ user.rfid_tag }}
             </p>
           </div>
         </div>
       </div>
 
-      <div
-        class="mt-6 pt-5 border-t border-gray-100/60 dark:border-dark-border"
-      >
-        <a
-          href="mailto:admin@nvsu.edu.ph?subject=DTR%20System%20Feedback"
-          class="inline-flex items-center text-sm font-medium text-brand-dark dark:text-brand-light hover:text-brand transition-colors duration-300"
-        >
-          <svg
-            class="w-4 h-4 mr-1.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            ></path>
+      <div class="mt-6 pt-5 border-t border-gray-100/60 dark:border-dark-border">
+        <a href="mailto:admin@nvsu.edu.ph?subject=DTR%20System%20Feedback"
+          class="inline-flex items-center text-sm font-medium text-brand-dark dark:text-brand-light hover:text-brand transition-colors duration-300">
+          <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+            </path>
           </svg>
           Send System Feedback
         </a>
@@ -122,38 +90,23 @@ block content %}
     </div>
 
     <!-- Security -->
-    <div
-      class="md:col-span-1 glass-strong rounded-2xl p-6 h-fit stagger-item"
-      style="animation-delay: 0.1s"
-    >
+    <div class="md:col-span-1 glass-strong rounded-2xl p-6 h-fit stagger-item" style="animation-delay: 0.1s">
       <h2
-        class="text-lg font-headline font-semibold text-gray-800 dark:text-white border-b border-gray-100/60 dark:border-dark-border pb-4 mb-5 tracking-tight"
-      >
+        class="text-lg font-headline font-semibold text-gray-800 dark:text-white border-b border-gray-100/60 dark:border-dark-border pb-4 mb-5 tracking-tight">
         Security
       </h2>
 
       <form action="/profile" method="POST" class="space-y-4">
         <div>
-          <label
-            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-            >New Password</label
-          >
-          <input
-            type="password"
-            name="new_password"
-            required
-            placeholder="Enter new password"
-            class="password-input"
-          />
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">New Password</label>
+          <input type="password" name="new_password" required placeholder="Enter new password" class="password-input" />
           <p class="text-[11px] text-gray-400 dark:text-dark-muted mt-1.5">
             Make sure it's at least 8 characters
           </p>
         </div>
 
-        <button
-          type="submit"
-          class="w-full bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-gray-800 dark:from-gray-700 dark:to-gray-800 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-500 shadow-lg shadow-gray-900/15 mt-1"
-        >
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-gray-800 dark:from-gray-700 dark:to-gray-800 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-500 shadow-lg shadow-gray-900/15 mt-1">
           Update Password
         </button>
       </form>
