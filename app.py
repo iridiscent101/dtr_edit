@@ -196,41 +196,73 @@ def get_time_range_epochs(filter_type, specific_date=None):
     return int(start_dt.timestamp()), int(end_dt.timestamp())
 
 
-# --- Utility: Avg Clock Times ---
-def get_avg_clock_times(cur, base_where, params):
-    """Run the avg clock-in/out query and return formatted strings."""
+def get_routine_markers(cur, base_where, params):
+    """Return Median (P50) for AM-In, AM-Out, PM-In, PM-Out as formatted strings."""
     avg_sql = f"""
-        SELECT
-            AVG(EXTRACT(HOUR FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 3600 +
-                EXTRACT(MINUTE FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 60 +
-                EXTRACT(SECOND FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore')) as avg_time_in,
-            AVG(EXTRACT(HOUR FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 3600 +
-                EXTRACT(MINUTE FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 60 +
-                EXTRACT(SECOND FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore')) as avg_time_out
-        FROM time_logs
-        WHERE 1=1 {base_where}
+        WITH daily_markers AS (
+            SELECT
+                user_id,
+                MIN(CASE WHEN EXTRACT(HOUR FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') < 12 THEN
+                    EXTRACT(HOUR FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 3600 +
+                    EXTRACT(MINUTE FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 60 +
+                    EXTRACT(SECOND FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') END) as am_in_s,
+                MAX(CASE WHEN EXTRACT(HOUR FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') <= 13 THEN
+                    EXTRACT(HOUR FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 3600 +
+                    EXTRACT(MINUTE FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 60 +
+                    EXTRACT(SECOND FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') END) as am_out_s,
+                MIN(CASE WHEN EXTRACT(HOUR FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') >= 12 THEN
+                    EXTRACT(HOUR FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 3600 +
+                    EXTRACT(MINUTE FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') * 60 +
+                    EXTRACT(SECOND FROM TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore') END) as pm_in_s,
+                MAX(CASE WHEN EXTRACT(HOUR FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') > 13 THEN
+                    EXTRACT(HOUR FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 3600 +
+                    EXTRACT(MINUTE FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') * 60 +
+                    EXTRACT(SECOND FROM TO_TIMESTAMP(time_out) AT TIME ZONE 'Asia/Singapore') END) as pm_out_s
+            FROM time_logs
+            WHERE 1=1 {base_where}
+            GROUP BY user_id, (TO_TIMESTAMP(time_in) AT TIME ZONE 'Asia/Singapore')::date
+        )
+        SELECT 
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY am_in_s) as am_in,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY am_out_s) as am_out,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY pm_in_s) as pm_in,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY pm_out_s) as pm_out
+        FROM daily_markers
     """
     cur.execute(avg_sql, tuple(params))
-    result = cur.fetchone()
-    avg_clock_in = "--:--"
-    avg_clock_out = "--:--"
-    if result and result["avg_time_in"]:
-        avg_dt = datetime.now(tz).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        ) + timedelta(seconds=int(result["avg_time_in"]))
-        avg_clock_in = format_time_12h(avg_dt)
-    if result and result["avg_time_out"]:
-        avg_dt = datetime.now(tz).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        ) + timedelta(seconds=int(result["avg_time_out"]))
-        avg_clock_out = format_time_12h(avg_dt)
-    return avg_clock_in, avg_clock_out
+    r = cur.fetchone()
+    
+    def fmt(secs):
+        if secs is None: return None
+        dt = datetime.now(tz).replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(seconds=int(secs))
+        return format_time_12h(dt)
+
+    return {
+        "am_in": fmt(r["am_in"]),
+        "am_out": fmt(r["am_out"]),
+        "pm_in": fmt(r["pm_in"]),
+        "pm_out": fmt(r["pm_out"])
+    }
 
 
 def validate_password(password):
     """Returns (ok, error_message). Enforces minimum 8 chars server-side."""
     if not password or len(password.strip()) < 8:
         return False, "Password must be at least 8 characters."
+    return True, None
+
+
+def validate_user_name(name):
+    """Returns (ok, error_message). Basic name check."""
+    if not name or len(name.strip()) < 3:
+        return False, "Full Name must be at least 3 characters."
+    return True, None
+
+
+def validate_user_email(email):
+    """Returns (ok, error_message). Basic email check."""
+    if not email or "@" not in email or "." not in email:
+        return False, "Please enter a valid email address."
     return True, None
 
 
@@ -374,7 +406,7 @@ def user_dashboard():
     if status_filter == "late":
         query += " AND is_late = TRUE"
     elif status_filter == "ontime":
-        query += " AND is_late = FALSE AND time_out IS NOT NULL"
+        query += " AND is_late = FALSE"
     
     # Get total count for pagination before applying LIMIT
     cur.execute(f"SELECT COUNT(*) FROM ({query}) as count_query", tuple(params))
@@ -402,14 +434,23 @@ def user_dashboard():
         )
     stats = cur.fetchone()
 
-    avg_where = "AND user_id = %s"
-    avg_params = [user_id]
+    # Determine the label for the cards based on current filters
+    avg_label = "(Today)"
     if start_ep and end_ep:
-        avg_where += " AND time_in >= %s AND time_in < %s"
-        avg_params += [start_ep, end_ep]
-    # Dashboard cards: Global Today Snapshot
-    s_td, e_td = get_time_range_epochs("today")
-    avg_clock_in, avg_clock_out = get_avg_clock_times(cur, " AND time_in >= %s AND time_in < %s", [s_td, e_td])
+        if filter_time == "today": avg_label = "(Today)"
+        elif filter_time == "week": avg_label = "(This Week)"
+        elif filter_time == "month": avg_label = "(This Month)"
+        elif filter_time == "year": avg_label = "(This Year)"
+        elif specific_date: avg_label = f"({specific_date})"
+        elif date_from and date_to:
+            if date_from == date_to: avg_label = f"({date_from})"
+            else: avg_label = f"({date_from} - {date_to})"
+        else: avg_label = "(Filtered)"
+    else:
+        avg_label = "(All Time)"
+
+    # Get the routine timeline markers (Median Arrival/Departure/Lunch)
+    routine = get_routine_markers(cur, " AND user_id = %s" + (" AND time_in >= %s AND time_in < %s" if start_ep and end_ep else ""), [user_id] + ([start_ep, end_ep] if start_ep and end_ep else []))
 
     # Prepare logs_data for template (if needed)
     logs_data = []
@@ -435,8 +476,8 @@ def user_dashboard():
         current_date_from=date_from,
         current_date_to=date_to,
         current_status_filter=status_filter,
-        avg_clock_in=avg_clock_in,
-        avg_clock_out=avg_clock_out,
+        routine=routine,
+        avg_label=avg_label,
         page=page,
         total_pages=total_pages,
         total_logs=total_logs,
@@ -493,7 +534,23 @@ def user_analytics():
     if start_ep and end_ep:
         avg_where += " AND time_in >= %s AND time_in < %s"
         avg_params += [start_ep, end_ep]
-    avg_clock_in, avg_clock_out = get_avg_clock_times(cur, avg_where, avg_params)
+
+    routine = get_routine_markers(cur, avg_where, avg_params)
+
+    # Determine the label for the cards dynamically
+    avg_label = "(Today)"
+    if start_ep and end_ep:
+        if filter_time == "today": avg_label = "(Today)"
+        elif filter_time == "week": avg_label = "(This Week)"
+        elif filter_time == "month": avg_label = "(This Month)"
+        elif filter_time == "year": avg_label = "(This Year)"
+        elif specific_date: avg_label = f"({specific_date})"
+        elif date_from and date_to:
+            if date_from == date_to: avg_label = f"({date_from})"
+            else: avg_label = f"({date_from} - {date_to})"
+        else: avg_label = "(Filtered)"
+    else:
+        avg_label = "(All Time)"
 
     logs_data = []
     for log in logs:
@@ -503,59 +560,76 @@ def user_analytics():
         logs_data.append(log_copy)
 
     # Calculate metrics for Radar tab (last 30 days)
+    # Calculate stats for the current user (last 30 days)
     thirty_days_ago_dt = datetime.now() - timedelta(days=30)
     thirty_days_ago_epoch = int(thirty_days_ago_dt.timestamp())
-    cur.execute("""
-        SELECT time_in, time_out, is_late 
-        FROM time_logs 
-        WHERE user_id = %s AND time_in > %s
-        ORDER BY time_in ASC
-    """, (user_id, thirty_days_ago_epoch))
-    radar_logs = cur.fetchall()
-    total_logs = len(radar_logs)
     
-    if total_logs == 0:
-        scores = {m: 50 for m in ["Punctuality", "Shift Completion", "Reliability", "Stability", "Integrity", "Retention"]}
-    else:
-        def to_dt(epoch_val):
-            if epoch_val is None: return None
-            return datetime.fromtimestamp(epoch_val if epoch_val < 1e11 else epoch_val/1000)
-
-        punctual_count = len([l for l in radar_logs if not l['is_late']])
-        punctuality = (punctual_count / total_logs) * 100
+    def calculate_user_metrics(logs_list):
+        if not logs_list:
+            return {m: 0 for m in ["Punctuality", "Shift Completion", "Reliability", "Stability", "Integrity", "Retention"]}
         
-        completed_shifts = 0
-        for l in radar_logs:
-            if l['time_out'] and l['time_in']:
-                duration_seconds = l['time_out'] - l['time_in']
-                threshold = 28800 if l['time_in'] < 1e11 else 28800000 
-                if duration_seconds >= threshold:
-                    completed_shifts += 1
-        shift_completion = (completed_shifts / total_logs) * 100
+        total = len(logs_list)
+        finished_logs = [l for l in logs_list if l['time_out']]
+        total_finished = len(finished_logs)
         
-        reliability = min((total_logs / 22) * 100, 100)
+        punctual = len([l for l in logs_list if not l['is_late']])
+        punctuality = (punctual / total) * 100
         
-        clock_in_minutes = []
-        for l in radar_logs:
-            dt = to_dt(l['time_in'])
-            clock_in_minutes.append(dt.hour * 60 + dt.minute)
+        # Shift Completion: Check for at least 4 hours (standard session)
+        completed = 0
+        for l in finished_logs:
+            if l['time_in']:
+                duration = l['time_out'] - l['time_in']
+                if duration >= 14400: completed += 1 # 4-hour threshold
+        shift_completion = (completed / total_finished * 100) if total_finished > 0 else 0
         
-        if len(clock_in_minutes) > 1:
-            std_dev = statistics.stdev(clock_in_minutes)
-            stability = max(100 - (std_dev * 2), 0)
+        # Reliability: Attendance frequency over 22 work days
+        reliability = min((total / 22) * 100, 100)
+        
+        # Consistent clock-in stability (use earliest daily clock-in, excluding today)
+        today_str = datetime.now(tz=tz).strftime('%Y-%m-%d')
+        daily_first_clock_ins = {}
+        for l in logs_list:
+            dt = datetime.fromtimestamp(l['time_in'], tz=tz)
+            date_str = dt.strftime('%Y-%m-%d')
+            if date_str == today_str:
+                continue  # Skip today — session may still be in progress
+            mins = dt.hour * 60 + dt.minute
+            if date_str not in daily_first_clock_ins or mins < daily_first_clock_ins[date_str]:
+                daily_first_clock_ins[date_str] = mins
+        
+        clock_in_mins = list(daily_first_clock_ins.values())
+        
+        if len(clock_in_mins) > 1:
+            try:
+                std_dev = statistics.stdev(clock_in_mins)
+                stability = max(100 - (std_dev * 2), 0) # 100% score for 0 variance
+            except:
+                stability = 0
         else:
-            stability = 100
+            stability = 0
             
-        integrity = (len([l for l in radar_logs if l['time_out']]) / total_logs) * 100
+        integrity = (total_finished / total) * 100
         
-        retention_count = 0
-        for l in radar_logs:
-            dt_out = to_dt(l['time_out'])
-            if dt_out and dt_out.hour >= 17:
-                retention_count += 1
-        retention = (retention_count / total_logs) * 100
+        # Retention: did the user's LAST clock-out of each day happen at or after 5 PM?
+        # Per-day check avoids penalizing split-shift workers for their mid-day clock-outs.
+        today_str_ret = datetime.now(tz=tz).strftime('%Y-%m-%d')
+        daily_last_out = {}
+        for l in finished_logs:
+            dt_in = datetime.fromtimestamp(l['time_in'], tz=tz)
+            dt_out = datetime.fromtimestamp(l['time_out'], tz=tz)
+            date_str = dt_in.strftime('%Y-%m-%d')
+            if date_str == today_str_ret:
+                continue  # Skip today — may still be in progress
+            out_mins = dt_out.hour * 60 + dt_out.minute
+            if date_str not in daily_last_out or out_mins > daily_last_out[date_str]:
+                daily_last_out[date_str] = out_mins
 
-        scores = {
+        retention_days = len(daily_last_out)
+        retention_count = sum(1 for mins in daily_last_out.values() if mins >= 17 * 60)
+        retention = (retention_count / retention_days * 100) if retention_days > 0 else 0
+
+        return {
             "Punctuality": round(punctuality),
             "Shift Completion": round(shift_completion),
             "Reliability": round(reliability),
@@ -563,8 +637,44 @@ def user_analytics():
             "Integrity": round(integrity),
             "Retention": round(retention)
         }
+
+    # Get user department
+    cur.execute("SELECT department FROM users WHERE id = %s", (user_id,))
+    u_row = cur.fetchone()
+    user_dept = u_row['department'] if u_row else 'General'
+
+    # 1. My Metrics (Last 30 days)
+    cur.execute("SELECT time_in, time_out, is_late FROM time_logs WHERE user_id = %s AND time_in > %s", (user_id, thirty_days_ago_epoch))
+    my_radar_logs = cur.fetchall()
+    my_scores = calculate_user_metrics(my_radar_logs)
+    total_logs_count = len(my_radar_logs)
+
+    # 2. Dept Average Metrics (Last 30 days)
+    cur.execute("""
+        SELECT tl.user_id, tl.time_in, tl.time_out, tl.is_late 
+        FROM time_logs tl
+        JOIN users u ON tl.user_id = u.id
+        WHERE u.department = %s AND tl.time_in > %s
+    """, (user_dept, thirty_days_ago_epoch))
+    dept_radar_logs = cur.fetchall()
     
-    metrics_json = [{"metric": k, "me": v, "avg": 75} for k, v in scores.items()]
+    user_map = {}
+    for l in dept_radar_logs:
+        uid = l['user_id']
+        if uid not in user_map: user_map[uid] = []
+        user_map[uid].append(l)
+    
+    all_user_metrics = [calculate_user_metrics(u_logs) for u_logs in user_map.values()]
+    avg_scores = {m: 0 for m in ["Punctuality", "Shift Completion", "Reliability", "Stability", "Integrity", "Retention"]}
+    
+    if all_user_metrics:
+        for m in avg_scores.keys():
+            avg_scores[m] = round(sum(u[m] for u in all_user_metrics) / len(all_user_metrics))
+
+    metrics_json = [
+        {"metric": m, "me": my_scores[m], "avg": avg_scores[m]} 
+        for m in ["Punctuality", "Shift Completion", "Reliability", "Stability", "Integrity", "Retention"]
+    ]
 
     # Additional KPI: Longest Shift
     cur.execute("SELECT MAX(rendered_hours) FROM time_logs WHERE user_id = %s" + 
@@ -582,11 +692,12 @@ def user_analytics():
         logs_data=logs_data,
         total_lates=stats["total_lates"] or 0 if stats else 0,
         total_hours=round(stats["total_hours"] or 0.0, 2) if stats else 0.0,
-        avg_clock_in=avg_clock_in,
-        avg_clock_out=avg_clock_out,
+        routine=routine,
+        avg_label=avg_label,
         max_shift=max_shift,
         metrics=metrics_json,
-        total_logs=total_logs,
+        total_logs=total_logs_count,
+        department=user_dept
     )
 
 
@@ -877,6 +988,7 @@ def api_admin_logs():
     start_ep, end_ep = f["start_ep"], f["end_ep"]
     status_filter = f["status_filter"]
     filter_user_id = request.args.get("user_id", "").strip() or None
+    search_query = request.args.get("search", "").strip()
     page = max(1, int(request.args.get("page", 1) or 1))
     per_page = max(1, int(request.args.get("per_page", 20) or 20))
 
@@ -889,6 +1001,10 @@ def api_admin_logs():
     if filter_user_id:
         query += " AND users.id = %s"
         params.append(int(filter_user_id))
+    if search_query:
+        query += " AND (users.name ILIKE %s OR users.department ILIKE %s OR users.rfid_tag ILIKE %s OR users.email ILIKE %s)"
+        like_term = f"%{search_query}%"
+        params.extend([like_term] * 4)
     if start_ep and end_ep:
         query += " AND time_in >= %s AND time_in < %s"
         params.extend([start_ep, end_ep])
@@ -896,7 +1012,7 @@ def api_admin_logs():
     if status_filter == "late":
         query += " AND is_late = TRUE"
     elif status_filter == "ontime":
-        query += " AND is_late = FALSE AND time_out IS NOT NULL"
+        query += " AND is_late = FALSE"
 
     # Get total count for pagination
     cur.execute(f"SELECT COUNT(*) FROM ({query}) as count_query", tuple(params))
@@ -925,7 +1041,7 @@ def api_admin_logs():
     if status_filter == "late":
         stats_query += " AND is_late = TRUE"
     elif status_filter == "ontime":
-        stats_query += " AND is_late = FALSE AND time_out IS NOT NULL"
+        stats_query += " AND is_late = FALSE"
 
     cur.execute(stats_query, tuple(stats_params))
     stats = cur.fetchone()
@@ -1019,7 +1135,7 @@ def api_user_logs():
     if status_filter == "late":
         query += " AND is_late = TRUE"
     elif status_filter == "ontime":
-        query += " AND is_late = FALSE AND time_out IS NOT NULL"
+        query += " AND is_late = FALSE"
     
     # Get total count
     cur.execute(f"SELECT COUNT(*) FROM ({query}) as count_query", tuple(params))
@@ -1039,6 +1155,34 @@ def api_user_logs():
                 tuple([user_id] + ([start_ep, end_ep] if start_ep and end_ep else [])))
     stats = cur.fetchone()
     
+    # Calculate filtered averages for the cards
+    avg_where = "AND user_id = %s"
+    avg_params = [user_id]
+    
+    # Determine the label for the cards dynamically
+    avg_label = "(Today)"
+    f_time = f["filter_time"]
+    d_from = f["date_from"]
+    d_to = f["date_to"]
+    s_date = f["specific_date"]
+
+    if start_ep and end_ep:
+        avg_where += " AND time_in >= %s AND time_in < %s"
+        avg_params += [start_ep, end_ep]
+        if f_time == "today": avg_label = "(Today)"
+        elif f_time == "week": avg_label = "(This Week)"
+        elif f_time == "month": avg_label = "(This Month)"
+        elif f_time == "year": avg_label = "(This Year)"
+        elif s_date: avg_label = f"({s_date})"
+        elif d_from and d_to:
+            if d_from == d_to: avg_label = f"({d_from})"
+            else: avg_label = f"({d_from} - {d_to})"
+        else: avg_label = "(Filtered)"
+    else:
+        avg_label = "(All Time)"
+
+    routine = get_routine_markers(cur, avg_where, avg_params)
+
     formatted_logs = []
     for log in logs:
         dt_in = datetime.fromtimestamp(log["time_in"], tz=timezone.utc).astimezone(tz)
@@ -1074,7 +1218,9 @@ def api_user_logs():
         },
         "stats": {
             "total_lates": stats["total_lates"] or 0,
-            "total_hours": round(stats["total_hours"] or 0.0, 2)
+            "total_hours": round(stats["total_hours"] or 0.0, 2),
+            "routine": routine,
+            "avg_label": avg_label
         }
     })
 
@@ -1128,7 +1274,7 @@ def admin_dashboard():
     if status_filter == "late":
         query += " AND is_late = TRUE"
     elif status_filter == "ontime":
-        query += " AND is_late = FALSE AND time_out IS NOT NULL"
+        query += " AND is_late = FALSE"
     
     # Get total count for pagination
     cur.execute(f"SELECT COUNT(*) FROM ({query}) as count_query", tuple(params))
@@ -1349,33 +1495,50 @@ def admin_qr_codes():
 def manage_users():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM users ORDER BY name")
+    users = cur.fetchall()
+
+    # Get unique departments for auto-suggestion
+    cur.execute("SELECT DISTINCT department FROM users WHERE department IS NOT NULL AND department != '' ORDER BY department")
+    departments = [row["department"] for row in cur.fetchall()]
+
     if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
-        rfid_tag = request.form["rfid_tag"]
+        rfid_tag = request.form.get("rfid_tag", "").strip()
         role = request.form["role"]
-        ok, err = validate_password(password)
-        if not ok:
-            flash(err, "error")
+        department = request.form.get("department", "General").strip() or "General"
+
+        # Validation
+        v_name_ok, v_name_err = validate_user_name(name)
+        v_email_ok, v_email_err = validate_user_email(email)
+        v_pass_ok, v_pass_err = validate_password(password)
+
+        if not v_name_ok:
+            flash(v_name_err, "error")
+        elif not v_email_ok:
+            flash(v_email_err, "error")
+        elif not v_pass_ok:
+            flash(v_pass_err, "error")
+        elif not rfid_tag:
+            flash("RFID Tag / ID Number is required.", "error")
         else:
             try:
                 cur.execute(
-                    "INSERT INTO users (name, email, password_hash, rfid_tag, role) VALUES (%s, %s, %s, %s, %s)",
-                    (name, email, generate_password_hash(password), rfid_tag, role),
+                    "INSERT INTO users (name, email, password_hash, rfid_tag, role, department) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (name, email, generate_password_hash(password), rfid_tag, role, department),
                 )
                 conn.commit()
                 flash("User created successfully.", "success")
+                return redirect(url_for("manage_users"))
             except Exception:
                 conn.rollback()
-                flash(
-                    "Error creating user. Email or RFID may already be in use.", "error"
-                )
-    cur.execute("SELECT * FROM users ORDER BY name")
-    users = cur.fetchall()
+                flash("Error creating user. Email or RFID may already be in use.", "error")
+
     cur.close()
     conn.close()
-    return render_template("admin_users.html", users=users)
+    return render_template("admin_users.html", users=users, departments=departments)
 
 
 @app.route("/admin/users/edit/<int:id>", methods=["POST"])
@@ -1383,25 +1546,38 @@ def manage_users():
 def edit_user(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    name = request.form["name"]
-    email = request.form["email"]
-    rfid = request.form["rfid_tag"]
+    name = request.form["name"].strip()
+    email = request.form["email"].strip()
+    rfid = request.form["rfid_tag"].strip()
     role = request.form["role"]
+    department = request.form.get("department", "General").strip() or "General"
     pw = request.form.get("new_password", "").strip()
+
+    # Validation
+    v_name_ok, v_name_err = validate_user_name(name)
+    v_email_ok, v_email_err = validate_user_email(email)
+
+    if not v_name_ok:
+        flash(v_name_err, "error")
+        return redirect(url_for("manage_users"))
+    if not v_email_ok:
+        flash(v_email_err, "error")
+        return redirect(url_for("manage_users"))
+
     try:
         if pw:
-            ok, err = validate_password(pw)
-            if not ok:
-                flash(err, "error")
+            v_pass_ok, v_pass_err = validate_password(pw)
+            if not v_pass_ok:
+                flash(v_pass_err, "error")
                 return redirect(url_for("manage_users"))
             cur.execute(
-                "UPDATE users SET name=%s, email=%s, rfid_tag=%s, role=%s, password_hash=%s WHERE id=%s",
-                (name, email, rfid, role, generate_password_hash(pw), id),
+                "UPDATE users SET name=%s, email=%s, rfid_tag=%s, role=%s, password_hash=%s, department=%s WHERE id=%s",
+                (name, email, rfid, role, generate_password_hash(pw), department, id),
             )
         else:
             cur.execute(
-                "UPDATE users SET name=%s, email=%s, rfid_tag=%s, role=%s WHERE id=%s",
-                (name, email, rfid, role, id),
+                "UPDATE users SET name=%s, email=%s, rfid_tag=%s, role=%s, department=%s WHERE id=%s",
+                (name, email, rfid, role, department, id),
             )
         conn.commit()
         flash("User updated.", "success")
@@ -1461,6 +1637,43 @@ def bulk_clear_logs():
     conn.close()
 
     flash(f"Successfully cleared logs for {len(user_ids)} selected users ({count} total records).", "success")
+    return redirect(url_for("manage_users"))
+
+
+@app.route("/admin/users/bulk-delete", methods=["POST"])
+@admin_required
+def bulk_delete_users():
+    user_ids = request.form.getlist("selected_users[]")
+    if not user_ids:
+        flash("No users selected to delete.", "error")
+        return redirect(url_for("manage_users"))
+
+    # Convert strings to ints and filter out current user
+    try:
+        user_ids = [int(uid) for uid in user_ids if int(uid) != session.get('user_id')]
+    except ValueError:
+        flash("Invalid user selection.", "error")
+        return redirect(url_for("manage_users"))
+
+    if not user_ids:
+        flash("Cannot delete your own account via bulk actions.", "error")
+        return redirect(url_for("manage_users"))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Delete logs first to satisfy foreign key constraints if not cascading
+        cur.execute("DELETE FROM time_logs WHERE user_id = ANY(%s::int[])", (user_ids,))
+        cur.execute("DELETE FROM users WHERE id = ANY(%s::int[])", (user_ids,))
+        conn.commit()
+        flash(f"Successfully deleted {len(user_ids)} selected accounts.", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Bulk deletion failed: {str(e)}", "error")
+    finally:
+        cur.close()
+        conn.close()
+
     return redirect(url_for("manage_users"))
 
 

@@ -212,63 +212,72 @@ selectattr("time_out", "equalto", none) | first %}
 
   <!-- â”€â”€ Stats Row â”€â”€ -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4" style="align-items: stretch">
-    <!-- Avg Clock In -->
+    <!-- Daily Routine Timeline -->
     <div
-      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
+      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between col-span-2"
       style="animation-delay: 0.05s">
-      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
+      <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full" style="
           background: radial-gradient(
             circle at top right,
-            rgba(209, 250, 229, 0.6),
+            rgba(52, 211, 153, 0.1),
             transparent 70%
           );
         "></div>
-      <div class="flex flex-col gap-3">
-        <div
-          class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-500 flex-shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
-        <div>
-          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
-            Avg. Clock-In
-          </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight whitespace-nowrap">
-            {{ avg_clock_in }}
-          </p>
-        </div>
-      </div>
-    </div>
 
-    <!-- Avg Clock Out -->
-    <div
-      class="stat-card glass-strong p-4 rounded-2xl stagger-item relative overflow-hidden flex flex-col justify-between"
-      style="animation-delay: 0.08s">
-      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="
-          background: radial-gradient(
-            circle at top right,
-            rgba(199, 210, 254, 0.6),
-            transparent 70%
-          );
-        "></div>
-      <div class="flex flex-col gap-3">
-        <div
-          class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500 flex-shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7"></path>
-          </svg>
+      <div class="flex flex-col h-full justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <p id="routine-label"
+              class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted">
+              Typical Daily Routine {{ avg_label }}
+            </p>
+          </div>
+          <span
+            class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold uppercase tracking-wider">Median
+            Pattern</span>
         </div>
-        <div>
-          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-0.5">
-            Avg. Clock-Out
-          </p>
-          <p
-            class="text-2xl font-headline font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight whitespace-nowrap">
-            {{ avg_clock_out }}
-          </p>
+
+        <div class="grid grid-cols-2 gap-4 relative">
+          <!-- Timeline Connecting Line -->
+          <div
+            class="absolute top-1/2 left-[20%] right-[20%] h-[1px] bg-gray-200 dark:bg-gray-800 -translate-y-1/2 z-0 hidden sm:block">
+          </div>
+
+          <!-- AM Shift -->
+          <div class="flex flex-col gap-1 relative z-10">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Morning Session</span>
+            <div class="flex items-center gap-2 text-xl font-headline font-extrabold tracking-tight">
+              <span id="routine-am-in" class="text-emerald-500">{{ routine.am_in or '--:--' }}</span>
+              <span class="text-gray-300 dark:text-gray-700 text-sm font-normal">to</span>
+              <span id="routine-am-out" class="text-emerald-500">{{ routine.am_out or routine.pm_out or '--:--'
+                }}</span>
+            </div>
+          </div>
+
+          <!-- PM Shift (Only if different logs exist) -->
+          <div id="routine-pm-container"
+            class="flex flex-col gap-1 relative z-10 {% if not routine.pm_in %}hidden{% endif %}">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Afternoon Session</span>
+            <div class="flex items-center gap-2 text-xl font-headline font-extrabold tracking-tight">
+              <span id="routine-pm-in" class="text-indigo-500">{{ routine.pm_in or '--:--' }}</span>
+              <span class="text-gray-300 dark:text-gray-700 text-sm font-normal">to</span>
+              <span id="routine-pm-out" class="text-indigo-500">{{ routine.pm_out or '--:--' }}</span>
+            </div>
+          </div>
+
+          <!-- Single Shift Fallback (if no real PM split) -->
+          <div id="routine-single-out"
+            class="flex flex-col gap-1 relative z-10 items-end {% if routine.pm_in %}hidden{% endif %}">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Departure</span>
+            <span class="text-xl font-headline font-extrabold text-indigo-500 tracking-tight">{{ routine.pm_out or
+              '--:--' }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -340,11 +349,55 @@ selectattr("time_out", "equalto", none) | first %}
     </div>
   </div>
 
-  <!-- â”€â”€ Main 2-Col Layout â”€â”€ -->
+  <!-- ── Main Grid Layout ── -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:items-start">
-    <!-- â”€â”€ Time Logs (left, 2/3) â”€â”€ -->
+
+    <!-- 1. My Hours Card (Top on Mobile, Side on Desktop) -->
+    <div id="hours-metric" hx-swap-oob="true"
+      class="order-1 lg:order-2 lg:col-span-1 glass-strong rounded-2xl p-7 stagger-item relative overflow-hidden"
+      style="animation-delay: 0.2s">
+      <div class="absolute top-0 right-0 w-40 h-40 rounded-full -mr-16 -mt-16" style="
+          background: radial-gradient(
+            circle,
+            rgba(6, 115, 2, 0.08) 0%,
+            transparent 70%
+          );
+        "></div>
+      <div class="relative z-10">
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-dark-muted mb-1">
+          Rendered Hours Metric
+        </p>
+        <h3 class="text-xl font-headline font-bold text-gray-800 dark:text-white mb-1">
+          My Hours
+        </h3>
+        <p class="text-sm text-gray-400 mb-6">
+          Cumulative productivity for the current period.
+        </p>
+        <div class="flex items-end justify-between">
+          <div>
+            <p class="text-5xl font-headline font-extrabold text-brand leading-none tracking-tighter">
+              {{ total_hours or '—' }}
+            </p>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2">
+              Total Hours
+            </p>
+          </div>
+          <div class="text-right">
+            <p
+              class="text-4xl font-headline font-extrabold {% if total_lates > 0 %}text-red-500{% else %}text-emerald-500{% endif %}">
+              {{ total_lates }}
+            </p>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              Lates
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Time Logs (Center on Mobile, Main on Desktop) -->
     <div id="time-logs" hx-boost="true"
-      class="glass-strong rounded-2xl overflow-hidden stagger-item lg:col-span-2 flex flex-col"
+      class="order-2 lg:order-1 lg:col-span-2 lg:row-span-2 glass-strong rounded-2xl overflow-hidden stagger-item flex flex-col"
       style="animation-delay: 0.15s">
       <!-- Header -->
       <div
@@ -515,162 +568,118 @@ selectattr("time_out", "equalto", none) | first %}
       </div>
     </div>
 
-    <!-- â”€â”€ Right Column â”€â”€ -->
-    <div class="lg:col-span-1 space-y-5">
-      <!-- Rendered Hours Metric -->
-      <div id="hours-metric" hx-swap-oob="true"
-        class="glass-strong rounded-2xl p-7 stagger-item relative overflow-hidden" style="animation-delay: 0.2s">
-        <div class="absolute top-0 right-0 w-40 h-40 rounded-full -mr-16 -mt-16" style="
-            background: radial-gradient(
-              circle,
-              rgba(6, 115, 2, 0.08) 0%,
-              transparent 70%
-            );
-          "></div>
-        <div class="relative z-10">
-          <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-dark-muted mb-1">
-            Rendered Hours Metric
-          </p>
-          <h3 class="text-xl font-headline font-bold text-gray-800 dark:text-white mb-1">
-            My Hours
+    <!-- 3. Parameters Filter (Bottom on Mobile, Side on Desktop) -->
+    <div class="order-3 lg:order-3 lg:col-span-1 glass-strong rounded-2xl overflow-hidden stagger-item"
+      style="animation-delay: 0.25s">
+      <div class="p-6 space-y-6">
+        <!-- Card Title -->
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z">
+            </path>
+          </svg>
+          <h3 class="font-headline font-bold text-gray-900 dark:text-white tracking-tight">
+            Parameters
           </h3>
-          <p class="text-sm text-gray-400 mb-6">
-            Cumulative productivity for the current period.
-          </p>
-          <div class="flex items-end justify-between">
-            <div>
-              <p class="text-5xl font-headline font-extrabold text-brand leading-none tracking-tighter">
-                {{ total_hours or 'â€”' }}
-              </p>
-              <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2">
-                Total Hours
-              </p>
-            </div>
-            <div class="text-right">
-              <p
-                class="text-lg font-headline font-extrabold {% if total_lates > 0 %}text-red-500{% else %}text-emerald-500{% endif %}">
-                {{ total_lates }}
-              </p>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                Lates
-              </p>
-            </div>
-          </div>
         </div>
-      </div>
 
-      <!-- Parameters Filter Card -->
-      <div class="glass-strong rounded-2xl overflow-hidden stagger-item" style="animation-delay: 0.25s">
-        <div class="p-6 space-y-6">
-          <!-- Card Title -->
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z">
-              </path>
-            </svg>
-            <h3 class="font-headline font-bold text-gray-900 dark:text-white tracking-tight">
-              Parameters
-            </h3>
+        <!-- Timeline -->
+        <form method="GET" action="/dashboard" id="filterForm" hx-boost="true" hx-target="#time-logs"
+          hx-select="#time-logs" hx-swap="outerHTML" hx-push-url="true" hx-select-oob="#hours-metric">
+          <div class="space-y-3">
+            <label
+              class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Timeline</label>
+            <div class="space-y-2">
+              <div>
+                <label
+                  class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">From</label>
+                <input type="date" name="date_from" value="{{ current_date_from or '' }}"
+                  class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
+              </div>
+              <div>
+                <label
+                  class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">To</label>
+                <input type="date" name="date_to" value="{{ current_date_to or '' }}"
+                  class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
+              </div>
+            </div>
           </div>
 
-          <!-- Timeline -->
-          <form method="GET" action="/dashboard" id="filterForm" hx-boost="true" hx-target="#time-logs"
-            hx-select="#time-logs" hx-swap="outerHTML" hx-push-url="true" hx-select-oob="#hours-metric">
-            <div class="space-y-3">
-              <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Timeline</label>
-              <div class="space-y-2">
-                <div>
-                  <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">From</label>
-                  <input type="date" name="date_from" value="{{ current_date_from or '' }}"
-                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
-                </div>
-                <div>
-                  <label
-                    class="block text-[10px] font-bold text-gray-400 dark:text-dark-muted uppercase tracking-wider mb-1 ml-1">To</label>
-                  <input type="date" name="date_to" value="{{ current_date_to or '' }}"
-                    class="w-full bg-gray-50 dark:bg-dark-surface border border-gray-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:ring-2 focus:ring-brand/30 focus:border-brand outline-none transition-all" />
-                </div>
-              </div>
+          <!-- Quick Filter Pills -->
+          <div class="space-y-2 mt-5">
+            <label
+              class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Quick
+              Filter</label>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="setTimeFilter('all')"
+                class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_time_filter or current_time_filter == 'all' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">All
+                Time</button>
+              <button type="button" onclick="setTimeFilter('year')"
+                class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'year' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                Year</button>
+              <button type="button" onclick="setTimeFilter('month')"
+                class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'month' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                Month</button>
+              <button type="button" onclick="setTimeFilter('week')"
+                class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'week' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                Week</button>
+              <button type="button" onclick="setTimeFilter('today')"
+                class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'today' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
+                Day</button>
             </div>
+          </div>
 
-            <!-- Quick Filter Pills -->
-            <div class="space-y-2 mt-5">
-              <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Quick
-                Filter</label>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="setTimeFilter('all')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_time_filter or current_time_filter == 'all' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">All
-                  Time</button>
-                <button type="button" onclick="setTimeFilter('year')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'year' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
-                  Year</button>
-                <button type="button" onclick="setTimeFilter('month')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'month' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
-                  Month</button>
-                <button type="button" onclick="setTimeFilter('week')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'week' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
-                  Week</button>
-                <button type="button" onclick="setTimeFilter('today')"
-                  class="quick-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_time_filter == 'today' %}bg-brand text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200 dark:hover:bg-dark-surface{% endif %}">This
-                  Day</button>
-              </div>
-            </div>
-
-            <!-- Attendance Status Filter -->
-            <div class="space-y-2 mt-5">
-              <label
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Attendance
-                Status</label>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="applyStatusFilter('all')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_status_filter or current_status_filter == 'all' %}bg-gray-700 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
-                  All
-                </button>
-                <button type="button" onclick="applyStatusFilter('ontime')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'ontime' %}bg-emerald-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
-                  On Time
-                </button>
-                <button type="button" onclick="applyStatusFilter('late')"
-                  class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'late' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
-                  Late
-                </button>
-              </div>
-              <input type="hidden" name="status_filter" id="status_filter_input"
-                value="{{ current_status_filter or 'all' }}" />
-            </div>
-
-            <!-- Apply / Clear Buttons -->
-            <div class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2">
-              <button type="submit"
-                class="w-full py-3.5 font-headline font-bold text-sm text-white rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
-                style="
-                  background: linear-gradient(135deg, #067302, #055902);
-                  box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
-                ">
-                Apply Filters
+          <!-- Attendance Status Filter -->
+          <div class="space-y-2 mt-5">
+            <label
+              class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Attendance
+              Status</label>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" onclick="applyStatusFilter('all')"
+                class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if not current_status_filter or current_status_filter == 'all' %}bg-gray-700 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
+                All
               </button>
-              <a href="/dashboard"
-                class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all">
-                Clear All
-              </a>
+              <button type="button" onclick="applyStatusFilter('ontime')"
+                class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'ontime' %}bg-emerald-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
+                On Time
+              </button>
+              <button type="button" onclick="applyStatusFilter('late')"
+                class="status-pill px-3 py-1.5 rounded-full text-[0.65rem] font-bold uppercase tracking-tight transition-all {% if current_status_filter == 'late' %}bg-amber-500 text-white shadow-sm{% else %}bg-gray-100 dark:bg-dark-border text-gray-500 dark:text-dark-muted hover:bg-gray-200{% endif %}">
+                Late
+              </button>
             </div>
-          </form>
-
-          <!-- Live Status Chip -->
-          <div class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between">
-            <div>
-              <span
-                class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Real-time
-                Status</span>
-              <span class="text-sm font-bold text-brand">Live Monitoring Active</span>
-            </div>
-            <div class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
-              style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"></div>
+            <input type="hidden" name="status_filter" id="status_filter_input"
+              value="{{ current_status_filter or 'all' }}" />
           </div>
+
+          <!-- Apply / Clear Buttons -->
+          <div class="pt-6 mt-2 border-t border-gray-100/60 dark:border-dark-border space-y-2">
+            <button type="submit"
+              class="w-full py-3.5 font-headline font-bold text-sm text-white rounded-xl transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95"
+              style="
+                background: linear-gradient(135deg, #067302, #055902);
+                box-shadow: 0 4px 15px rgba(6, 115, 2, 0.25);
+              ">
+              Apply Filters
+            </button>
+            <a href="/dashboard"
+              class="block w-full py-3 font-headline font-semibold text-sm text-brand text-center rounded-xl hover:bg-brand/5 dark:hover:bg-brand/10 transition-all">
+              Clear All
+            </a>
+          </div>
+        </form>
+
+        <!-- Live Status Chip -->
+        <div class="bg-brand/8 dark:bg-brand/15 rounded-xl px-4 py-3 flex items-center justify-between">
+          <div>
+            <span
+              class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-dark-muted">Real-time
+              Status</span>
+            <span class="text-sm font-bold text-brand">Live Monitoring Active</span>
+          </div>
+          <div class="w-2.5 h-2.5 bg-brand rounded-full animate-pulse"
+            style="box-shadow: 0 0 10px rgba(6, 115, 2, 0.5)"></div>
         </div>
       </div>
     </div>
@@ -813,12 +822,51 @@ selectattr("time_out", "equalto", none) | first %}
   }
 
   function updateSummaryCards(stats, p) {
+    if (!stats || !p) return;
+
+    // Core Metrics
     const latesVal = document.getElementById('total-lates-val');
     const hoursVal = document.getElementById('total-hours-val');
     const sessionsVal = document.getElementById('total-sessions-val');
-    if (latesVal) latesVal.innerText = stats.total_lates;
-    if (hoursVal) hoursVal.innerHTML = `${stats.total_hours}<span class="text-xs text-gray-400 font-semibold ml-1">hrs</span>`;
-    if (sessionsVal) sessionsVal.innerText = p.total_logs;
+    const onTimeVal = document.getElementById('ontime-rate-val');
+
+    if (latesVal) latesVal.innerText = stats.total_lates || 0;
+    if (hoursVal) hoursVal.innerHTML = `${stats.total_hours || '0.0'}<span class="text-xs text-gray-400 font-semibold ml-1">hrs</span>`;
+    if (sessionsVal) sessionsVal.innerText = p.total_logs || 0;
+
+    // On-Time Rate
+    if (onTimeVal && p.total_logs > 0) {
+      const rate = Math.round(((p.total_logs - stats.total_lates) / p.total_logs) * 100);
+      onTimeVal.innerHTML = `${rate}<span class="text-sm font-semibold text-gray-400 ml-0.5">%</span>`;
+    }
+
+    // Routine Timeline
+    if (!stats.routine) return;
+    const label = document.getElementById('routine-label');
+    const amIn = document.getElementById('routine-am-in');
+    const amOut = document.getElementById('routine-am-out');
+    const pmIn = document.getElementById('routine-pm-in');
+    const pmOut = document.getElementById('routine-pm-out');
+    const pmContainer = document.getElementById('routine-pm-container');
+    const singleOut = document.getElementById('routine-single-out');
+
+    if (label && stats.avg_label) label.innerText = 'Typical Daily Routine ' + stats.avg_label;
+    if (amIn) amIn.innerText = stats.routine.am_in || '--:--';
+    if (amOut) amOut.innerText = stats.routine.am_out || stats.routine.pm_out || '--:--';
+
+    if (pmIn && stats.routine.pm_in) {
+      pmIn.innerText = stats.routine.pm_in;
+      if (pmOut) pmOut.innerText = stats.routine.pm_out || '--:--';
+      if (pmContainer) pmContainer.classList.remove('hidden');
+      if (singleOut) singleOut.classList.add('hidden');
+    } else {
+      if (pmContainer) pmContainer.classList.add('hidden');
+      if (singleOut) {
+        singleOut.classList.remove('hidden');
+        const finalOut = singleOut.querySelector('span:last-child');
+        if (finalOut) finalOut.innerText = stats.routine.pm_out || '--:--';
+      }
+    }
   }
 
   function changePage(p) { state.page = p; fetchLogs(); document.getElementById('time-logs').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
@@ -832,9 +880,9 @@ selectattr("time_out", "equalto", none) | first %}
     document.querySelectorAll('.status-pill').forEach(btn => {
       const btnText = btn.innerText.toLowerCase();
       const isActive = (btnText.includes('all') && status === 'all') ||
-                       (btnText.includes('on time') && status === 'ontime') ||
-                       (btnText.includes('late') && status === 'late');
-      
+        (btnText.includes('on time') && status === 'ontime') ||
+        (btnText.includes('late') && status === 'late');
+
       if (isActive) {
         btn.classList.remove('bg-gray-100', 'text-gray-500');
         if (status === 'all') btn.classList.add('bg-gray-700', 'text-white');
@@ -851,7 +899,7 @@ selectattr("time_out", "equalto", none) | first %}
     state.date_from = '';
     state.date_to = '';
     state.page = 1;
-    
+
     // Clear date inputs visually
     const fromInput = document.querySelector('input[name="date_from"]');
     const toInput = document.querySelector('input[name="date_to"]');

@@ -37,9 +37,9 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   }
 
   .hm-cell {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
     transition: transform 0.15s;
     cursor: default;
   }
@@ -59,7 +59,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   }
 </style>
 
-<div class="max-w-[1600px] mx-auto space-y-7">
+<div class="w-full max-w-[1600px] xl:max-w-[1600px] mx-auto space-y-7">
   <!-- ── Profile Hero Banner ── -->
   <div class="rounded-2xl overflow-hidden stagger-item relative" style="
       animation-delay: 0.02s;
@@ -225,13 +225,13 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
         </svg>
       </div>
       <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-dark-muted mb-1">
-        Longest Shift
+        Avg Clock-In
       </p>
-      <p class="text-3xl font-headline font-extrabold text-violet-500">
-        {{ max_shift }}<span class="text-base text-gray-400 ml-0.5">h</span>
+      <p class="text-2xl font-headline font-extrabold text-violet-500 tracking-tight">
+        {{ avg_clock_in }}
       </p>
       <p class="text-xs text-gray-400 mt-1">
-        Your peak productivity day.
+        Avg Clock-Out: {{ avg_clock_out }}
       </p>
     </div>
   </div>
@@ -250,76 +250,26 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
 
   <!-- ══════════════════ SUMMARY TAB ══════════════════ -->
   <div id="panel-summary">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="flex flex-col gap-5">
       <!-- Hours Bar Chart -->
       <div class="glass-strong rounded-2xl p-6">
         <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">This Period</p>
         <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">Hours per Day</h3>
         <div class="flex gap-3 text-[10px] font-semibold text-gray-400 mb-3">
-          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span>On
-            Time</span>
-          <span class="flex items-center gap-1.5"><span
-              class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span>Late</span>
-          <span class="flex items-center gap-1.5 ml-2 border-l border-gray-200 dark:border-dark-border pl-2"><span
-              class="w-8 border-t-2 border-dashed border-gray-400 inline-block"></span>8h target</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-brand inline-block"></span>On Time</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span>Late</span>
+          <span class="flex items-center gap-1.5 ml-2 border-l border-gray-200 dark:border-dark-border pl-2"><span class="w-8 border-t-2 border-dashed border-gray-400 inline-block"></span>8h target</span>
         </div>
         <div class="relative h-52">
           <canvas id="chartHoursBar"></canvas>
         </div>
       </div>
 
-        <div class="glass-strong rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6">
-          <div class="relative w-28 h-28 flex-shrink-0">
-            <canvas id="chartShiftDonut"></canvas>
-          </div>
-          <div class="flex-1 w-full text-center sm:text-left">
-            <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">Shift Insights</p>
-            <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3">Morning vs Afternoon</h3>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="p-2 bg-gray-50 dark:bg-dark-border/30 rounded-xl border border-gray-100 dark:border-dark-border/50">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Morning Lates</p>
-                <p class="text-base font-bold text-amber-500" id="morning-late-val">0</p>
-              </div>
-              <div class="p-2 bg-gray-50 dark:bg-dark-border/30 rounded-xl border border-gray-100 dark:border-dark-border/50">
-                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">Afternoon Lates</p>
-                <p class="text-base font-bold text-amber-500" id="afternoon-late-val">0</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Avg Arrival Gauge -->
-        <div class="glass-strong rounded-2xl p-6 flex flex-col items-center">
-          <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5 self-start">Avg Arrival</p>
-          <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 self-start">When Do You Usually Arrive?</h3>
-          <div class="flex items-end gap-6">
-            <svg id="arrival-gauge" viewBox="0 0 160 90" class="w-44 overflow-visible" style="height: 90px">
-              <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#e5e7eb" stroke-width="10"
-                stroke-linecap="round" class="dark:stroke-dark-border" />
-              <path id="gauge-fill" d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#067302" stroke-width="10"
-                stroke-linecap="round" stroke-dasharray="0 188" />
-              <line id="gauge-needle" x1="80" y1="80" x2="80" y2="25" stroke="#374151" stroke-width="2.5"
-                stroke-linecap="round" class="dark:stroke-gray-200" />
-              <circle cx="80" cy="80" r="5" fill="#067302" />
-              <text x="12" y="96" font-size="9" fill="#9ca3af" text-anchor="middle">7AM</text>
-              <text x="80" y="14" font-size="9" fill="#9ca3af" text-anchor="middle">8AM</text>
-              <text x="148" y="96" font-size="9" fill="#9ca3af" text-anchor="middle">9AM</text>
-              <line x1="118" y1="38" x2="124" y2="32" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2" />
-              <text x="126" y="30" font-size="8" fill="#f59e0b">8:15</text>
-            </svg>
-            <div class="text-center">
-              <p class="text-3xl font-extrabold text-gray-900 dark:text-white">{{ avg_clock_in }}</p>
-              <p class="text-xs text-gray-400 mt-0.5">Average</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Work Duration Distribution -->
-      <div class="glass-strong rounded-2xl p-6 lg:col-span-2">
+      <div class="glass-strong rounded-2xl p-6 flex flex-col justify-between">
         <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">Work Duration</p>
         <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">Hours Rendered Distribution</h3>
-        <div class="relative h-44">
+        <div class="relative h-44 w-full">
           <canvas id="chartDurationDist"></canvas>
         </div>
       </div>
@@ -327,7 +277,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   </div>
 
   <!-- ══════════════════ HEATMAP TAB ══════════════════ -->
-  <div id="panel-heatmap" class="hidden">
+  <div id="panel-heatmap" class="hidden mt-7">
     <div class="glass-strong rounded-2xl p-6">
       <div class="mb-5">
         <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
@@ -341,10 +291,10 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
         </p>
       </div>
 
-      <div id="heatmap-grid" class="flex gap-1.5 overflow-x-auto pb-2"></div>
+      <div id="heatmap-grid" class="flex gap-2 overflow-x-auto pb-4 pt-2"></div>
 
       <!-- Legend -->
-      <div class="flex items-center gap-2 mt-4 text-xs text-gray-400 dark:text-dark-muted">
+      <div class="flex items-center gap-3 mt-4 text-sm text-gray-400 dark:text-dark-muted">
         <span>Less</span>
         <span class="hm-cell" style="background: #f3f4f6" title="No data / absent"></span>
         <span class="hm-cell" style="background: #bbf7d0" title="Present (late)"></span>
@@ -360,7 +310,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   </div>
 
   <!-- ══════════════════ HISTORY TAB ══════════════════ -->
-  <div id="panel-history" class="hidden">
+  <div id="panel-history" class="hidden mt-7">
     <div class="glass-strong rounded-2xl overflow-hidden">
       <div class="p-6 border-b border-gray-100/60 dark:border-dark-border">
         <p class="text-[10px] font-bold uppercase tracking-[0.15em] text-brand mb-0.5">
@@ -370,6 +320,21 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
           Full Session History
         </h3>
       </div>
+      
+      <!-- Show entries selector -->
+      <div class="px-6 py-3 flex items-center justify-end gap-2 border-b border-gray-100/60 dark:border-dark-border">
+        <label class="text-xs text-gray-500 dark:text-dark-muted font-semibold">Show</label>
+        <select id="hist-per-page" onchange="changeHistPerPage(this.value)"
+          class="text-xs border border-gray-200 dark:border-dark-border rounded-lg px-2 py-1 bg-white dark:bg-dark-surface text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand/50">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="40">40</option>
+          <option value="100">100</option>
+          <option value="-1">All</option>
+        </select>
+        <span class="text-xs text-gray-500 dark:text-dark-muted">entries</span>
+      </div>
+      
       <!-- Table head -->
       <div class="overflow-auto" style="max-height: 500px;">
         <table class="w-full min-w-[600px]">
@@ -417,7 +382,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   </div>
 
   <!-- ══════════════════ RADAR TAB ══════════════════ -->
-  <div id="panel-radar" class="hidden">
+  <div id="panel-radar" class="hidden mt-7">
     <div id="radar-root"></div>
   </div>
 </div>
@@ -446,15 +411,8 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   function fmtDate(epoch) { return fmt(epoch, { weekday: 'short', month: 'short', day: 'numeric' }); }
   function fmtShort(epoch) { return fmt(epoch, { month: 'short', day: 'numeric' }); }
 
-  const completedLogs = logsData.filter(l => l.time_out);
-  const lates = completedLogs.filter(l => l.is_late);
-  const ontime = completedLogs.filter(l => !l.is_late);
-
-  // Shift Analysis
-  const morningSessions = completedLogs.filter(l => new Date(l.time_in * 1000).getHours() < 12);
-  const afternoonSessions = completedLogs.filter(l => new Date(l.time_in * 1000).getHours() >= 12);
-  const morningLates = morningSessions.filter(l => l.is_late).length;
-  const afternoonLates = afternoonSessions.filter(l => l.is_late).length;
+  const completed = logsData.filter(l => l.time_out);
+  const lates = completed.filter(l => l.is_late);
 
   // ── Radar Tab Data (injected from Flask) ───────────────────────────────────
   const rawMetrics = {{ metrics| tojson }};
@@ -463,7 +421,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
 
   // Daily aggregates
   const dailyMap = {};
-  completedLogs.forEach(l => {
+  completed.forEach(l => {
     const d = new Date(l.time_in * 1000).toLocaleDateString('en-CA');
     if (!dailyMap[d]) dailyMap[d] = { hours: 0, late: false, timeIn: l.time_in };
     dailyMap[d].hours += parseFloat(l.rendered_hours) || 0;
@@ -480,13 +438,20 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
     });
     document.getElementById('panel-' + name).classList.remove('hidden');
     document.getElementById('tab-' + name).classList.add('active');
+    
+    if (name === 'summary') initSummary();
     if (name === 'heatmap') initHeatmap();
     if (name === 'history') initHistory();
     if (name === 'radar') initHabitRadar();
+
+    localStorage.setItem('activeAnalyticsTab', name);
   }
 
   // ── Summary Charts ─────────────────────────────────────────────────────────
+  let sumInited = false;
   function initSummary() {
+    if (sumInited) return; sumInited = true;
+    
     // Hours bar with 8h annotation line
     new Chart(document.getElementById('chartHoursBar'), {
       type: 'bar',
@@ -515,40 +480,15 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
       }
     });
 
-    // Punctuality donut
-    new Chart(document.getElementById('chartPuncDonut'), {
-      type: 'doughnut',
-      data: { labels: ['On-Time', 'Late'], datasets: [{ data: [ontime.length, lates.length], backgroundColor: [BRAND, '#fbbf24'], borderColor: isDark() ? '#1a1d27' : '#fff', borderWidth: 2 }] },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
-    });
-
-    // Shift Donut
-    new Chart(document.getElementById('chartShiftDonut'), {
-      type: 'doughnut',
-      data: { 
-        labels: ['Morning', 'Afternoon'], 
-        datasets: [{ 
-          data: [morningSessions.length, afternoonSessions.length], 
-          backgroundColor: ['#6366f1', '#fb923c'], 
-          borderColor: isDark() ? '#1a1d27' : '#fff', 
-          borderWidth: 3 
-        }] 
-      },
-      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false } } }
-    });
-
-    document.getElementById('morning-late-val').textContent = morningLates;
-    document.getElementById('afternoon-late-val').textContent = afternoonLates;
-
     // Duration histogram (bucket by hours)
-    const buckets = { '<6h': 0, '6-7h': 0, '7-8h': 0, '8h': 0, '>8h': 0 };
-    completedLogs.forEach(l => {
+    const buckets = { '<4h (Half)': 0, '4-7h (Under)': 0, '7-8h (Near)': 0, '8-9h (Full)': 0, '9h+ (Over)': 0 };
+    completed.forEach(l => {
       const h = parseFloat(l.rendered_hours) || 0;
-      if (h < 6) buckets['<6h']++;
-      else if (h < 7) buckets['6-7h']++;
-      else if (h < 8) buckets['7-8h']++;
-      else if (h === 8) buckets['8h']++;
-      else buckets['>8h']++;
+      if (h < 4) buckets['<4h (Half)']++;
+      else if (h < 7) buckets['4-7h (Under)']++;
+      else if (h < 8) buckets['7-8h (Near)']++;
+      else if (h < 9) buckets['8-9h (Full)']++;
+      else buckets['9h+ (Over)']++;
     });
     new Chart(document.getElementById('chartDurationDist'), {
       type: 'bar',
@@ -556,116 +496,9 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
         labels: Object.keys(buckets),
         datasets: [{ data: Object.values(buckets), backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', BRAND, '#8b5cf6'], borderRadius: 6, barThickness: 36 }]
       },
-      options: { ...baseOpts(), scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, ticks: { ...baseOpts().scales.y.ticks, stepSize: 1 } } } }
-    });
-
-    // Arrival gauge needle animation
-    animateGauge();
-
-    // Performance Radar Chart
-    const onTimeCount = completed.length - lates.length;
-    const avgHoursPerDay = last7.length > 0
-      ? (last7.reduce((sum, d) => sum + (dailyMap[d]?.hours || 0), 0) / last7.length).toFixed(1)
-      : 0;
-
-    new Chart(document.getElementById('chartRadar'), {
-      type: 'radar',
-      data: {
-        labels: ['Sessions', 'Hours', 'On-Time', 'Late', 'Avg/Day'],
-        datasets: [{
-          label: 'This Week',
-          data: [completed.length, parseFloat(totalHours || 0), onTimeCount, lates.length, parseFloat(avgHoursPerDay)],
-          backgroundColor: 'rgba(6, 115, 2, 0.2)',
-          borderColor: '#067302',
-          borderWidth: 2,
-          pointBackgroundColor: '#067302',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          fill: true
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1,
-              display: true,
-              backdropColor: 'transparent',
-              color: '#9ca3af'
-            },
-            grid: {
-              color: 'rgba(156, 163, 175, 0.2)'
-            },
-            angleLines: {
-              color: 'rgba(156, 163, 175, 0.2)'
-            },
-            pointLabels: {
-              color: '#6b7280',
-              font: {
-                size: 11,
-                weight: '600'
-              }
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            cornerRadius: 8,
-            padding: 10
-          }
-        }
-      }
+      options: { ...baseOpts(), maintainAspectRatio: false, scales: { ...baseOpts().scales, y: { ...baseOpts().scales.y, ticks: { ...baseOpts().scales.y.ticks, stepSize: 1 } } } }
     });
   }
-
-  function animateGauge() {
-    const needle = document.getElementById('gauge-needle');
-    const fill = document.getElementById('gauge-fill');
-    if (!needle || !avgClockIn || avgClockIn === '--:--') return;
-
-    // Parse avg_clock_in like "7:54 AM"
-    const match = avgClockIn.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!match) return;
-    let h = parseInt(match[1]), m = parseInt(match[2]);
-    if (match[3].toUpperCase() === 'PM' && h < 12) h += 12;
-    if (match[3].toUpperCase() === 'AM' && h === 12) h = 0;
-
-    // Map 7:00 AM (0%) → 9:00 AM (100%) → needle angle -90deg → +90deg
-    const totalMins = (h - 7) * 60 + m; // 0 at 7AM, 120 at 9AM
-    const pct = Math.min(Math.max(totalMins / 120, 0), 1);
-    const angleDeg = -90 + pct * 180; // -90 = leftmost, +90 = rightmost
-
-    // Gauge is drawn around center (80,80), needle points up at 0deg
-    const rad = (angleDeg * Math.PI) / 180;
-    const len = 55;
-    const x2 = 80 + len * Math.sin(rad);
-    const y2 = 80 - len * Math.cos(rad);
-
-    setTimeout(() => {
-      needle.setAttribute('x2', x2.toFixed(1));
-      needle.setAttribute('y2', y2.toFixed(1));
-      // Color
-      const color = totalMins <= 0 ? '#3b82f6' : totalMins <= 15 ? BRAND : '#f59e0b';
-      needle.setAttribute('stroke', color);
-      document.querySelector('circle[cx="80"][cy="80"]').setAttribute('fill', color);
-      // Fill arc (stroke-dasharray trick: arc circumference ≈ 188 for r=60)
-      const arcLen = pct * 188;
-      fill.setAttribute('stroke-dasharray', `${arcLen.toFixed(1)} 188`);
-      fill.setAttribute('stroke', color);
-    }, 400);
-  }
-
   // ── Heatmap (lazy) ─────────────────────────────────────────────────────────
   let hmInited = false;
   function initHeatmap() {
@@ -692,7 +525,7 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
     let streak = 0, maxStreak = 0, curStreak = 0, perfectWeeks = 0;
 
     for (let w = 0; w < weeks; w++) {
-      html += '<div class="flex flex-col gap-1">';
+      html += '<div class="flex flex-col gap-2">';
       let weekPerfect = true;
       for (let d = 1; d <= 5; d++) { // Mon=1 to Fri=5
         const date = new Date(startDate);
@@ -722,9 +555,9 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
 
     // Add day labels before grid
     const dayLabels = document.createElement('div');
-    dayLabels.className = 'flex flex-col gap-1 mr-1';
+    dayLabels.className = 'flex flex-col gap-2 mr-2';
     ['M', 'T', 'W', 'T', 'F'].forEach(l => {
-      dayLabels.innerHTML += `<div class="flex items-center justify-center text-[9px] text-gray-400 dark:text-dark-muted" style="width:14px;height:14px">${l}</div>`;
+      dayLabels.innerHTML += `<div class="flex items-center justify-center font-bold text-[10px] text-gray-400 dark:text-dark-muted" style="width:20px;height:20px">${l}</div>`;
     });
     grid.prepend(dayLabels);
 
@@ -744,12 +577,13 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
   }
 
   // ── History Table with Pagination ─────────────────────────────────────────
-  const HIST_PER_PAGE = 10;
+  let histPerPage = 10;
   let histInited = false;
   let histPage = 1;
 
   function histTotalPages() {
-    return Math.max(1, Math.ceil(logsData.length / HIST_PER_PAGE));
+    if (histPerPage === -1) return 1; // "All" option
+    return Math.max(1, Math.ceil(logsData.length / histPerPage));
   }
 
   function renderHistPage() {
@@ -759,73 +593,124 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
     const prevBtn = document.getElementById('hist-prev');
     const nextBtn = document.getElementById('hist-next');
     const pageBtns = document.getElementById('hist-page-btns');
+    const perPageSelect = document.getElementById('hist-per-page');
 
     if (!logsData.length) {
-      rows.innerHTML = '<p class="text-sm text-gray-400 p-6">No sessions found.</p>';
+      rows.innerHTML = '<tr><td colspan="6"><p class="text-sm text-gray-400 p-6 text-center">No sessions found.</p></td></tr>';
+      pagination.classList.add('hidden');
       return;
     }
 
     const total = logsData.length;
     const totalPages = histTotalPages();
-    const start = (histPage - 1) * HIST_PER_PAGE;
-    const pageData = logsData.slice(start, start + HIST_PER_PAGE);
+    
+    // Calculate which items to show
+    let pageData;
+    if (histPerPage === -1) {
+      pageData = logsData;
+      histPage = 1;
+    } else {
+      const start = (histPage - 1) * histPerPage;
+      pageData = logsData.slice(start, start + histPerPage);
+    }
 
     rows.innerHTML = pageData.map(l => {
       const isActive = !l.time_out;
-      const hrs = parseFloat(l.rendered_hours) || 0;
+      const hrs = isActive ? 0 : parseFloat(l.rendered_hours) || 0;
+      
+      const isMorning = new Date(l.time_in * 1000).getHours() < 12;
+      const shiftBadge = isMorning 
+        ? `<span class="pill-badge bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">Morning</span>`
+        : `<span class="pill-badge bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400">Afternoon</span>`;
+
+      let statusBadge;
+      if (isActive) {
+        statusBadge = `<span class="pill-badge bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400">Active</span>`;
+      } else if (l.is_late) {
+        statusBadge = `<span class="pill-badge bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Late</span>`;
+      } else {
+        statusBadge = `<span class="pill-badge bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">On Time</span>`;
+      }
+
       return `<tr class="hover:bg-gray-50 dark:hover:bg-dark-surface/50">
-        <td class="px-3 py-3 text-center text-sm font-semibold text-gray-800 dark:text-white">${fmtDate(l.time_in)}</td>
-        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${fmtTime(l.time_in)}</td>
-        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${l.time_out ? fmtTime(l.time_out) : '—'}</td>
-        <td class="px-3 py-3 text-center text-sm font-bold ${isActive ? 'text-blue-500' : 'text-gray-800 dark:text-white'}">${isActive ? 'Active' : hrs.toFixed(2) + 'h'}</td>
         <td class="px-3 py-3 text-center">
-          ${isActive
-          ? `<span class="pill-badge bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">Active</span>`
-          : l.is_late
-            ? `<span class="pill-badge bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">Late</span>`
-            : `<span class="pill-badge bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">On Time</span>`}
+          <div class="flex flex-col items-center justify-center gap-1.5">
+            <span class="text-sm font-semibold text-gray-800 dark:text-white">${fmtDate(l.time_in)}</span>
+            ${shiftBadge}
+          </div>
         </td>
+        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${fmtTime(l.time_in)}</td>
+        <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300">${fmtTime(l.time_out) || '--:--'}</td>
+        <td class="px-3 py-3 text-center text-sm font-bold ${isActive ? 'text-cyan-500' : 'text-gray-800 dark:text-white'}">${isActive ? 'Active' : hrs.toFixed(2) + 'h'}</td>
+        <td class="px-3 py-3 text-center">${statusBadge}</td>
       </tr>`;
     }).join('');
 
-    // Update pagination controls
-    pagination.classList.remove('hidden');
-    pageInfo.textContent = `Showing ${start + 1}–${Math.min(start + HIST_PER_PAGE, total)} of ${total} records`;
-    prevBtn.disabled = histPage <= 1;
-    nextBtn.disabled = histPage >= totalPages;
+    if (histPerPage === -1 || totalPages <= 1) {
+      pagination.classList.add('hidden');
+    } else {
+      pagination.classList.remove('hidden');
+      pageInfo.textContent = `Showing ${histPerPage === -1 ? total : (histPage - 1) * histPerPage + 1}–${histPerPage === -1 ? total : Math.min(histPage * histPerPage, total)} of ${total} records`;
+      prevBtn.disabled = histPage <= 1;
+      nextBtn.disabled = histPage >= totalPages;
+    }
 
-    // Page number buttons (show up to 5 around current)
-    const delta = 2;
-    let pages = [];
-    for (let i = Math.max(1, histPage - delta); i <= Math.min(totalPages, histPage + delta); i++) pages.push(i);
-    pageBtns.innerHTML = pages.map(p => `
-      <button onclick="histGoTo(${p})"
-        class="w-7 h-7 rounded-lg text-xs font-semibold transition-all
-          ${p === histPage
-        ? 'bg-brand text-white shadow'
-        : 'border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface'}">
-        ${p}
-      </button>`).join('');
+    if (histPerPage !== -1 && totalPages > 1) {
+      const delta = 2;
+      let pages = [];
+      for (let i = Math.max(1, histPage - delta); i <= Math.min(totalPages, histPage + delta); i++) pages.push(i);
+      pageBtns.innerHTML = pages.map(p => `
+        <button onclick="histGoTo(${p})"
+          class="w-7 h-7 rounded-lg text-xs font-semibold transition-all
+            ${p === histPage
+          ? 'bg-brand text-white shadow'
+          : 'border border-gray-200 dark:border-dark-border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-surface'}">
+          ${p}
+        </button>`).join('');
+    } else {
+      pageBtns.innerHTML = '';
+    }
+    
+    if (perPageSelect) {
+      perPageSelect.value = histPerPage.toString();
+    }
   }
+
+  window.changeHistPerPage = function(value) {
+    histPerPage = parseInt(value);
+    histPage = 1;
+    renderHistPage();
+    localStorage.setItem('histPerPage', value);
+  };
 
   function histGoTo(page) {
     histPage = page;
     renderHistPage();
-    document.getElementById('panel-history').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (document.getElementById('panel-history').classList.contains('hidden') === false) {
+      document.getElementById('panel-history').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   function histChangePage(delta) {
-    histGoTo(Math.max(1, Math.min(histTotalPages(), histPage + delta)));
+    const totalPages = histTotalPages();
+    histGoTo(Math.max(1, Math.min(totalPages, histPage + delta)));
   }
 
   function initHistory() {
     if (histInited) return; histInited = true;
+    const savedPerPage = localStorage.getItem('histPerPage');
+    if (savedPerPage) {
+      histPerPage = parseInt(savedPerPage);
+      const selector = document.getElementById('hist-per-page');
+      if (selector) selector.value = savedPerPage;
+    }
     renderHistPage();
   }
 
   // ── Boot ───────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    const go = () => { initSummary(); };
+    const activeTab = localStorage.getItem('activeAnalyticsTab') || 'summary';
+    const go = () => { switchTab(activeTab); };
     if (typeof Chart === 'undefined') setTimeout(go, 300); else go();
   });
 
@@ -844,8 +729,8 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
     const avgScore = Math.round(rawMetrics.reduce((a, b) => a + b.me, 0) / 6);
 
     let persona = {
-      title: 'Standard Contributor',
-      desc: 'Balanced attendance habits that align well with university standards and department flow.',
+      title: 'Steady Contributor',
+      desc: 'Balanced attendance habits that align well with university standards and team flow.',
       color: 'text-slate-600 dark:text-slate-400',
       bg: 'bg-slate-50 dark:bg-slate-900/50',
       icon: 'star',
@@ -853,8 +738,8 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
     };
     if (scores.Punctuality > 85 && scores.Stability > 80) {
       persona = {
-        title: 'High Stability',
-        desc: 'Demonstrates highly predictable and punctual patterns. Attendance habits consistently meet the top reliability benchmarks.',
+        title: 'The Disciplined Anchor',
+        desc: 'Highly predictable and punctual. Your habits are the benchmark for department reliability.',
         color: 'text-blue-600 dark:text-blue-400',
         bg: 'bg-blue-50 dark:bg-blue-900/20',
         icon: 'shield-check',
@@ -862,8 +747,8 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
       };
     } else if (scores.Punctuality > 85) {
       persona = {
-        title: 'Consistent Punctuality',
-        desc: 'Maintains a strong record of early or on-time arrivals, consistently preparing for the start of the duty period.',
+        title: 'The Early Bird Maverick',
+        desc: 'You arrive early, though your timing varies day-to-day. Always ready before the official start.',
         color: 'text-emerald-600 dark:text-emerald-400',
         bg: 'bg-emerald-50 dark:bg-emerald-900/20',
         icon: 'zap',
@@ -871,8 +756,8 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
       };
     } else if (scores.Integrity === 100) {
       persona = {
-        title: 'Administrative Excellence',
-        desc: 'Maintains flawless data logs with no missing clock-outs, ensuring accurate administrative and payroll records.',
+        title: 'The Precise Chronicler',
+        desc: 'Your data logs are perfect. No missing clock-outs, ensuring flawless administrative records.',
         color: 'text-purple-600 dark:text-purple-400',
         bg: 'bg-purple-50 dark:bg-purple-900/20',
         icon: 'check-circle',
@@ -916,17 +801,29 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
           <div class="glass-strong rounded-2xl p-6 h-full">
             <h3 class="text-base font-headline font-bold text-gray-900 dark:text-white mb-4">Observations</h3>
             <div class="space-y-4">
-              ${rawMetrics.map(m => `
+              ${rawMetrics.map(m => {
+                const diff = (m.me - m.avg).toFixed(1);
+                const sign = diff > 0 ? '+' : '';
+                const diffColor = diff > 0 ? 'text-emerald-500' : diff < 0 ? 'text-rose-500' : 'text-gray-500';
+                return `
                 <div>
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${m.metric}</span>
-                    <span class="${m.me > 85 ? 'text-brand' : m.me < 70 ? 'text-amber-500' : 'text-gray-500'} text-xs font-bold">${m.me}%</span>
+                  <div class="flex flex-col mb-1.5">
+                    <div class="flex justify-between items-end">
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${m.metric}</span>
+                      <span class="${m.me > 85 ? 'text-brand' : m.me < 70 ? 'text-amber-500' : 'text-gray-500'} text-xs font-bold">${m.me}% <span class="text-[10px] font-medium text-gray-500 ml-1">You</span></span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                      <span class="text-[9px] text-gray-400 dark:text-dark-muted font-semibold">Dept Avg: ${Math.round(m.avg)}%</span>
+                      <span class="text-[9px] font-bold ${diffColor} bg-gray-50 dark:bg-dark-surface px-1.5 py-0.5 rounded-md">${sign}${diff}% vs Avg</span>
+                    </div>
                   </div>
-                  <div class="h-2 w-full bg-gray-100 dark:bg-dark-bg rounded-full overflow-hidden">
-                    <div class="h-full rounded-full ${m.me > 85 ? 'bg-brand' : m.me < 70 ? 'bg-amber-500' : 'bg-gray-400'}" style="width:${m.me}%"></div>
+                  <div class="relative h-2.5 w-full bg-gray-100 dark:bg-dark-bg rounded-full overflow-hidden">
+                    <div class="absolute top-0 left-0 h-full rounded-full ${m.me > 85 ? 'bg-brand' : m.me < 70 ? 'bg-amber-500' : 'bg-gray-400'} opacity-20" style="width:${Math.round(m.avg)}%"></div>
+                    <div class="absolute top-0 left-0 h-full rounded-full ${m.me > 85 ? 'bg-brand' : m.me < 70 ? 'bg-amber-500' : 'bg-gray-400'}" style="width:${m.me}%"></div>
+                    <div class="absolute top-0 bottom-0 border-r-2 border-slate-700 dark:border-white z-10" style="left:${Math.round(m.avg)}%; margin-left:-1px;" title="Dept Avg (${Math.round(m.avg)}%)"></div>
                   </div>
                 </div>
-              `).join('')}
+              `}).join('')}
               ${radarTotalLogs < 5 ? `
                 <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                   <p class="text-[11px] text-blue-600 dark:text-blue-400 font-medium italic">Data will become more accurate as you record more logs.</p>
@@ -985,6 +882,28 @@ completed_logs|length) * 100)|round(0)|int if completed_logs|length > 0 else 0
           legend: {
             position: 'bottom',
             labels: { font: { size: 11, weight: '500' }, usePointStyle: true, padding: 20 }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            cornerRadius: 8,
+            padding: 10,
+            callbacks: {
+              label: function(context) {
+                const metricIndex = context.dataIndex;
+                const myScore = rawMetrics[metricIndex].me;
+                const deptAvg = rawMetrics[metricIndex].avg;
+                const diff = (myScore - deptAvg).toFixed(1);
+                const sign = diff > 0 ? '+' : '';
+                
+                if (context.datasetIndex === 0) {
+                  return ` You: ${myScore}% (${sign}${diff}% vs Avg)`;
+                } else {
+                  return ` Dept Avg: ${Math.round(deptAvg)}%`;
+                }
+              }
+            }
           }
         }
       }

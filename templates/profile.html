@@ -64,6 +64,14 @@ block content %}
             </p>
           </div>
           <div
+            class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border">
+            <label
+              class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">Department</label>
+            <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+              {{ user.department or 'General' }}
+            </p>
+          </div>
+          <div
             class="bg-white/50 dark:bg-dark-surface/50 rounded-xl p-4 border border-gray-100/40 dark:border-dark-border sm:col-span-2">
             <label
               class="block text-[11px] font-semibold text-gray-400 dark:text-dark-muted uppercase tracking-wider">RFID
